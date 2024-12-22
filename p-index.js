@@ -4,9 +4,11 @@
 // @version      2024-12-22
 // @description  Calculate the p-index for a parkrunner and display it on their results page.
 // @author       @johnsyweb
-// @match        https://www.parkrun.com.au/parkrunner/*
+// @match        https://www.parkrun.com.au/parkrunner/*/all/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
 // @grant        none
+// @tag          parkrun
+// @run-at       document-end
 // ==/UserScript==
 
 (function () {
@@ -41,22 +43,20 @@
       pIndexElement.style.justifyContent = 'center';
       pIndexElement.setAttribute('id', 'p-index-display');
 
-      // Create a list of contributing events
       let eventList = document.createElement('ul');
-      eventList.style.listStyleType = 'none'; // Remove bullets
-      eventList.style.padding = '0'; // Remove padding
+      eventList.style.listStyleType = 'none';
+      eventList.style.padding = '0';
       contributingEvents.forEach(event => {
         let listItem = document.createElement('li');
         listItem.textContent = event;
-        listItem.style.fontWeight = 'normal'; // Normal weight
-        listItem.style.fontSize = '1em'; // Normal size
+        listItem.style.fontWeight = 'normal';
+        listItem.style.fontSize = '1em';
         eventList.appendChild(listItem);
       });
       pIndexElement.appendChild(eventList);
 
       h2Element.parentNode.insertBefore(pIndexElement, h2Element.nextSibling);
 
-      // Ensure the p-index-display is square
       setTimeout(() => {
         let rect = pIndexElement.getBoundingClientRect();
         let maxDimension = Math.max(rect.width, rect.height);
@@ -73,21 +73,11 @@
       let eventName = row.querySelector('td:nth-child(1) > a').textContent.trim();
       let date = row.querySelector('td:nth-child(2)').textContent.trim();
       let eventNumber = row.querySelector('td:nth-child(3)').textContent.trim();
-      eventDetails.push({ eventName, date, eventNumber });
+      eventDetails.unshift({ eventName, date, eventNumber });
     });
-    // Reverse the eventDetails array to make it chronological
-    eventDetails.reverse();
-    return eventDetails;
-  }
 
-  function findResultsTable() {
-    let tables = document.querySelectorAll('#results');
-    return tables[tables.length - 1];
-  }
-
-  function calculatePIndex(eventDetails) {
     // Group event details by event name
-    let groupedEvents = eventDetails.reduce((acc, { eventName, date, eventNumber }) => {
+    const groupedEvents = eventDetails.reduce((acc, { eventName, date, eventNumber }) => {
       if (!acc[eventName]) {
         acc[eventName] = [];
       }
@@ -96,12 +86,18 @@
     }, {});
 
     // Convert groupedEvents to an array of entries and sort by the number of visits
-    let sortedGroupedEvents = Object.entries(groupedEvents).sort((a, b) => b[1].length - a[1].length);
+    const sortedGroupedEvents = Object.entries(groupedEvents).sort((a, b) => b[1].length - a[1].length);
 
-    // Filter the sortedGroupedEvents to keep only items with visits greater than the index
-    let filteredGroupedEvents = sortedGroupedEvents.filter(([, events], index) => events.length > index);
+    return sortedGroupedEvents;
+  }
 
-    // The length of the filtered group is the p-index
+  function findResultsTable() {
+    let tables = document.querySelectorAll('#results');
+    return tables[tables.length - 1];
+  }
+
+  function calculatePIndex(eventDetails) {
+    let filteredGroupedEvents = eventDetails.filter(([, events], index) => events.length > index);
     let pIndex = filteredGroupedEvents.length;
 
     function convertDate(dateStr) {
@@ -129,6 +125,4 @@
 
     return { pIndex, contributingEvents };
   }
-
-  module.exports = { calculatePIndex };
 })();
