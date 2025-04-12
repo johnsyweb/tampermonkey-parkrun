@@ -107,7 +107,7 @@
         container.appendChild(canvas);
 
         const ctx = canvas.getContext('2d');
-        new Chart(ctx, {
+        const chart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: indices.map(i => i.parkruns),
@@ -130,13 +130,15 @@
                         title: {
                             display: true,
                             text: 'Wilson Index'
-                        }
+                        },
+                        suggestedMax: Math.ceil(Math.max(...indices.map(i => i.wilsonIndex)) * 1.1) // Add 10% padding
                     },
                     x: {
                         title: {
                             display: true,
                             text: 'parkruns'
-                        }
+                        },
+                        suggestedMax: Math.ceil(indices.length * 1.1) // Add 10% padding
                     }
                 },
                 plugins: {
@@ -155,6 +157,100 @@
                 }
             }
         });
+
+        return chart;
+    }
+
+    async function fetchFriendResults(athleteId) {
+        const response = await fetch(`https://www.parkrun.com.au/parkrunner/${athleteId}/all/`);
+        const text = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/html');
+        return findResultsTable(doc);
+    }
+
+    function createComparisonUI(container, onCompare) {
+        const form = document.createElement('form');
+        form.style.marginBottom = '20px';
+        form.style.textAlign = 'center';
+
+        const input = document.createElement('input');
+        input.style.width = '200px';
+        input.type = 'text';
+        input.placeholder = "Enter friend's athlete ID (e.g. A507)";
+        input.style.padding = '5px';
+        input.style.marginRight = '10px';
+        input.style.borderRadius = '3px';
+        input.style.border = '1px solid #ffa300';
+        input.style.backgroundColor = '#2b223d';
+        input.style.color = '#ffa300';
+
+        const button = document.createElement('button');
+        button.textContent = 'Compare';
+        button.style.padding = '5px 10px';
+        button.style.backgroundColor = '#ffa300';
+        button.style.color = '#2b223d';
+        button.style.border = 'none';
+        button.style.borderRadius = '3px';
+        button.style.cursor = 'pointer';
+
+        form.appendChild(input);
+        form.appendChild(button);
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const athleteId = input.value.trim();
+            if (!athleteId) return;
+
+            button.disabled = true;
+            button.textContent = 'Loading...';
+
+            try {
+                const friendTable = await fetchFriendResults(athleteId);
+                if (friendTable) {
+                    const friendEvents = extractEventDetails(friendTable);
+                    const friendIndices = calculateWilsonIndexOverTime(friendEvents);
+                    onCompare(friendIndices, athleteId);
+                }
+            } catch (error) {
+                console.error('Failed to fetch friend\'s results:', error);
+                alert('Failed to fetch friend\'s results. Please check the ID and try again.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Compare';
+            }
+        });
+
+        container.insertBefore(form, container.firstChild);
+    }
+
+    function updateChart(chart, friendIndices, friendId) {
+        const friendDataset = {
+            label: `Friend ${friendId} Wilson Index`,
+            data: friendIndices.map(i => ({
+                x: i.parkruns,
+                y: i.wilsonIndex,
+                event: i.event
+            })),
+            borderColor: '#90EE90', // Light green
+            backgroundColor: '#2b223d',
+        };
+
+        chart.data.datasets.push(friendDataset);
+
+        // Calculate new maximum values
+        const maxParkruns = Math.max(
+            ...chart.data.datasets.flatMap(dataset => dataset.data.map(d => d.x))
+        );
+        const maxWilsonIndex = Math.max(
+            ...chart.data.datasets.flatMap(dataset => dataset.data.map(d => d.y))
+        );
+
+        // Update scales with suggested maximums
+        chart.options.scales.x.suggestedMax = Math.ceil(maxParkruns * 1.1); // Add 10% padding
+        chart.options.scales.y.suggestedMax = Math.ceil(maxWilsonIndex * 1.1); // Add 10% padding
+
+        chart.update();
     }
 
     const table = findResultsTable(document);
@@ -185,7 +281,12 @@
         wilsonElement.style.marginBottom = '20px';
 
         container.appendChild(wilsonElement);
-        createWilsonGraph(wilsonIndices, container);
+        const chartInstance = createWilsonGraph(wilsonIndices, container);
+
+        // Add comparison UI
+        createComparisonUI(container, (friendIndices, friendId) => {
+            updateChart(chartInstance, friendIndices, friendId);
+        });
 
         h2Element.parentNode.insertBefore(container, h2Element.nextSibling);
     }
