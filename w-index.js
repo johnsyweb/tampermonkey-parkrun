@@ -89,7 +89,7 @@
 
         const eventNumbers = events.map((e) => e.eventNumber).sort((a, b) => a - b);
 
-        for (let eventNumber of eventNumbers) {
+        for (const eventNumber of eventNumbers) {
             if (eventNumber >= wilsonIndex + 2) {
                 break;
             } else if (eventNumber === wilsonIndex + 1) {

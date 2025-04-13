@@ -37,21 +37,21 @@
 (function () {
   'use strict';
 
-  let table = findResultsTable();
+  const table = findResultsTable();
   if (!table) {
     console.error('Results table not found');
     return;
   }
-  let eventDetails = extractEventDetails(table);
+  const eventDetails = extractEventDetails(table);
 
-  let { pIndex, contributingEvents } = calculatePIndex(eventDetails);
+  const { pIndex, contributingEvents } = calculatePIndex(eventDetails);
 
   displayPIndex(pIndex, contributingEvents);
 
   function displayPIndex(pIndex, contributingEvents) {
-    let h2Element = document.querySelector('h2');
+    const h2Element = document.querySelector('h2');
     if (h2Element) {
-      let pIndexElement = document.createElement('div');
+      const pIndexElement = document.createElement('div');
       pIndexElement.textContent = `p-index: ${pIndex}`;
       pIndexElement.style.fontSize = '1.5em';
       pIndexElement.style.fontWeight = 'bold';
@@ -66,11 +66,11 @@
       pIndexElement.style.justifyContent = 'center';
       pIndexElement.setAttribute('id', 'p-index-display');
 
-      let eventList = document.createElement('ul');
+      const eventList = document.createElement('ul');
       eventList.style.listStyleType = 'none';
       eventList.style.padding = '0';
       contributingEvents.forEach((event) => {
-        let listItem = document.createElement('li');
+        const listItem = document.createElement('li');
         listItem.textContent = event;
         listItem.style.fontWeight = 'normal';
         listItem.style.fontSize = '1em';
@@ -81,8 +81,8 @@
       h2Element.parentNode.insertBefore(pIndexElement, h2Element.nextSibling);
 
       setTimeout(() => {
-        let rect = pIndexElement.getBoundingClientRect();
-        let maxDimension = Math.max(rect.width, rect.height);
+        const rect = pIndexElement.getBoundingClientRect();
+        const maxDimension = Math.max(rect.width, rect.height);
         pIndexElement.style.width = `${maxDimension}px`;
         pIndexElement.style.height = `${maxDimension}px`;
       }, 0);
@@ -90,12 +90,12 @@
   }
 
   function extractEventDetails(table) {
-    let eventDetails = [];
-    let rows = table.querySelectorAll('tbody > tr');
+    const eventDetails = [];
+    const rows = table.querySelectorAll('tbody > tr');
     rows.forEach((row) => {
-      let eventName = row.querySelector('td:nth-child(1) > a').textContent.trim();
-      let date = row.querySelector('td:nth-child(2)').textContent.trim();
-      let eventNumber = row.querySelector('td:nth-child(3)').textContent.trim();
+      const eventName = row.querySelector('td:nth-child(1) > a').textContent.trim();
+      const date = row.querySelector('td:nth-child(2)').textContent.trim();
+      const eventNumber = row.querySelector('td:nth-child(3)').textContent.trim();
       eventDetails.unshift({ eventName, date, eventNumber });
     });
 
@@ -117,24 +117,24 @@
   }
 
   function findResultsTable() {
-    let tables = document.querySelectorAll('#results');
+    const tables = document.querySelectorAll('#results');
     return tables[tables.length - 1];
   }
 
   function calculatePIndex(eventDetails) {
-    let filteredGroupedEvents = eventDetails.filter(
+    const filteredGroupedEvents = eventDetails.filter(
       ([, events], index) => events.length > index
     );
-    let pIndex = filteredGroupedEvents.length;
+    const pIndex = filteredGroupedEvents.length;
 
     function convertDate(dateStr) {
       return new Date(dateStr.split('/').reverse().join('-'));
     }
 
-    let contributingEvents = filteredGroupedEvents
+    const contributingEvents = filteredGroupedEvents
       .map(([eventName, events]) => {
-        let first = events[0];
-        let pIndexReached = events[pIndex - 1];
+        const first = events[0];
+        const pIndexReached = events[pIndex - 1];
         return {
           eventName,
           eventCount: events.length,
