@@ -63,6 +63,12 @@ ${Object.entries(bookmarklets)
 }
 
 async function main() {
+  if (process.env.CI) {
+    console.log('Running in CI environment');
+    await exec('git config --global user.name github-actions[bot]');
+    await exec('git config --global user.email github-actions[bot]@users.noreply.github.com');
+  }
+
   const scripts = {
     'Wilson Index': 'w-index.js',
     'P-Index': 'p-index.js'

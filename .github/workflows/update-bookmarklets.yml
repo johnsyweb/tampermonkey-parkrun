@@ -1,0 +1,38 @@
+name: Update Bookmarklets
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - '*.js'
+            - 'package.json'
+            - 'pnpm-lock.yaml'
+
+jobs:
+    update-readme:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  cache: 'pnpm'
+
+            - uses: pnpm/action-setup@v3
+              with:
+                  version: latest
+                  run_install: true
+
+            - name: Update bookmarklets
+              run: pnpm create-bookmarklets
+
+            - name: Commit changes
+              uses: stefanzweifel/git-auto-commit-action@v5
+              with:
+                  commit_message: 'docs: update bookmarklets in README'
+                  file_pattern: 'README.md'
+                  branch: main
