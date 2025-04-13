@@ -1,10 +1,33 @@
 // ==UserScript==
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.js
+// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.js
+// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
 // @name         parkrun p-index display
 // @namespace    http://tampermonkey.net/
 // @version      2024-12-22
 // @description  Calculate the p-index for a parkrunner and display it on their results page.
 // @author       @johnsyweb
-// @match        https://www.parkrun.com.au/parkrunner/*/all/
+// @match        *://www.parkrun.com.au/parkrunner/*/all/
+// @match        *://www.parkrun.co.at/parkrunner/*/all/
+// @match        *://www.parkrun.ca/parkrunner/*/all/
+// @match        *://www.parkrun.dk/parkrunner/*/all/
+// @match        *://www.parkrun.fi/parkrunner/*/all/
+// @match        *://www.parkrun.fr/parkrunner/*/all/
+// @match        *://www.parkrun.com.de/parkrunner/*/all/
+// @match        *://www.parkrun.ie/parkrunner/*/all/
+// @match        *://www.parkrun.it/parkrunner/*/all/
+// @match        *://www.parkrun.jp/parkrunner/*/all/
+// @match        *://www.parkrun.lt/parkrunner/*/all/
+// @match        *://www.parkrun.my/parkrunner/*/all/
+// @match        *://www.parkrun.co.nl/parkrunner/*/all/
+// @match        *://www.parkrun.co.nz/parkrunner/*/all/
+// @match        *://www.parkrun.no/parkrunner/*/all/
+// @match        *://www.parkrun.pl/parkrunner/*/all/
+// @match        *://www.parkrun.sg/parkrunner/*/all/
+// @match        *://www.parkrun.co.za/parkrunner/*/all/
+// @match        *://www.parkrun.se/parkrunner/*/all/
+// @match        *://www.parkrun.org.uk/parkrunner/*/all/
+// @match        *://www.parkrun.us/parkrunner/*/all/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
 // @grant        none
 // @tag          parkrun
@@ -46,7 +69,7 @@
       let eventList = document.createElement('ul');
       eventList.style.listStyleType = 'none';
       eventList.style.padding = '0';
-      contributingEvents.forEach(event => {
+      contributingEvents.forEach((event) => {
         let listItem = document.createElement('li');
         listItem.textContent = event;
         listItem.style.fontWeight = 'normal';
@@ -69,7 +92,7 @@
   function extractEventDetails(table) {
     let eventDetails = [];
     let rows = table.querySelectorAll('tbody > tr');
-    rows.forEach(row => {
+    rows.forEach((row) => {
       let eventName = row.querySelector('td:nth-child(1) > a').textContent.trim();
       let date = row.querySelector('td:nth-child(2)').textContent.trim();
       let eventNumber = row.querySelector('td:nth-child(3)').textContent.trim();
@@ -86,7 +109,9 @@
     }, {});
 
     // Convert groupedEvents to an array of entries and sort by the number of visits
-    const sortedGroupedEvents = Object.entries(groupedEvents).sort((a, b) => b[1].length - a[1].length);
+    const sortedGroupedEvents = Object.entries(groupedEvents).sort(
+      (a, b) => b[1].length - a[1].length
+    );
 
     return sortedGroupedEvents;
   }
@@ -97,7 +122,9 @@
   }
 
   function calculatePIndex(eventDetails) {
-    let filteredGroupedEvents = eventDetails.filter(([, events], index) => events.length > index);
+    let filteredGroupedEvents = eventDetails.filter(
+      ([, events], index) => events.length > index
+    );
     let pIndex = filteredGroupedEvents.length;
 
     function convertDate(dateStr) {
@@ -116,12 +143,15 @@
           pIndexDate: pIndexReached.date,
           pIndexEventNumber: pIndexReached.eventNumber,
           firstDateForSorting: convertDate(first.date),
-          pIndexDateForSorting: convertDate(pIndexReached.date)
+          pIndexDateForSorting: convertDate(pIndexReached.date),
         };
       })
       .sort((a, b) => a.pIndexDateForSorting - b.pIndexDateForSorting)
       .slice(0, pIndex)
-      .map(event => `${event.eventName} (${event.eventCount}): ${event.firstDate} (#${event.firstEventNumber}) - ${event.pIndexDate} (#${event.pIndexEventNumber})`);
+      .map(
+        (event) =>
+          `${event.eventName} (${event.eventCount}): ${event.firstDate} (#${event.firstEventNumber}) - ${event.pIndexDate} (#${event.pIndexEventNumber})`
+      );
 
     return { pIndex, contributingEvents };
   }

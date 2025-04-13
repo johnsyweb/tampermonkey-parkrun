@@ -1,26 +1,49 @@
 // ==UserScript==
 // @name         parkrun Wilson index display
 // @namespace    http://tampermonkey.net/
-// @version      2024-04-12
+// @version      2024-04-13
 // @description  Calculate the Wilson index for a parkrunner and display it on their results page
 // @author       @johnsyweb
-// @match        https://www.parkrun.com.au/parkrunner/*/all/
+// @match        *://www.parkrun.com.au/parkrunner/*/all/
+// @match        *://www.parkrun.co.at/parkrunner/*/all/
+// @match        *://www.parkrun.ca/parkrunner/*/all/
+// @match        *://www.parkrun.dk/parkrunner/*/all/
+// @match        *://www.parkrun.fi/parkrunner/*/all/
+// @match        *://www.parkrun.fr/parkrunner/*/all/
+// @match        *://www.parkrun.com.de/parkrunner/*/all/
+// @match        *://www.parkrun.ie/parkrunner/*/all/
+// @match        *://www.parkrun.it/parkrunner/*/all/
+// @match        *://www.parkrun.jp/parkrunner/*/all/
+// @match        *://www.parkrun.lt/parkrunner/*/all/
+// @match        *://www.parkrun.my/parkrunner/*/all/
+// @match        *://www.parkrun.co.nl/parkrunner/*/all/
+// @match        *://www.parkrun.co.nz/parkrunner/*/all/
+// @match        *://www.parkrun.no/parkrunner/*/all/
+// @match        *://www.parkrun.pl/parkrunner/*/all/
+// @match        *://www.parkrun.sg/parkrunner/*/all/
+// @match        *://www.parkrun.co.za/parkrunner/*/all/
+// @match        *://www.parkrun.se/parkrunner/*/all/
+// @match        *://www.parkrun.org.uk/parkrunner/*/all/
+// @match        *://www.parkrun.us/parkrunner/*/all/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
 // @grant        none
 // @tag          parkrun
 // @run-at       document-end
-// @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js
+// @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.js
+// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.js
+// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
 // ==/UserScript==
 
 (function () {
     'use strict';
 
     /**
-    * Finds the last results table with a specified number of columns
-    * @param {Document} document - The document object to search in
-    * @param {number} [columnCount=7] - Required number of columns
-    * @returns {HTMLTableElement|null} The matching table or null if not found
-    */
+     * Finds the last results table with a specified number of columns
+     * @param {Document} document - The document object to search in
+     * @param {number} [columnCount=7] - Required number of columns
+     * @returns {HTMLTableElement|null} The matching table or null if not found
+     */
     function findResultsTable(document, columnCount = 7) {
         const tables = document.querySelectorAll('[id="results"]');
         let matchingTable = null;
@@ -36,19 +59,19 @@
             }
         }
 
-        return matchingTable
+        return matchingTable;
     }
 
     function extractEventDetails(table) {
         const rows = Array.from(table.querySelectorAll('tbody > tr'));
-        return rows.reverse().map(row => {
+        return rows.reverse().map((row) => {
             const eventName = row.querySelector('td:nth-child(1)').textContent.trim();
             const eventDate = row.querySelector('td:nth-child(2)').textContent.trim();
             const eventNumber = row.querySelector('td:nth-child(3)').textContent.trim();
             return {
                 eventName,
                 eventDate,
-                eventNumber: parseInt(eventNumber, 10)
+                eventNumber: parseInt(eventNumber, 10),
             };
         });
     }
@@ -57,14 +80,14 @@
      * Calculates the Wilson index, which represents the highest consecutive number of parkrun events
      * completed starting from 1. It iterates through the sorted event numbers and increments the index
      * as long as the next event number matches the expected value.
-     * 
+     *
      * @param {Array} events - An array of event objects containing event numbers.
      * @returns {number} The calculated Wilson index.
      */
     function calculateWilsonIndex(events) {
         let wilsonIndex = 0;
 
-        const eventNumbers = events.map(e => e.eventNumber).sort((a, b) => a - b);
+        const eventNumbers = events.map((e) => e.eventNumber).sort((a, b) => a - b);
 
         for (let eventNumber of eventNumbers) {
             if (eventNumber >= wilsonIndex + 2) {
@@ -100,7 +123,7 @@
         };
     }
 
-    function createWilsonGraph(indices, container) {
+    function createWilsonGraph(indices, container, athleteInfo) {
         const canvas = document.createElement('canvas');
         canvas.style.width = '100%';
         canvas.style.height = '300px';
@@ -110,17 +133,19 @@
         const chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: indices.map(i => i.parkruns),
-                datasets: [{
-                    label: 'Wilson Index',
-                    data: indices.map(i => ({
-                        x: i.parkruns,
-                        y: i.wilsonIndex,
-                        event: i.event
-                    })),
-                    borderColor: '#ffa300',
-                    backgroundColor: '#2b223d',
-                }]
+                labels: indices.map((i) => i.parkruns),
+                datasets: [
+                    {
+                        label: athleteInfo,
+                        data: indices.map((i) => ({
+                            x: i.parkruns,
+                            y: i.wilsonIndex,
+                            event: i.event,
+                        })),
+                        borderColor: getDatasetColor(0),
+                        backgroundColor: '#2b223d',
+                    },
+                ],
             },
             options: {
                 responsive: true,
@@ -129,33 +154,36 @@
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Wilson Index'
+                            text: 'Wilson Index',
                         },
-                        suggestedMax: Math.ceil(Math.max(...indices.map(i => i.wilsonIndex)) * 1.1) // Add 10% padding
+                        suggestedMax: Math.ceil(
+                            Math.max(...indices.map((i) => i.wilsonIndex)) * 1.1
+                        ), // Add 10% padding
                     },
                     x: {
                         title: {
                             display: true,
-                            text: 'parkruns'
+                            text: 'parkruns',
                         },
-                        suggestedMax: Math.ceil(indices.length * 1.1) // Add 10% padding
-                    }
+                        min: 0,
+                        suggestedMax: Math.ceil(indices.length * 1.1), // Initial padding
+                    },
                 },
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Wilson Index Progress'
+                        text: 'Wilson Index Progress',
                     },
                     tooltip: {
                         callbacks: {
                             label: function (context) {
                                 const point = context.raw;
                                 return [`Wilson Index: ${point.y}`, `Event: ${point.event}`];
-                            }
-                        }
-                    }
-                }
-            }
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         return chart;
@@ -199,7 +227,7 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const athleteId = input.value.trim();
+            const athleteId = input.value.trim().replace(/^[aA]/, '');
             if (!athleteId) return;
 
             button.disabled = true;
@@ -213,8 +241,8 @@
                     onCompare(friendIndices, athleteId);
                 }
             } catch (error) {
-                console.error('Failed to fetch friend\'s results:', error);
-                alert('Failed to fetch friend\'s results. Please check the ID and try again.');
+                console.error("Failed to fetch friend's results:", error);
+                alert("Failed to fetch friend's results. Please check the ID and try again.");
             } finally {
                 button.disabled = false;
                 button.textContent = 'Compare';
@@ -224,21 +252,22 @@
         container.insertBefore(form, container.firstChild);
     }
 
-    function updateChart(chart, friendIndices, friendId) {
+    function updateChart(chart, friendIndices, friendInfo) {
+        const datasetIndex = chart.data.datasets.length;
         const friendDataset = {
-            label: `Friend ${friendId} Wilson Index`,
-            data: friendIndices.map(i => ({
+            label: friendInfo,
+            data: friendIndices.map((i) => ({
                 x: i.parkruns,
                 y: i.wilsonIndex,
-                event: i.event
+                event: i.event,
             })),
-            borderColor: '#90EE90', // Light green
+            borderColor: getDatasetColor(datasetIndex),
             backgroundColor: '#2b223d',
         };
 
         chart.data.datasets.push(friendDataset);
+        chart.update();
 
-        // Calculate new maximum values
         const maxParkruns = Math.max(
             ...chart.data.datasets.flatMap(dataset => dataset.data.map(d => d.x))
         );
@@ -246,11 +275,30 @@
             ...chart.data.datasets.flatMap(dataset => dataset.data.map(d => d.y))
         );
 
-        // Update scales with suggested maximums
-        chart.options.scales.x.suggestedMax = Math.ceil(maxParkruns * 1.1); // Add 10% padding
-        chart.options.scales.y.suggestedMax = Math.ceil(maxWilsonIndex * 1.1); // Add 10% padding
+        chart.options.scales.x.suggestedMax = Math.ceil(maxParkruns * 1.1);
+        chart.options.scales.y.suggestedMax = Math.ceil(maxWilsonIndex * 1.1);
 
         chart.update();
+    }
+
+    function extractAthleteInfo(h2Element) {
+        return h2Element.textContent.trim();
+    }
+
+    function getDatasetColor(index) {
+        const colors = [
+            '#FFA300',
+            '#90EE90',
+            '#FF69B4',
+            '#4169E1',
+            '#FFD700',
+            '#9370DB',
+            '#20B2AA',
+            '#FF6347',
+            '#DDA0DD',
+            '#00CED1',
+        ];
+        return colors[index % colors.length];
     }
 
     const table = findResultsTable(document);
@@ -259,33 +307,49 @@
         return;
     }
 
-    let eventDetails = extractEventDetails(table);
-    let wilsonIndex = calculateWilsonIndex(eventDetails);
-    let wilsonIndices = calculateWilsonIndexOverTime(eventDetails);
+    const h2Element = document.querySelector('h2');
+    if (!h2Element) {
+        console.error('H2 element not found');
+        return;
+    }
 
-    // Display the Wilson index and graph
-    let h2Element = document.querySelector('h2');
+    const athleteInfo = extractAthleteInfo(h2Element);
+    if (!athleteInfo) {
+        console.error('Could not extract athlete info');
+        return;
+    }
+
+    const eventDetails = extractEventDetails(table);
+    const wilsonIndex = calculateWilsonIndex(eventDetails);
+    const wilsonIndices = calculateWilsonIndexOverTime(eventDetails);
+
     if (h2Element) {
-        let container = document.createElement('div');
+        const container = document.createElement('div');
         container.style.marginTop = '20px';
         container.style.backgroundColor = '#2b223d';
         container.style.padding = '20px';
         container.style.borderRadius = '5px';
 
-        let wilsonElement = document.createElement('div');
+        const wilsonElement = document.createElement('div');
         wilsonElement.textContent = `Wilson index: ${wilsonIndex}`;
         wilsonElement.style.fontSize = '1.5em';
-        wilsonElement.style.fontWeight = 'bold';
         wilsonElement.style.color = '#ffa300';
-        wilsonElement.style.textAlign = 'center';
+        wilsonElement.style.fontWeight = 'bold';
         wilsonElement.style.marginBottom = '20px';
-
+        wilsonElement.style.textAlign = 'center';
         container.appendChild(wilsonElement);
-        const chartInstance = createWilsonGraph(wilsonIndices, container);
 
-        // Add comparison UI
-        createComparisonUI(container, (friendIndices, friendId) => {
-            updateChart(chartInstance, friendIndices, friendId);
+        const chartInstance = createWilsonGraph(wilsonIndices, container, athleteInfo);
+
+        createComparisonUI(container, async (friendIndices, friendId) => {
+            const friendResponse = await fetch(
+                `${window.location.origin}/parkrunner/${friendId}/all/`
+            );
+            const friendText = await friendResponse.text();
+            const friendDoc = new DOMParser().parseFromString(friendText, 'text/html');
+            const friendH2 = friendDoc.querySelector('h2');
+            const friendInfo = extractAthleteInfo(friendH2);
+            updateChart(chartInstance, friendIndices, friendInfo);
         });
 
         h2Element.parentNode.insertBefore(container, h2Element.nextSibling);
