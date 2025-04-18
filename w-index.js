@@ -113,16 +113,6 @@
         return wilsonIndices;
     }
 
-    // Export for testing
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = {
-            calculateWilsonIndex,
-            calculateWilsonIndexOverTime,
-            extractEventDetails,
-            findResultsTable,
-        };
-    }
-
     function createWilsonGraph(indices, container, athleteInfo) {
         const canvas = document.createElement('canvas');
         canvas.style.width = '100%';
@@ -269,10 +259,10 @@
         chart.update();
 
         const maxParkruns = Math.max(
-            ...chart.data.datasets.flatMap(dataset => dataset.data.map(d => d.x))
+            ...chart.data.datasets.flatMap((dataset) => dataset.data.map((d) => d.x))
         );
         const maxWilsonIndex = Math.max(
-            ...chart.data.datasets.flatMap(dataset => dataset.data.map(d => d.y))
+            ...chart.data.datasets.flatMap((dataset) => dataset.data.map((d) => d.y))
         );
 
         chart.options.scales.x.suggestedMax = Math.ceil(maxParkruns * 1.1);
@@ -301,57 +291,70 @@
         return colors[index % colors.length];
     }
 
-    const table = findResultsTable(document);
-    if (!table) {
-        console.error('Results table not found');
-        return;
+    function displayWilseonIndex() {
+        const table = findResultsTable(document);
+        if (!table) {
+            console.error('Results table not found');
+            return;
+        }
+
+        const h2Element = document.querySelector('h2');
+        if (!h2Element) {
+            console.error('H2 element not found');
+            return;
+        }
+
+        const athleteInfo = extractAthleteInfo(h2Element);
+        if (!athleteInfo) {
+            console.error('Could not extract athlete info');
+            return;
+        }
+
+        const eventDetails = extractEventDetails(table);
+        const wilsonIndex = calculateWilsonIndex(eventDetails);
+        const wilsonIndices = calculateWilsonIndexOverTime(eventDetails);
+
+        if (h2Element) {
+            const container = document.createElement('div');
+            container.style.marginTop = '20px';
+            container.style.backgroundColor = '#2b223d';
+            container.style.padding = '20px';
+            container.style.borderRadius = '5px';
+
+            const wilsonElement = document.createElement('div');
+            wilsonElement.textContent = `Wilson index: ${wilsonIndex}`;
+            wilsonElement.style.fontSize = '1.5em';
+            wilsonElement.style.color = '#ffa300';
+            wilsonElement.style.fontWeight = 'bold';
+            wilsonElement.style.marginBottom = '20px';
+            wilsonElement.style.textAlign = 'center';
+            container.appendChild(wilsonElement);
+
+            const chartInstance = createWilsonGraph(wilsonIndices, container, athleteInfo);
+
+            createComparisonUI(container, async (friendIndices, friendId) => {
+                const friendResponse = await fetch(
+                    `${window.location.origin}/parkrunner/${friendId}/all/`
+                );
+                const friendText = await friendResponse.text();
+                const friendDoc = new DOMParser().parseFromString(friendText, 'text/html');
+                const friendH2 = friendDoc.querySelector('h2');
+                const friendInfo = extractAthleteInfo(friendH2);
+                updateChart(chartInstance, friendIndices, friendInfo);
+            });
+
+            h2Element.parentNode.insertBefore(container, h2Element.nextSibling);
+        }
     }
 
-    const h2Element = document.querySelector('h2');
-    if (!h2Element) {
-        console.error('H2 element not found');
-        return;
-    }
-
-    const athleteInfo = extractAthleteInfo(h2Element);
-    if (!athleteInfo) {
-        console.error('Could not extract athlete info');
-        return;
-    }
-
-    const eventDetails = extractEventDetails(table);
-    const wilsonIndex = calculateWilsonIndex(eventDetails);
-    const wilsonIndices = calculateWilsonIndexOverTime(eventDetails);
-
-    if (h2Element) {
-        const container = document.createElement('div');
-        container.style.marginTop = '20px';
-        container.style.backgroundColor = '#2b223d';
-        container.style.padding = '20px';
-        container.style.borderRadius = '5px';
-
-        const wilsonElement = document.createElement('div');
-        wilsonElement.textContent = `Wilson index: ${wilsonIndex}`;
-        wilsonElement.style.fontSize = '1.5em';
-        wilsonElement.style.color = '#ffa300';
-        wilsonElement.style.fontWeight = 'bold';
-        wilsonElement.style.marginBottom = '20px';
-        wilsonElement.style.textAlign = 'center';
-        container.appendChild(wilsonElement);
-
-        const chartInstance = createWilsonGraph(wilsonIndices, container, athleteInfo);
-
-        createComparisonUI(container, async (friendIndices, friendId) => {
-            const friendResponse = await fetch(
-                `${window.location.origin}/parkrunner/${friendId}/all/`
-            );
-            const friendText = await friendResponse.text();
-            const friendDoc = new DOMParser().parseFromString(friendText, 'text/html');
-            const friendH2 = friendDoc.querySelector('h2');
-            const friendInfo = extractAthleteInfo(friendH2);
-            updateChart(chartInstance, friendIndices, friendInfo);
-        });
-
-        h2Element.parentNode.insertBefore(container, h2Element.nextSibling);
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = {
+            calculateWilsonIndex,
+            calculateWilsonIndexOverTime,
+            extractEventDetails,
+            findResultsTable,
+        };
+    } else {
+        displayWilseonIndex();
     }
 })();
