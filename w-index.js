@@ -1,38 +1,38 @@
 // ==UserScript==
 // @name         parkrun Wilson index display
 // @namespace    http://tampermonkey.net/
-// @version      2024-04-13
-// @description  Calculate the Wilson index for a parkrunner and display it on their results page
 // @author       @johnsyweb
-// @match        *://www.parkrun.com.au/parkrunner/*/all/
-// @match        *://www.parkrun.co.at/parkrunner/*/all/
+// @description  Calculate the Wilson index for a parkrunner and display it on their results page
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.js
+// @grant        none
+// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
 // @match        *://www.parkrun.ca/parkrunner/*/all/
+// @match        *://www.parkrun.co.at/parkrunner/*/all/
+// @match        *://www.parkrun.co.nl/parkrunner/*/all/
+// @match        *://www.parkrun.co.nz/parkrunner/*/all/
+// @match        *://www.parkrun.co.za/parkrunner/*/all/
+// @match        *://www.parkrun.com.au/parkrunner/*/all/
+// @match        *://www.parkrun.com.de/parkrunner/*/all/
 // @match        *://www.parkrun.dk/parkrunner/*/all/
 // @match        *://www.parkrun.fi/parkrunner/*/all/
 // @match        *://www.parkrun.fr/parkrunner/*/all/
-// @match        *://www.parkrun.com.de/parkrunner/*/all/
 // @match        *://www.parkrun.ie/parkrunner/*/all/
 // @match        *://www.parkrun.it/parkrunner/*/all/
 // @match        *://www.parkrun.jp/parkrunner/*/all/
 // @match        *://www.parkrun.lt/parkrunner/*/all/
 // @match        *://www.parkrun.my/parkrunner/*/all/
-// @match        *://www.parkrun.co.nl/parkrunner/*/all/
-// @match        *://www.parkrun.co.nz/parkrunner/*/all/
 // @match        *://www.parkrun.no/parkrunner/*/all/
-// @match        *://www.parkrun.pl/parkrunner/*/all/
-// @match        *://www.parkrun.sg/parkrunner/*/all/
-// @match        *://www.parkrun.co.za/parkrunner/*/all/
-// @match        *://www.parkrun.se/parkrunner/*/all/
 // @match        *://www.parkrun.org.uk/parkrunner/*/all/
+// @match        *://www.parkrun.pl/parkrunner/*/all/
+// @match        *://www.parkrun.se/parkrunner/*/all/
+// @match        *://www.parkrun.sg/parkrunner/*/all/
 // @match        *://www.parkrun.us/parkrunner/*/all/
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
-// @grant        none
-// @tag          parkrun
-// @run-at       document-end
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.js
+// @run-at       document-end
+// @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.js
-// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @version      2025-04-18
 // ==/UserScript==
 
 (function () {
