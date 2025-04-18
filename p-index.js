@@ -40,7 +40,7 @@
         module.exports = {
             calculatePIndex,
             extractEventDetails,
-            findResultsTable
+            findResultsTable,
         };
     } else {
         main();

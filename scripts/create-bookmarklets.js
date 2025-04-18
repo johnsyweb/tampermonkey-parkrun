@@ -1,6 +1,8 @@
-import { readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
-import * as uglifyjs from 'uglify-js';
+const { readFile, writeFile } = require('fs/promises');
+const { join } = require('path');
+const process = require('process');
+const uglifyjs = require('uglify-js');
+const { exec } = require('child_process');
 
 async function createBookmarklet(filepath) {
     const content = await readFile(filepath, 'utf-8');
@@ -47,8 +49,8 @@ async function updateReadme(bookmarklets) {
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
 
 ${Object.entries(bookmarklets)
-            .map(([name, code]) => `### ${name}\n\n\`\`\`javascript\n${code}\n\`\`\``)
-            .join('\n\n')}
+    .map(([name, code]) => `### ${name}\n\n\`\`\`javascript\n${code}\n\`\`\``)
+    .join('\n\n')}
 `;
 
     // Replace existing bookmarklet section or append

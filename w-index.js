@@ -120,6 +120,7 @@
         container.appendChild(canvas);
 
         const ctx = canvas.getContext('2d');
+        // eslint-disable-next-line no-undef
         const chart = new Chart(ctx, {
             type: 'line',
             data: {

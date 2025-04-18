@@ -20,41 +20,14 @@
         "eslint": "^9.24.0",
         "eslint-config-prettier": "^10.1.2",
         "eslint-plugin-prettier": "^5.2.6",
+        "globals": "^16.0.0",
         "jest": "^29.7.0",
         "jest-fixed-jsdom": "^0.0.9",
         "prettier": "^3.5.3",
-        "uglify-js": "^3.17.4"
+        "uglify-js": "^3.19.3"
     },
     "jest": {
         "testEnvironment": "jest-fixed-jsdom"
-    },
-    "eslintConfig": {
-        "env": {
-            "browser": true,
-            "es2021": true,
-            "node": true,
-            "jest": true
-        },
-        "extends": [
-            "eslint:recommended",
-            "plugin:prettier/recommended"
-        ],
-        "parserOptions": {
-            "ecmaVersion": "latest",
-            "sourceType": "module"
-        },
-        "rules": {
-            "no-console": [
-                "warn",
-                {
-                    "allow": [
-                        "error",
-                        "warn"
-                    ]
-                }
-            ],
-            "prettier/prettier": "error"
-        }
     },
     "prettier": {
         "semi": true,
@@ -62,6 +35,11 @@
         "singleQuote": true,
         "printWidth": 100,
         "tabWidth": 4,
-        "endOfLine": "lf"
+        "endOfLine": "lf",
+        "ignore": [
+            "pnpm-lock.yaml",
+            "README.md",
+            "test-data/**/*"
+        ]
     }
 }
