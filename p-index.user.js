@@ -2,7 +2,7 @@
 // @name         parkrun p-index display
 // @namespace    http://tampermonkey.net/
 // @author       @johnsyweb
-// @description  Calculate the p-index for a parkrunner and display it on their results page.
+// @description  The parkrun p-index is an unofficial statistic that measures the number of different parkrun events a person has completed a specific number of times. To achieve a p-index of 10, you must have completed at least 10 different parkrun events 10 times each. This script calculate the p-index for a parkrunner and displays it on their results page.
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
 // @grant        none
 // @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
