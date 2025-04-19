@@ -30,6 +30,7 @@
 // @match        *://www.parkrun.us/parkrunner/*/all/
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
 // @run-at       document-end
+// @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.user.js
 // @version      2025-04-18
