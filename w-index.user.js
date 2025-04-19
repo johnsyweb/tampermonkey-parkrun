@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @author       @johnsyweb
 // @description  Calculate the Wilson index for a parkrunner and display it on their results page
-// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.js
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.user.js
 // @grant        none
 // @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
@@ -31,7 +31,7 @@
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
 // @run-at       document-end
 // @tag          parkrun
-// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.js
+// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.user.js
 // @version      2025-04-18
 // ==/UserScript==
 

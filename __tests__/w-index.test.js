@@ -3,7 +3,7 @@ const {
     calculateWilsonIndexOverTime,
     extractEventDetails,
     findResultsTable,
-} = require('../w-index');
+} = require('../w-index.user');
 const fs = require('fs');
 const path = require('path');
 const { JSDOM } = require('jsdom');

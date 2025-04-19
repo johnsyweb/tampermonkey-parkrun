@@ -49,8 +49,8 @@ async function updateReadme(bookmarklets) {
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
 
 ${Object.entries(bookmarklets)
-    .map(([name, code]) => `### ${name}\n\n\`\`\`javascript\n${code}\n\`\`\``)
-    .join('\n\n')}
+            .map(([name, code]) => `### ${name}\n\n\`\`\`javascript\n${code}\n\`\`\``)
+            .join('\n\n')}
 `;
 
     // Replace existing bookmarklet section or append
@@ -72,8 +72,8 @@ async function main() {
     }
 
     const scripts = {
-        'Wilson Index': 'w-index.js',
-        'p-index': 'p-index.js',
+        'Wilson Index': 'w-index.user.js',
+        'p-index': 'p-index.user.js',
     };
 
     const bookmarklets = {};

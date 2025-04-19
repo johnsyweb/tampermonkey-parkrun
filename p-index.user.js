@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @author       @johnsyweb
 // @description  Calculate the p-index for a parkrunner and display it on their results page.
-// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.js
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
 // @grant        none
 // @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
@@ -30,7 +30,7 @@
 // @match        *://www.parkrun.us/parkrunner/*/all/
 // @run-at       document-end
 // @tag          parkrun
-// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.js
+// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
 // @version      2025-04-18
 // ==/UserScript==
 
