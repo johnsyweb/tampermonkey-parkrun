@@ -71,7 +71,8 @@ ${description ? `\n${description}\n` : ''}
 ${code}
 \`\`\``)
                     .join('\n\n')}
-${BOOKMARKLETS_END_MARKER}`;
+${BOOKMARKLETS_END_MARKER}
+`;
 
             const bookmarkletRegex = new RegExp(
                 `${BOOKMARKLETS_START_MARKER}[\\s\\S]*?${BOOKMARKLETS_END_MARKER}`
