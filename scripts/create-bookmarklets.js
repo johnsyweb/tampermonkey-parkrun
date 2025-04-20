@@ -14,8 +14,12 @@ function extractScriptInfo(filepath) {
         .then(content => {
             const headerSection = content.split(USERSCRIPT_DELIMITER)[0];
             const nameMatch = headerSection.match(/@name\s+(.*)/);
+            const descriptionMatch = headerSection.match(/@description\s+(.*)/);
+
             const name = nameMatch ? nameMatch[1].trim() : basename(filepath, '.user.js');
-            return { name, content };
+            const description = descriptionMatch ? descriptionMatch[1].trim() : '';
+
+            return { name, description, content };
         });
 }
 
@@ -61,8 +65,8 @@ function updateReadme(bookmarklets) {
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
 
 ${Object.entries(bookmarklets)
-                    .map(([name, code]) => `### ${name}
-
+                    .map(([name, { code, description }]) => `### ${name}
+${description ? `\n${description}\n` : ''}
 \`\`\`javascript
 ${code}
 \`\`\``)
@@ -111,7 +115,7 @@ function main() {
                         return createBookmarklet(file)
                             .then(bookmarkletCode => {
                                 console.log(`Processed: ${file} (${scriptInfo.name})`);
-                                return [scriptInfo.name, bookmarkletCode];
+                                return [scriptInfo.name, { code: bookmarkletCode, description: scriptInfo.description }];
                             });
                     });
             });

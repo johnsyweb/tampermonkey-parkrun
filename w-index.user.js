@@ -2,7 +2,7 @@
 // @name         parkrun Wilson index display
 // @namespace    http://tampermonkey.net/
 // @author       @johnsyweb
-// @description  Calculate the Wilson index for a parkrunner and display it on their results page
+// @description  The "Wilson index" in parkrun is the highest consecutive event number completed, starting from #1. This script calculates and displays a parkrunner's Wilson index on their results page.
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.user.js
 // @grant        none
 // @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
