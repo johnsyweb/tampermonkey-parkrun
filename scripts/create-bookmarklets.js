@@ -1,14 +1,18 @@
-const { readFile, writeFile } = require('fs/promises');
-const { join, basename } = require('path');
-const process = require('process');
-const uglifyjs = require('uglify-js');
 const { exec } = require('child_process');
 const { glob } = require('glob');
+const { join, basename } = require('path');
+const { readFile, writeFile } = require('fs/promises');
+const process = require('process');
+const uglifyjs = require('uglify-js');
+
+const BOOKMARKLETS_START_MARKER = '## Bookmarklets';
+const BOOKMARKLETS_END_MARKER = '<!-- END BOOKMARKLETS SECTION -->';
+const USERSCRIPT_DELIMITER = '// ==/UserScript==';
 
 function extractScriptInfo(filepath) {
     return readFile(filepath, 'utf-8')
         .then(content => {
-            const headerSection = content.split('// ==/UserScript==')[0];
+            const headerSection = content.split(USERSCRIPT_DELIMITER)[0];
             const nameMatch = headerSection.match(/@name\s+(.*)/);
             const name = nameMatch ? nameMatch[1].trim() : basename(filepath, '.user.js');
             return { name, content };
@@ -18,7 +22,7 @@ function extractScriptInfo(filepath) {
 function createBookmarklet(filepath) {
     return extractScriptInfo(filepath)
         .then(({ content }) => {
-            const scriptContent = content.split('// ==/UserScript==')[1];
+            const scriptContent = content.split(USERSCRIPT_DELIMITER)[1];
             const requireMatch = content.match(/@require\s+(.*)/);
             const externalScripts = requireMatch ? [`await loadScript('${requireMatch[1]}');`] : [];
 
@@ -52,20 +56,30 @@ function updateReadme(bookmarklets) {
 
     return readFile(readmePath, 'utf-8')
         .then(readme => {
-            const bookmarkletSection = `## Bookmarklets
+            const bookmarkletSection = `${BOOKMARKLETS_START_MARKER}
 
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
 
 ${Object.entries(bookmarklets)
-                    .map(([name, code]) => `### ${name}\n\n\`\`\`javascript\n${code}\n\`\`\``)
-                    .join('\n\n')}
-`;
+                    .map(([name, code]) => `### ${name}
 
-            const bookmarkletRegex = /## Bookmarklets[\s\S]*?(?=##|$)/;
+\`\`\`javascript
+${code}
+\`\`\``)
+                    .join('\n\n')}
+${BOOKMARKLETS_END_MARKER}`;
+
+            const bookmarkletRegex = new RegExp(
+                `${BOOKMARKLETS_START_MARKER}[\\s\\S]*?${BOOKMARKLETS_END_MARKER}`
+            );
+
             if (readme.match(bookmarkletRegex)) {
                 readme = readme.replace(bookmarkletRegex, bookmarkletSection);
             } else {
-                readme += '\n\n' + bookmarkletSection;
+                while (!readme.endsWith('\n\n')) {
+                    readme += '\n';
+                }
+                readme += bookmarkletSection;
             }
 
             return writeFile(readmePath, readme);
@@ -91,7 +105,6 @@ function main() {
         .then(userScriptFiles => {
             console.log(`Found ${userScriptFiles.length} userscripts: ${userScriptFiles.join(', ')}`);
 
-            // Process all files in parallel
             const bookmarkletPromises = userScriptFiles.map(file => {
                 return extractScriptInfo(file)
                     .then(scriptInfo => {
