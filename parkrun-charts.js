@@ -39,7 +39,6 @@
 (function () {
   'use strict';
 
-  // Common styling values
   const STYLES = {
     backgroundColor: '#2b223d',
     barColor: '#FFA300',
@@ -49,13 +48,6 @@
     gridColor: 'rgba(200, 200, 200, 0.2)'
   };
 
-  /**
-   * Creates the container element for a chart
-   * @param {string} title - Chart title
-   * @param {string} id - Canvas ID
-   * @param {number} width - Max width in pixels
-   * @returns {Object} Object containing container and canvas elements
-   */
   function createChartContainer(title, id, width = 800) {
     const container = document.createElement('div');
     container.className = `parkrun-chart-container ${id}-container`;
@@ -81,10 +73,6 @@
     return { container, canvas };
   }
 
-  /**
-   * Inserts a container before the results table
-   * @param {Element} container - The container element to insert
-   */
   function insertContainer(container) {
     const resultsTable = document.querySelector('.Results-table');
     if (resultsTable && resultsTable.parentNode) {
@@ -94,12 +82,65 @@
     }
   }
 
-  // ----- FINISHERS PER MINUTE CHART FUNCTIONS -----
+  function addChartDownloadButton(container, canvas, chartType) {
+    const controlsContainer = document.createElement('div');
+    controlsContainer.style.display = 'flex';
+    controlsContainer.style.justifyContent = 'center';
+    controlsContainer.style.marginTop = '10px';
+    controlsContainer.style.marginBottom = '10px';
 
-  /**
-   * Extracts finish time data from the results table
-   * @returns {Object} Object containing minutes and the count of finishers per minute
-   */
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = '💾 Save as Image';
+    downloadBtn.style.padding = '6px 12px';
+    downloadBtn.style.backgroundColor = STYLES.barColor;
+    downloadBtn.style.color = '#2b223d';
+    downloadBtn.style.border = 'none';
+    downloadBtn.style.borderRadius = '4px';
+    downloadBtn.style.cursor = 'pointer';
+    downloadBtn.style.fontWeight = 'bold';
+    downloadBtn.style.display = 'inline-block';
+    downloadBtn.style.margin = '0 5px';
+    downloadBtn.title = 'Download chart as PNG image';
+
+    downloadBtn.addEventListener('mouseover', function () {
+      this.style.backgroundColor = '#e59200';
+    });
+
+    downloadBtn.addEventListener('mouseout', function () {
+      this.style.backgroundColor = STYLES.barColor;
+    });
+
+    downloadBtn.addEventListener('click', function () {
+      const link = document.createElement('a');
+
+      const date = new Date();
+      const dateStr = date.toISOString().split('T')[0];
+
+      const pathParts = window.location.pathname.split('/');
+      const parkrunName = pathParts[1];
+
+      let filename;
+      if (chartType === 'event-history') {
+        filename = `${parkrunName}-event-history-${dateStr}.png`;
+      } else {
+        const eventNumber = pathParts[3] || 'latest';
+        filename = `${parkrunName}-event-${eventNumber}-finishers-${dateStr}.png`;
+      }
+
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    controlsContainer.appendChild(downloadBtn);
+    container.appendChild(controlsContainer);
+
+    return controlsContainer;
+  }
+
   function extractFinishTimeData() {
     const timeData = {};
     const rows = document.querySelectorAll('tr.Results-table-row');
@@ -148,11 +189,6 @@
     };
   }
 
-  /**
-   * Prepares data for the finishers per minute chart
-   * @param {Object} timeData Object containing minutes and counts
-   * @returns {Object} Object containing sorted labels and data for Chart.js
-   */
   function prepareFinisherChartData({ timeData, minMinute, maxMinute }) {
     const minutes = [];
     const counts = [];
@@ -177,9 +213,6 @@
     };
   }
 
-  /**
-   * Creates the finishers per minute chart
-   */
   function createFinishersChart() {
     const timeData = extractFinishTimeData();
     const chartData = prepareFinisherChartData(timeData);
@@ -189,7 +222,6 @@
       return;
     }
 
-    // Check if chart already exists to prevent duplicate rendering
     if (document.getElementById('finishersChart')) {
       console.log('Finishers chart already exists, skipping render');
       return;
@@ -197,6 +229,8 @@
 
     const { container, canvas } = createChartContainer('Finishers per Minute', 'finishersChart');
     insertContainer(container);
+
+    addChartDownloadButton(container, canvas, 'finishers');
 
     const ctx = canvas.getContext('2d');
     // eslint-disable-next-line no-undef
@@ -215,7 +249,7 @@
         ],
       },
       options: {
-        animation: false, // Disable all animations
+        animation: false,
         responsive: true,
         plugins: {
           legend: {
@@ -281,12 +315,6 @@
     });
   }
 
-  // ----- EVENT HISTORY CHART FUNCTIONS -----
-
-  /**
-   * Extracts event history data from the results table
-   * @returns {Object} Object containing labels and datasets
-   */
   function extractEventHistoryData() {
     const eventNumbers = [];
     const dates = [];
@@ -295,18 +323,14 @@
 
     const rows = document.querySelectorAll('tr.Results-table-row');
 
-    // Process rows in reverse to get chronological order (oldest to newest)
     Array.from(rows).reverse().forEach((row) => {
-      // Use data attributes from the row
       const eventNumber = row.getAttribute('data-parkrun');
       if (eventNumber) {
         eventNumbers.push(eventNumber);
       }
 
-      // Date from data attribute
       const date = row.getAttribute('data-date');
       if (date) {
-        // Format date from YYYY-MM-DD to a more readable format
         const dateObj = new Date(date);
         const formattedDate = dateObj.toLocaleDateString(undefined, {
           year: 'numeric',
@@ -316,13 +340,11 @@
         dates.push(formattedDate);
       }
 
-      // Finishers from data attribute
       const finishersCount = row.getAttribute('data-finishers');
       if (finishersCount) {
         finishers.push(parseInt(finishersCount, 10));
       }
 
-      // Volunteers from data attribute
       const volunteersCount = row.getAttribute('data-volunteers');
       if (volunteersCount) {
         volunteers.push(parseInt(volunteersCount, 10));
@@ -337,11 +359,7 @@
     };
   }
 
-  /**
-   * Creates the event history chart with appropriate sizing
-   */
   function createEventHistoryChart() {
-    // Check if chart already exists to prevent duplicate rendering
     if (document.getElementById('eventHistoryChart')) {
       console.log('Event history chart already exists, skipping render');
       return;
@@ -360,12 +378,13 @@
       1000
     );
 
-    // Set a specific fixed size for the canvas before Chart.js initialization
     canvas.height = 400;
     canvas.style.height = '400px';
     canvas.style.maxHeight = '400px';
 
     insertContainer(container);
+
+    addChartDownloadButton(container, canvas, 'event-history');
 
     const ctx = canvas.getContext('2d');
     // eslint-disable-next-line no-undef
@@ -389,9 +408,9 @@
             type: 'line',
             borderColor: STYLES.lineColor,
             backgroundColor: 'rgba(83, 186, 157, 0.2)',
-            borderWidth: 2,
+            borderWidth: 1,
             pointBackgroundColor: STYLES.lineColor,
-            pointRadius: 4,
+            pointRadius: 2,
             fill: false,
             tension: 0.2,
             yAxisID: 'y-volunteers',
@@ -400,11 +419,11 @@
         ]
       },
       options: {
-        animation: false, // Disable all animations
+        animation: false,
         responsive: true,
-        maintainAspectRatio: true, // Force maintain aspect ratio
-        aspectRatio: 2.5, // Set a fixed aspect ratio
-        onResize: null, // Disable the default resize behavior
+        maintainAspectRatio: true,
+        aspectRatio: 2.5,
+        onResize: null,
         plugins: {
           legend: {
             labels: {
@@ -486,10 +505,6 @@
     });
   }
 
-
-  /**
-   * Main function to detect page type and initialize appropriate chart
-   */
   function initCharts() {
     if (typeof Chart === 'undefined') {
       console.error('Chart.js not loaded');
