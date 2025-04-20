@@ -10,27 +10,25 @@ const BOOKMARKLETS_END_MARKER = '<!-- END BOOKMARKLETS SECTION -->';
 const USERSCRIPT_DELIMITER = '// ==/UserScript==';
 
 function extractScriptInfo(filepath) {
-    return readFile(filepath, 'utf-8')
-        .then(content => {
-            const headerSection = content.split(USERSCRIPT_DELIMITER)[0];
-            const nameMatch = headerSection.match(/@name\s+(.*)/);
-            const descriptionMatch = headerSection.match(/@description\s+(.*)/);
+    return readFile(filepath, 'utf-8').then((content) => {
+        const headerSection = content.split(USERSCRIPT_DELIMITER)[0];
+        const nameMatch = headerSection.match(/@name\s+(.*)/);
+        const descriptionMatch = headerSection.match(/@description\s+(.*)/);
 
-            const name = nameMatch ? nameMatch[1].trim() : basename(filepath, '.user.js');
-            const description = descriptionMatch ? descriptionMatch[1].trim() : '';
+        const name = nameMatch ? nameMatch[1].trim() : basename(filepath, '.user.js');
+        const description = descriptionMatch ? descriptionMatch[1].trim() : '';
 
-            return { name, description, content };
-        });
+        return { name, description, content };
+    });
 }
 
 function createBookmarklet(filepath) {
-    return extractScriptInfo(filepath)
-        .then(({ content }) => {
-            const scriptContent = content.split(USERSCRIPT_DELIMITER)[1];
-            const requireMatch = content.match(/@require\s+(.*)/);
-            const externalScripts = requireMatch ? [`await loadScript('${requireMatch[1]}');`] : [];
+    return extractScriptInfo(filepath).then(({ content }) => {
+        const scriptContent = content.split(USERSCRIPT_DELIMITER)[1];
+        const requireMatch = content.match(/@require\s+(.*)/);
+        const externalScripts = requireMatch ? [`await loadScript('${requireMatch[1]}');`] : [];
 
-            const bookmarkletWrapper = `
+        const bookmarkletWrapper = `
                 javascript:(async function(){
                     async function loadScript(url) {
                         return new Promise((resolve, reject) => {
@@ -46,57 +44,57 @@ function createBookmarklet(filepath) {
                 })();
             `;
 
-            const minified = uglifyjs.minify(bookmarkletWrapper, {
-                compress: true,
-                mangle: true,
-            });
-
-            return minified.code;
+        const minified = uglifyjs.minify(bookmarkletWrapper, {
+            compress: true,
+            mangle: true,
         });
+
+        return minified.code;
+    });
 }
 
 function updateReadme(bookmarklets) {
     const readmePath = join(process.cwd(), 'README.md');
 
-    return readFile(readmePath, 'utf-8')
-        .then(readme => {
-            const bookmarkletSection = `${BOOKMARKLETS_START_MARKER}
+    return readFile(readmePath, 'utf-8').then((readme) => {
+        const bookmarkletSection = `${BOOKMARKLETS_START_MARKER}
 
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
 
 ${Object.entries(bookmarklets)
-                    .map(([name, { code, description }]) => `### ${name}
+    .map(
+        ([name, { code, description }]) => `### ${name}
 ${description ? `\n${description}\n` : ''}
 \`\`\`javascript
 ${code}
-\`\`\``)
-                    .join('\n\n')}
+\`\`\``
+    )
+    .join('\n\n')}
 ${BOOKMARKLETS_END_MARKER}
 `;
 
-            const bookmarkletRegex = new RegExp(
-                `${BOOKMARKLETS_START_MARKER}[\\s\\S]*?${BOOKMARKLETS_END_MARKER}`
-            );
+        const bookmarkletRegex = new RegExp(
+            `${BOOKMARKLETS_START_MARKER}[\\s\\S]*?${BOOKMARKLETS_END_MARKER}`
+        );
 
-            if (readme.match(bookmarkletRegex)) {
-                readme = readme.replace(bookmarkletRegex, bookmarkletSection);
-            } else {
-                while (!readme.endsWith('\n\n')) {
-                    readme += '\n';
-                }
-                readme += bookmarkletSection;
+        if (readme.match(bookmarkletRegex)) {
+            readme = readme.replace(bookmarkletRegex, bookmarkletSection);
+        } else {
+            while (!readme.endsWith('\n\n')) {
+                readme += '\n';
             }
+            readme += bookmarkletSection;
+        }
 
-            return writeFile(readmePath, readme);
-        });
+        return writeFile(readmePath, readme);
+    });
 }
 
 function findUserScripts() {
-    return glob('*.user.js', { cwd: process.cwd() })
-        .catch(err => {
-            console.error('Error finding userscripts:', err);
-            throw err;
-        });
+    return glob('*.user.js', { cwd: process.cwd() }).catch((err) => {
+        console.error('Error finding userscripts:', err);
+        throw err;
+    });
 }
 
 function main() {
@@ -107,23 +105,26 @@ function main() {
     }
 
     return findUserScripts()
-        .then(userScriptFiles => {
-            console.log(`Found ${userScriptFiles.length} userscripts: ${userScriptFiles.join(', ')}`);
+        .then((userScriptFiles) => {
+            console.log(
+                `Found ${userScriptFiles.length} userscripts: ${userScriptFiles.join(', ')}`
+            );
 
-            const bookmarkletPromises = userScriptFiles.map(file => {
-                return extractScriptInfo(file)
-                    .then(scriptInfo => {
-                        return createBookmarklet(file)
-                            .then(bookmarkletCode => {
-                                console.log(`Processed: ${file} (${scriptInfo.name})`);
-                                return [scriptInfo.name, { code: bookmarkletCode, description: scriptInfo.description }];
-                            });
+            const bookmarkletPromises = userScriptFiles.map((file) => {
+                return extractScriptInfo(file).then((scriptInfo) => {
+                    return createBookmarklet(file).then((bookmarkletCode) => {
+                        console.log(`Processed: ${file} (${scriptInfo.name})`);
+                        return [
+                            scriptInfo.name,
+                            { code: bookmarkletCode, description: scriptInfo.description },
+                        ];
                     });
+                });
             });
 
             return Promise.all(bookmarkletPromises);
         })
-        .then(bookmarkletEntries => {
+        .then((bookmarkletEntries) => {
             const bookmarklets = Object.fromEntries(bookmarkletEntries);
             return updateReadme(bookmarklets);
         })
