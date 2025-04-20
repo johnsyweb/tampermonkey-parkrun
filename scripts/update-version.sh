@@ -7,13 +7,13 @@ date_today=$(date +%Y-%m-%d)
 update_version() {
   local file=$1
   local current_version
-  current_version=$(grep -oP '(?<=@version\s{2,}).*' "$file")
+  current_version=$(awk '/@version/ {print $2; exit}' "$file")
   local new_version="$date_today"
 
   if [[ "$current_version" == "$date_today"* ]]; then
     if [[ "$current_version" =~ $date_today\ ([0-9]{2}:[0-9]{2}(:[0-9]{2})?) ]]; then
       local time
-      time=$(echo "$current_version" | grep -oP "$date_today \K.*")
+      time=${BASH_REMATCH[1]}
       if [[ "$time" =~ ([0-9]{2}:[0-9]{2})$ ]]; then
         new_version="$date_today ${BASH_REMATCH[1]}:$(date +%S)"
       else
