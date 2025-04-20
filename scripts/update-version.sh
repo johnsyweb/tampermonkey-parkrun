@@ -25,7 +25,7 @@ update_version() {
   fi
 
   echo "Updating $file from '$current_version' to '$new_version'"
-  sed -i -e "s/@version\s\+.*/@version $new_version/" "$file"
+  sed -i '' "s/\(@version  *\).*$/\\1${new_version}/" "$file"
 }
 
 for file in *.user.js; do
