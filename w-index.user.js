@@ -33,7 +33,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.user.js
-// @version      2025-04-20
+// @version      2025-04-21
 // ==/UserScript==
 
 (function () {
@@ -181,12 +181,71 @@
         return chart;
     }
 
+    /**
+     * Fetches text content from a URI with caching support
+     * @param {string} uri - The URI to fetch from
+     * @param {string} cacheKey - The key to use for caching
+     * @param {number} [cacheTtlMs=3600000] - Cache TTL in milliseconds (default: 1 hour)
+     * @returns {Promise<string>} - The fetched text content
+     */
+    async function fetchWithCache(uri, cacheKey, cacheTtlMs = 60 * 60 * 1000) {
+        const cached = sessionStorage.getItem(cacheKey);
+
+        if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            const isFresh = Date.now() - timestamp < cacheTtlMs;
+            if (isFresh) {
+                return data;
+            }
+        }
+        return fetch(uri)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then(text => {
+                sessionStorage.setItem(cacheKey, JSON.stringify({
+                    data: text,
+                    timestamp: Date.now()
+                }));
+                return text;
+            })
+            .catch(error => {
+                console.error(`Error fetching ${uri}:`, error);
+                if (cached) {
+                    console.warn('Using stale cached data after fetch failure');
+                    return JSON.parse(cached).data;
+                }
+                throw error;
+            });
+    }
+
     async function fetchFriendResults(athleteId) {
-        const response = await fetch(`https://www.parkrun.com.au/parkrunner/${athleteId}/all/`);
-        const text = await response.text();
+        const cacheKey = `parkrunner_${athleteId}_all`;
+        const uri = `${window.location.origin}/parkrunner/${athleteId}/all/`;
+        const text = await fetchWithCache(uri, cacheKey);
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, 'text/html');
-        return findResultsTable(doc);
+        const table = findResultsTable(doc);
+        if (!table) {
+            console.error('Friend results table not found');
+            return null;
+        }
+        const h2Element = doc.querySelector('h2');
+        if (!h2Element) {
+            console.error('Friend H2 element not found');
+            return null;
+        }
+        const friendInfo = extractAthleteInfo(h2Element);
+        if (!friendInfo) {
+            console.error('Could not extract friend athlete info');
+            return null;
+        }
+        const friendEvents = extractEventDetails(table);
+        const friendIndices = calculateWilsonIndexOverTime(friendEvents);
+        return { friendIndices, friendInfo };
     }
 
     function createComparisonUI(container, onCompare) {
@@ -226,12 +285,8 @@
             button.textContent = 'Loading...';
 
             try {
-                const friendTable = await fetchFriendResults(athleteId);
-                if (friendTable) {
-                    const friendEvents = extractEventDetails(friendTable);
-                    const friendIndices = calculateWilsonIndexOverTime(friendEvents);
-                    onCompare(friendIndices, athleteId);
-                }
+                const { friendIndices, friendInfo } = await fetchFriendResults(athleteId);
+                onCompare(friendIndices, friendInfo);
             } catch (error) {
                 console.error("Failed to fetch friend's results:", error);
                 alert("Failed to fetch friend's results. Please check the ID and try again.");
@@ -293,7 +348,7 @@
         return colors[index % colors.length];
     }
 
-    function displayWilseonIndex() {
+    function displayWilsonIndex() {
         const table = findResultsTable(document);
         if (!table) {
             console.error('Results table not found');
@@ -334,14 +389,7 @@
 
             const chartInstance = createWilsonGraph(wilsonIndices, container, athleteInfo);
 
-            createComparisonUI(container, async (friendIndices, friendId) => {
-                const friendResponse = await fetch(
-                    `${window.location.origin}/parkrunner/${friendId}/all/`
-                );
-                const friendText = await friendResponse.text();
-                const friendDoc = new DOMParser().parseFromString(friendText, 'text/html');
-                const friendH2 = friendDoc.querySelector('h2');
-                const friendInfo = extractAthleteInfo(friendH2);
+            createComparisonUI(container, async (friendIndices, friendInfo) => {
                 updateChart(chartInstance, friendIndices, friendInfo);
             });
 
@@ -357,6 +405,6 @@
             findResultsTable,
         };
     } else {
-        displayWilseonIndex();
+        displayWilsonIndex();
     }
 })();
