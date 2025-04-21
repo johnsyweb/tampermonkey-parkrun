@@ -237,10 +237,12 @@
       const y3 = centerY + outerRadius * Math.sin(endAngle);
 
       // Path goes from center to outer edge, arcs around, then back to center
-      const pathData = `M ${centerX},${centerY} 
-                     L ${x2},${y2} 
-                     A ${outerRadius},${outerRadius} 0 0,1 ${x3},${y3} 
-                     Z`;
+      const pathData = [
+        `M ${centerX},${centerY}`,
+        `L ${x2},${y2}`,
+        `A ${outerRadius},${outerRadius} 0 0,1 ${x3},${y3}`,
+        'Z'
+      ].join(' ');
 
       path.setAttribute('d', pathData);
 
@@ -480,13 +482,23 @@
 
     // Add table header
     const thead = document.createElement('thead');
-    thead.innerHTML = `
-            <tr>
-                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #555;">Date</th>
-                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #555;">Event</th>
-                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #555;">Time</th>
-            </tr>
-        `;
+    const headers = [
+      { title: 'Date', align: 'left' },
+      { title: 'Event', align: 'left' },
+      { title: 'Time', align: 'left' }
+    ];
+
+    const headerRow = document.createElement('tr');
+    headers.forEach(header => {
+      const th = document.createElement('th');
+      th.textContent = header.title;
+      th.style.textAlign = header.align;
+      th.style.padding = '8px';
+      th.style.borderBottom = '1px solid #555';
+      headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
     table.appendChild(thead);
 
     // Add table body
@@ -494,11 +506,15 @@
     times.forEach((time, index) => {
       const row = document.createElement('tr');
       row.style.backgroundColor = index === 0 ? 'rgba(255, 163, 0, 0.2)' : 'transparent';
-      row.innerHTML = `
-                <td style="padding: 8px; border-bottom: 1px solid #444;">${time.date}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #444;">${time.event}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #444;">${time.time}</td>
-            `;
+      const cells = [
+        { content: time.date },
+        { content: time.event },
+        { content: time.time }
+      ].map(cell =>
+        `<td style="padding: 8px; border-bottom: 1px solid #444;">${cell.content}</td>`
+      ).join('');
+
+      row.innerHTML = cells;
       tbody.appendChild(row);
     });
     table.appendChild(tbody);
