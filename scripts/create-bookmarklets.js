@@ -62,14 +62,14 @@ function updateReadme(bookmarklets) {
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
 
 ${Object.entries(bookmarklets)
-    .map(
-        ([name, { code, description }]) => `### ${name}
+                .map(
+                    ([name, { code, description }]) => `### ${name}
 ${description ? `\n${description}\n` : ''}
 \`\`\`javascript
-${code}
+javascript:${code}
 \`\`\``
-    )
-    .join('\n\n')}
+                )
+                .join('\n\n')}
 ${BOOKMARKLETS_END_MARKER}
 `;
 
