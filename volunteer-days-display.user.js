@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         parkrun Volunteer Days Display
 // @namespace    http://tampermonkey.net/
-// @version      2025-04-20
+// @version      2025-04-21
 // @description  Displays the number of volunteer days for parkrun finishers on results pages
 // @author       @johnsyweb
 // @match        *://www.parkrun.com.au/*/results/*

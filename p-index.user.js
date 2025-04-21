@@ -32,7 +32,7 @@
 // @tag          parkrun
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
-// @version      2025-04-20
+// @version      2025-04-21
 // ==/UserScript==
 
 (function () {

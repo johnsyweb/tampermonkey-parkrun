@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         parkrun Charts
 // @namespace    http://tampermonkey.net/
-// @version      2025-04-20
+// @version      2025-04-21
 // @description  Displays charts on parkrun pages: finishers per minute on results pages and event history on event history pages
 // @author       @johnsyweb
 // @match        *://www.parkrun.com.au/*/results/*
