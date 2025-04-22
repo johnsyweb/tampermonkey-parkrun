@@ -45,6 +45,7 @@
     const completedLetters = {};
     const rows = Array.from(table.querySelectorAll('tr')).reverse(); // Reverse rows for chronological order
     let totalEvents = 0;
+    let dateOfCompletion = null;
 
     for (const row of rows) {
       const cells = row.querySelectorAll('td');
@@ -61,19 +62,14 @@
 
         // Stop processing if all 25 letters are attained
         if (Object.keys(completedLetters).length === 25) {
+          dateOfCompletion = date;
           break;
         }
       }
     }
 
     const completedCount = Object.keys(completedLetters).length;
-    const dateOfCompletion =
-      completedCount === 25
-        ? Object.values(completedLetters).reduce((latest, { date }) => {
-            return new Date(date) > new Date(latest) ? date : latest;
-          }, '1970-01-01')
-        : null;
-
+ 
     return {
       completedLetters,
       remainingLetters: ALPHABET.filter((letter) => !completedLetters[letter]),
