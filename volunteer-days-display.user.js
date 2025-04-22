@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         parkrun Volunteer Days Display
 // @namespace    http://tampermonkey.net/
-// @version      2025-04-21
+// @version      2025-04-22
 // @description  Displays the number of volunteer days for parkrun finishers on results pages
 // @author       @johnsyweb
 // @match        *://www.parkrun.com.au/*/results/*
@@ -36,40 +36,38 @@
 // ==/UserScript==
 
 (function () {
-    'use strict';
+  'use strict';
 
-    /**
-     * Adds volunteer day information to each finisher who has volunteered
-     */
-    function showVolunteerDays() {
-        document
-            .querySelectorAll(
-                'tr[data-vols] > td.Results-table-td.Results-table-td--name > div.detailed'
-            )
-            .forEach((div) => {
-                const volDays = div.closest('tr').getAttribute('data-vols');
+  /**
+   * Adds volunteer day information to each finisher who has volunteered
+   */
+  function showVolunteerDays() {
+    document
+      .querySelectorAll('tr[data-vols] > td.Results-table-td.Results-table-td--name > div.detailed')
+      .forEach((div) => {
+        const volDays = div.closest('tr').getAttribute('data-vols');
 
-                if (volDays && parseInt(volDays) > 0) {
-                    const volSpan = document.createElement('span');
-                    volSpan.textContent = `${volDays} volunteer day${volDays === '1' ? '' : 's'} | `;
-                    volSpan.classList.add('volunteer-days');
-                    volSpan.style.color = '#d35226';
-                    div.insertBefore(volSpan, div.firstChild);
-                }
-            });
-    }
-
-    /**
-     * Waits for the page to fully load before adding volunteer information
-     */
-    function init() {
-        const resultsTable = document.querySelector('.Results-table');
-        if (resultsTable) {
-            showVolunteerDays();
-        } else {
-            setTimeout(init, 500);
+        if (volDays && parseInt(volDays) > 0) {
+          const volSpan = document.createElement('span');
+          volSpan.textContent = `${volDays} volunteer day${volDays === '1' ? '' : 's'} | `;
+          volSpan.classList.add('volunteer-days');
+          volSpan.style.color = '#d35226';
+          div.insertBefore(volSpan, div.firstChild);
         }
-    }
+      });
+  }
 
-    init();
+  /**
+   * Waits for the page to fully load before adding volunteer information
+   */
+  function init() {
+    const resultsTable = document.querySelector('.Results-table');
+    if (resultsTable) {
+      showVolunteerDays();
+    } else {
+      setTimeout(init, 500);
+    }
+  }
+
+  init();
 })();

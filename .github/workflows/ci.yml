@@ -1,29 +1,29 @@
 name: CI
 
 on:
-    push:
-        branches:
-            - main
-    pull_request:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - uses: pnpm/action-setup@v4
-              with:
-                  run_install: true
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
 
-            - uses: actions/setup-node@v4
-              with:
-                  cache: 'pnpm'
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
 
-            - name: Run tests
-              run: pnpm test
+      - name: Run tests
+        run: pnpm test
 
-            - name: Run lint
-              run: pnpm lint
+      - name: Run lint
+        run: pnpm lint

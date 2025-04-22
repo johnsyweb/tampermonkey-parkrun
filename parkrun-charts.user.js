@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         parkrun Charts
 // @namespace    http://tampermonkey.net/
-// @version      2025-04-21
+// @version      2025-04-22
 // @description  Displays charts on parkrun pages: finishers per minute on results pages and event history on event history pages
 // @author       @johnsyweb
 // @match        *://www.parkrun.com.au/*/results/*
@@ -45,7 +45,7 @@
     lineColor: '#53BA9D',
     textColor: '#e0e0e0',
     subtleTextColor: '#cccccc',
-    gridColor: 'rgba(200, 200, 200, 0.2)'
+    gridColor: 'rgba(200, 200, 200, 0.2)',
   };
 
   function createChartContainer(title, id, width = 800) {
@@ -323,39 +323,41 @@
 
     const rows = document.querySelectorAll('tr.Results-table-row');
 
-    Array.from(rows).reverse().forEach((row) => {
-      const eventNumber = row.getAttribute('data-parkrun');
-      if (eventNumber) {
-        eventNumbers.push(eventNumber);
-      }
+    Array.from(rows)
+      .reverse()
+      .forEach((row) => {
+        const eventNumber = row.getAttribute('data-parkrun');
+        if (eventNumber) {
+          eventNumbers.push(eventNumber);
+        }
 
-      const date = row.getAttribute('data-date');
-      if (date) {
-        const dateObj = new Date(date);
-        const formattedDate = dateObj.toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        });
-        dates.push(formattedDate);
-      }
+        const date = row.getAttribute('data-date');
+        if (date) {
+          const dateObj = new Date(date);
+          const formattedDate = dateObj.toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+          dates.push(formattedDate);
+        }
 
-      const finishersCount = row.getAttribute('data-finishers');
-      if (finishersCount) {
-        finishers.push(parseInt(finishersCount, 10));
-      }
+        const finishersCount = row.getAttribute('data-finishers');
+        if (finishersCount) {
+          finishers.push(parseInt(finishersCount, 10));
+        }
 
-      const volunteersCount = row.getAttribute('data-volunteers');
-      if (volunteersCount) {
-        volunteers.push(parseInt(volunteersCount, 10));
-      }
-    });
+        const volunteersCount = row.getAttribute('data-volunteers');
+        if (volunteersCount) {
+          volunteers.push(parseInt(volunteersCount, 10));
+        }
+      });
 
     return {
       eventNumbers,
       dates,
       finishers,
-      volunteers
+      volunteers,
     };
   }
 
@@ -400,7 +402,7 @@
             borderColor: STYLES.barColor,
             borderWidth: 1,
             yAxisID: 'y-finishers',
-            order: 1
+            order: 1,
           },
           {
             label: 'Volunteers',
@@ -414,9 +416,9 @@
             fill: false,
             tension: 0.2,
             yAxisID: 'y-volunteers',
-            order: 0
-          }
-        ]
+            order: 0,
+          },
+        ],
       },
       options: {
         animation: false,
@@ -428,8 +430,8 @@
           legend: {
             labels: {
               color: STYLES.textColor,
-              usePointStyle: true
-            }
+              usePointStyle: true,
+            },
           },
           tooltip: {
             mode: 'index',
@@ -448,23 +450,23 @@
                   return `Volunteers: ${tooltipItem.raw}`;
                 }
                 return tooltipItem.formattedValue;
-              }
-            }
-          }
+              },
+            },
+          },
         },
         scales: {
           x: {
             title: {
               display: true,
               text: 'Event Number',
-              color: STYLES.textColor
+              color: STYLES.textColor,
             },
             ticks: {
-              color: STYLES.subtleTextColor
+              color: STYLES.subtleTextColor,
             },
             grid: {
-              color: STYLES.gridColor
-            }
+              color: STYLES.gridColor,
+            },
           },
           'y-finishers': {
             type: 'linear',
@@ -473,15 +475,15 @@
             title: {
               display: true,
               text: 'Number of Finishers',
-              color: STYLES.textColor
+              color: STYLES.textColor,
             },
             ticks: {
               precision: 0,
-              color: STYLES.subtleTextColor
+              color: STYLES.subtleTextColor,
             },
             grid: {
-              color: STYLES.gridColor
-            }
+              color: STYLES.gridColor,
+            },
           },
           'y-volunteers': {
             type: 'linear',
@@ -490,18 +492,18 @@
             title: {
               display: true,
               text: 'Number of Volunteers',
-              color: STYLES.lineColor
+              color: STYLES.lineColor,
             },
             ticks: {
               precision: 0,
-              color: STYLES.lineColor
+              color: STYLES.lineColor,
             },
             grid: {
-              display: false
-            }
-          }
-        }
-      }
+              display: false,
+            },
+          },
+        },
+      },
     });
   }
 

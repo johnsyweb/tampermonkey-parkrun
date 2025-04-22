@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         parkrun Stopwatch Bingo
 // @namespace    http://tampermonkey.net/
-// @version      2025-04-21
+// @version      2025-04-22
 // @description  Visualizes your progress on the stopwatch bingo challenge (collecting seconds 00-59)
 // @author       @johnsyweb
 // @match        *://www.parkrun.com.au/parkrunner/*/all*
@@ -46,7 +46,7 @@
     completedColor: '#FFA300',
     pendingColor: '#53BA9D',
     textColor: '#e0e0e0',
-    subtleTextColor: '#cccccc'
+    subtleTextColor: '#cccccc',
   };
 
   function findResultsTable() {
@@ -65,7 +65,7 @@
     const rows = table.querySelectorAll('tr');
     // First collect all results since they're in reverse order
     const allResults = [];
-    rows.forEach(row => {
+    rows.forEach((row) => {
       const cells = row.querySelectorAll('td');
       if (cells.length < 5) return;
 
@@ -93,7 +93,7 @@
         secondValue,
         date,
         event,
-        time
+        time,
       });
     });
 
@@ -110,7 +110,7 @@
         seconds[secondValue] = {
           date,
           event,
-          time
+          time,
         };
         collectedCount++;
 
@@ -130,7 +130,7 @@
       timeData[secondValue].push({
         date,
         event,
-        time
+        time,
       });
     }
 
@@ -140,7 +140,7 @@
       collectedCount,
       totalParkruns,
       dateOfCompletion,
-      firstCompleteEvent
+      firstCompleteEvent,
     };
   }
 
@@ -241,7 +241,7 @@
         `M ${centerX},${centerY}`,
         `L ${x2},${y2}`,
         `A ${outerRadius},${outerRadius} 0 0,1 ${x3},${y3}`,
-        'Z'
+        'Z',
       ].join(' ');
 
       path.setAttribute('d', pathData);
@@ -260,10 +260,16 @@
         const b = parseInt(baseColor.slice(5, 7), 16);
 
         // Darken the color as frequency increases (multiply RGB values)
-        const darkenFactor = 1 - (intensity * 0.3); // Ranges from 1.0 to 0.7
-        const newR = Math.floor(r * darkenFactor).toString(16).padStart(2, '0');
-        const newG = Math.floor(g * darkenFactor).toString(16).padStart(2, '0');
-        const newB = Math.floor(b * darkenFactor).toString(16).padStart(2, '0');
+        const darkenFactor = 1 - intensity * 0.3; // Ranges from 1.0 to 0.7
+        const newR = Math.floor(r * darkenFactor)
+          .toString(16)
+          .padStart(2, '0');
+        const newG = Math.floor(g * darkenFactor)
+          .toString(16)
+          .padStart(2, '0');
+        const newB = Math.floor(b * darkenFactor)
+          .toString(16)
+          .padStart(2, '0');
 
         const frequencyColor = `#${newR}${newG}${newB}`;
 
@@ -272,7 +278,10 @@
 
         // Update title to include frequency information
         const secondData = data.seconds[i];
-        path.setAttribute('title', `${secondData.time} - ${secondData.date} ${secondData.event} (${occurrences} occurrences)`);
+        path.setAttribute(
+          'title',
+          `${secondData.time} - ${secondData.date} ${secondData.event} (${occurrences} occurrences)`
+        );
       } else {
         path.setAttribute('fill', STYLES.pendingColor);
         path.setAttribute('opacity', '0.4');
@@ -307,7 +316,7 @@
     // Create indices at 5-second intervals (0, 5, 10, etc.)
     for (let i = 0; i < 60; i += 5) {
       // Calculate angle for this index
-      const angle = ((i / 60) * 360) - 90; // -90 to start at top
+      const angle = (i / 60) * 360 - 90; // -90 to start at top
       const radians = angle * (Math.PI / 180);
 
       // Calculate position (outer edge of the clock)
@@ -374,7 +383,8 @@
     explanation.style.marginTop = '20px';
     explanation.style.color = STYLES.subtleTextColor;
     explanation.style.fontSize = '0.9em';
-    explanation.innerHTML = 'Stopwatch Bingo: collect finish times with every second from 00-59.<br>Orange segments show seconds you\'ve collected, green segments are still needed.<br>Click on any segment to see details.';
+    explanation.innerHTML =
+      "Stopwatch Bingo: collect finish times with every second from 00-59.<br>Orange segments show seconds you've collected, green segments are still needed.<br>Click on any segment to see details.";
     container.appendChild(explanation);
 
     return container;
@@ -416,8 +426,8 @@
         scale: 2, // Higher resolution
         logging: false,
         allowTaint: true,
-        useCORS: true
-      }).then(canvas => {
+        useCORS: true,
+      }).then((canvas) => {
         // Show the button again
         btnContainer.style.display = 'block';
 
@@ -485,11 +495,11 @@
     const headers = [
       { title: 'Date', align: 'left' },
       { title: 'Event', align: 'left' },
-      { title: 'Time', align: 'left' }
+      { title: 'Time', align: 'left' },
     ];
 
     const headerRow = document.createElement('tr');
-    headers.forEach(header => {
+    headers.forEach((header) => {
       const th = document.createElement('th');
       th.textContent = header.title;
       th.style.textAlign = header.align;
@@ -506,13 +516,11 @@
     times.forEach((time, index) => {
       const row = document.createElement('tr');
       row.style.backgroundColor = index === 0 ? 'rgba(255, 163, 0, 0.2)' : 'transparent';
-      const cells = [
-        { content: time.date },
-        { content: time.event },
-        { content: time.time }
-      ].map(cell =>
-        `<td style="padding: 8px; border-bottom: 1px solid #444;">${cell.content}</td>`
-      ).join('');
+      const cells = [{ content: time.date }, { content: time.event }, { content: time.time }]
+        .map(
+          (cell) => `<td style="padding: 8px; border-bottom: 1px solid #444;">${cell.content}</td>`
+        )
+        .join('');
 
       row.innerHTML = cells;
       tbody.appendChild(row);
@@ -568,7 +576,7 @@
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       findResultsTable,
-      extractFinishTimes
+      extractFinishTimes,
     };
   } else {
     initStopwatchBingo();

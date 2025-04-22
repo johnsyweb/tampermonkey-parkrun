@@ -2,29 +2,29 @@
 name: Update Userscript Version
 
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - '*.user.js'
+  push:
+    branches:
+      - main
+    paths:
+      - '*.user.js'
 
 jobs:
-    update-version:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-        steps:
-            - uses: actions/checkout@v4
+  update-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Make scripts executable
-              run: chmod +x scripts/update-version.sh
+      - name: Make scripts executable
+        run: chmod +x scripts/update-version.sh
 
-            - name: Update version string
-              run: ./scripts/update-version.sh
+      - name: Update version string
+        run: ./scripts/update-version.sh
 
-            - name: Commit changes
-              uses: stefanzweifel/git-auto-commit-action@v5
-              with:
-                  commit_message: 'chore: update userscript versions [skip ci]'
-                  file_pattern: '*.user.js'
-                  branch: main
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: update userscript versions [skip ci]'
+          file_pattern: '*.user.js'
+          branch: main
