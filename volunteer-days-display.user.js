@@ -2,7 +2,7 @@
 // @name         parkrun Volunteer Days Display
 // @description  Displays the number of volunteer days for parkrun finishers on results pages
 // @author       Pete Johns (@johnsyweb)
-// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days.user.js
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days-display.user.js
 // @grant        none
 // @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
@@ -32,7 +32,7 @@
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days.user.js
+// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days-display.user.js
 // @version      2025-04-22
 // ==/UserScript==
 
