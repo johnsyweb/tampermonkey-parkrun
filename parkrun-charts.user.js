@@ -74,12 +74,14 @@
     return { container, canvas };
   }
 
-  function insertContainer(container) {
-    const resultsTable = document.querySelector('.Results-table');
-    if (resultsTable && resultsTable.parentNode) {
-      resultsTable.parentNode.insertBefore(container, resultsTable);
-    } else {
-      (document.querySelector('.content') || document.body).appendChild(container);
+  function insertAfterTitle(element) {
+    const pageTitle = document.querySelector('h1');
+    if (pageTitle && pageTitle.parentNode) {
+      if (pageTitle.nextSibling) {
+        pageTitle.parentNode.insertBefore(element, pageTitle.nextSibling);
+      } else {
+        pageTitle.parentNode.appendChild(element);
+      }
     }
   }
 
@@ -229,7 +231,7 @@
     }
 
     const { container, canvas } = createChartContainer('Finishers per Minute', 'finishersChart');
-    insertContainer(container);
+    insertAfterTitle(container);
 
     addChartDownloadButton(container, canvas, 'finishers');
 
@@ -385,7 +387,7 @@
     canvas.style.height = '400px';
     canvas.style.maxHeight = '400px';
 
-    insertContainer(container);
+    insertAfterTitle(container);
 
     addChartDownloadButton(container, canvas, 'event-history');
 
