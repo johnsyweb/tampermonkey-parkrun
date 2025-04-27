@@ -189,7 +189,7 @@
     // Download handler
     downloadBtn.addEventListener('click', function () {
       // Hide the download button temporarily for the screenshot
-      btnContainer.style.display = 'none';
+      downloadBtn.style.display = 'none';
 
       // Use html2canvas to capture the container
       // eslint-disable-next-line no-undef
@@ -201,7 +201,7 @@
         useCORS: true,
       }).then((canvas) => {
         // Show the button again
-        btnContainer.style.display = 'block';
+        downloadBtn.style.display = 'block';
 
         const link = document.createElement('a');
         link.download = 'parkrun-alphabet-challenge.png';
