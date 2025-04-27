@@ -9,7 +9,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "create-bookmarklets": "node scripts/create-bookmarklets.js"
+    "create-bookmarklets": "node scripts/create-bookmarklets.js",
+    "update-version": "node scripts/update-version.js"
   },
   "keywords": [
     "parkrun",
