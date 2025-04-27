@@ -39,11 +39,11 @@ const updateVersion = (filePath) => {
 };
 
 const userScriptFiles = fs
-  .readdirSync(process.cwd())
+  .readdirSync(require('process').cwd())
   .filter((file) => file.endsWith('.user.js'));
 
 userScriptFiles.forEach((file) => {
-  const filePath = path.join(process.cwd(), file);
+  const filePath = path.join(require('process').cwd(), file);
   updateVersion(filePath);
 });
 
