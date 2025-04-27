@@ -191,7 +191,6 @@
       // Hide the download button temporarily for the screenshot
       downloadBtn.style.display = 'none';
 
-      // Use html2canvas to capture the container
       // eslint-disable-next-line no-undef
       html2canvas(container, {
         backgroundColor: '#2b223d',
@@ -204,7 +203,10 @@
         downloadBtn.style.display = 'block';
 
         const link = document.createElement('a');
-        link.download = 'parkrun-alphabet-challenge.png';
+        const timestamp = new Date().toISOString().split('T')[0];
+        const pageUrl = window.location.pathname.split('/');
+        const parkrunnerId = pageUrl[2] || 'parkrunner';
+        link.download = `alphabet-challenge-${parkrunnerId}-${timestamp}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       });

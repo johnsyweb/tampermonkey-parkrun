@@ -248,7 +248,10 @@
         downloadBtn.style.display = 'block';
 
         const link = document.createElement('a');
-        link.download = 'parkrun-position-bingo.png';
+        const timestamp = new Date().toISOString().split('T')[0];
+        const pageUrl = window.location.pathname.split('/');
+        const parkrunnerId = pageUrl[2] || 'parkrunner';
+        link.download = `position-bingo-${parkrunnerId}-${timestamp}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
