@@ -206,12 +206,9 @@
     }
 
     const labels = minutes.map((min) => {
-      if (min >= 60) {
-        const hours = Math.floor(min / 60);
-        const remainingMins = min % 60;
-        return `${hours}:${remainingMins.toString().padStart(2, '0')}`;
-      }
-      return `${min}'`;
+      const hours = Math.floor(min / 60);
+      const remainingMins = min % 60;
+      return `${hours}:${remainingMins.toString().padStart(2, '0')}`;
     });
 
     return {
