@@ -29,6 +29,10 @@
 // @grant        none
 // @run-at       document-end
 // @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
+// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/alphabet-challenge.user.js
+// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/alphabet-challenge.user.js
 // ==/UserScript==
 
 (function () {
@@ -69,7 +73,7 @@
     }
 
     const completedCount = Object.keys(completedLetters).length;
- 
+
     return {
       completedLetters,
       remainingLetters: ALPHABET.filter((letter) => !completedLetters[letter]),
