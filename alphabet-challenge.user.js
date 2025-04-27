@@ -1,38 +1,40 @@
 // ==UserScript==
 // @name         parkrun Alphabet Challenge
-// @namespace    http://tampermonkey.net/
-// @version      2025-04-22
 // @description  Tracks progress on the unofficial parkrun alphabet challenge (A-Z, excluding X) with a 5x5 grid visualization and download feature.
-// @author       @johnsyweb
-// @match        *://www.parkrun.com.au/parkrunner/*/all*
-// @match        *://www.parkrun.co.at/parkrunner/*/all*
+// @author       Pete Johns (@johnsyweb)
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/alphabet-challenge.user.js
+// @grant        none
+// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
+// @license      MIT
 // @match        *://www.parkrun.ca/parkrunner/*/all*
+// @match        *://www.parkrun.co.at/parkrunner/*/all*
+// @match        *://www.parkrun.co.nl/parkrunner/*/all*
+// @match        *://www.parkrun.co.nz/parkrunner/*/all*
+// @match        *://www.parkrun.co.za/parkrunner/*/all*
+// @match        *://www.parkrun.com.au/parkrunner/*/all*
+// @match        *://www.parkrun.com.de/parkrunner/*/all*
 // @match        *://www.parkrun.dk/parkrunner/*/all*
 // @match        *://www.parkrun.fi/parkrunner/*/all*
 // @match        *://www.parkrun.fr/parkrunner/*/all*
-// @match        *://www.parkrun.com.de/parkrunner/*/all*
 // @match        *://www.parkrun.ie/parkrunner/*/all*
 // @match        *://www.parkrun.it/parkrunner/*/all*
 // @match        *://www.parkrun.jp/parkrunner/*/all*
 // @match        *://www.parkrun.lt/parkrunner/*/all*
 // @match        *://www.parkrun.my/parkrunner/*/all*
-// @match        *://www.parkrun.co.nl/parkrunner/*/all*
-// @match        *://www.parkrun.co.nz/parkrunner/*/all*
 // @match        *://www.parkrun.no/parkrunner/*/all*
-// @match        *://www.parkrun.pl/parkrunner/*/all*
-// @match        *://www.parkrun.sg/parkrunner/*/all*
-// @match        *://www.parkrun.co.za/parkrunner/*/all*
-// @match        *://www.parkrun.se/parkrunner/*/all*
 // @match        *://www.parkrun.org.uk/parkrunner/*/all*
+// @match        *://www.parkrun.pl/parkrunner/*/all*
+// @match        *://www.parkrun.se/parkrunner/*/all*
+// @match        *://www.parkrun.sg/parkrunner/*/all*
 // @match        *://www.parkrun.us/parkrunner/*/all*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
-// @grant        none
-// @run-at       document-end
+// @namespace    http://tampermonkey.net/
 // @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
-// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
-// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/alphabet-challenge.user.js
+// @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/alphabet-challenge.user.js
+// @version      2025-04-22
 // ==/UserScript==
 
 (function () {
@@ -103,13 +105,12 @@
     container.appendChild(heading);
 
     const stats = document.createElement('div');
-    stats.innerHTML = `
-      <div style="font-size: 1.2em; margin-bottom: 10px;">
-        <strong>${data.completedCount} of 25</strong> letters completed
-      </div>
-      <div>After ${data.totalEvents} parkruns</div>
-      ${data.dateOfCompletion ? `<div>🎉 Challenge completed on: ${data.dateOfCompletion}</div>` : ''}
-    `;
+    stats.innerHTML =
+      '<div style="font-size: 1.2em; margin-bottom: 10px;">' +
+      '<strong>' + data.completedCount + ' of 25</strong> letters completed' +
+      '</div>' +
+      '<div>After ' + data.totalEvents + ' parkruns</div>' +
+      (data.dateOfCompletion ? '<div>🎉 Challenge completed on: ' + data.dateOfCompletion + '</div>' : '');
     container.appendChild(stats);
 
     const grid = document.createElement('div');
@@ -142,12 +143,11 @@
 
       if (data.completedLetters[letter]) {
         const eventDetails = document.createElement('div');
-        eventDetails.innerHTML = `
-          <div style="font-size: 0.8em; text-align: left;">
-            ${data.completedLetters[letter].eventName}<br>
-            <span style="font-size: 0.7em;">(${data.completedLetters[letter].date})</span>
-          </div>
-        `;
+        eventDetails.innerHTML =
+          '<div style="font-size: 0.8em; text-align: left;">' +
+          data.completedLetters[letter].eventName + '<br>' +
+          '<span style="font-size: 0.7em;">(' + data.completedLetters[letter].date + ')</span>' +
+          '</div>';
         cell.appendChild(eventDetails);
       }
 

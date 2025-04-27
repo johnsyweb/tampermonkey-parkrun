@@ -1,39 +1,40 @@
 // ==UserScript==
 // @name         parkrun Stopwatch Bingo
-// @namespace    http://tampermonkey.net/
-// @version      2025-04-22
 // @description  Visualizes your progress on the stopwatch bingo challenge (collecting seconds 00-59)
-// @author       @johnsyweb
-// @match        *://www.parkrun.com.au/parkrunner/*/all*
-// @match        *://www.parkrun.co.at/parkrunner/*/all*
+// @author       Pete Johns (@johnsyweb)
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/stopwatch-bingo.user.js
+// @grant        none
+// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
+// @license      MIT
 // @match        *://www.parkrun.ca/parkrunner/*/all*
+// @match        *://www.parkrun.co.at/parkrunner/*/all*
+// @match        *://www.parkrun.co.nl/parkrunner/*/all*
+// @match        *://www.parkrun.co.nz/parkrunner/*/all*
+// @match        *://www.parkrun.co.za/parkrunner/*/all*
+// @match        *://www.parkrun.com.au/parkrunner/*/all*
+// @match        *://www.parkrun.com.de/parkrunner/*/all*
 // @match        *://www.parkrun.dk/parkrunner/*/all*
 // @match        *://www.parkrun.fi/parkrunner/*/all*
 // @match        *://www.parkrun.fr/parkrunner/*/all*
-// @match        *://www.parkrun.com.de/parkrunner/*/all*
 // @match        *://www.parkrun.ie/parkrunner/*/all*
 // @match        *://www.parkrun.it/parkrunner/*/all*
 // @match        *://www.parkrun.jp/parkrunner/*/all*
 // @match        *://www.parkrun.lt/parkrunner/*/all*
 // @match        *://www.parkrun.my/parkrunner/*/all*
-// @match        *://www.parkrun.co.nl/parkrunner/*/all*
-// @match        *://www.parkrun.co.nz/parkrunner/*/all*
 // @match        *://www.parkrun.no/parkrunner/*/all*
-// @match        *://www.parkrun.pl/parkrunner/*/all*
-// @match        *://www.parkrun.sg/parkrunner/*/all*
-// @match        *://www.parkrun.co.za/parkrunner/*/all*
-// @match        *://www.parkrun.se/parkrunner/*/all*
 // @match        *://www.parkrun.org.uk/parkrunner/*/all*
+// @match        *://www.parkrun.pl/parkrunner/*/all*
+// @match        *://www.parkrun.se/parkrunner/*/all*
+// @match        *://www.parkrun.sg/parkrunner/*/all*
 // @match        *://www.parkrun.us/parkrunner/*/all*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
-// @grant        none
-// @tag          parkrun
-// @run-at       document-end
+// @namespace    http://tampermonkey.net/
 // @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
-// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
-// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/stopwatch-bingo.user.js
+// @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/stopwatch-bingo.user.js
+// @version      2025-04-22
 // ==/UserScript==
 
 (function () {

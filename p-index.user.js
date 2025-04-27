@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         parkrun p-index display
-// @namespace    http://tampermonkey.net/
-// @author       @johnsyweb
 // @description  The parkrun p-index is an unofficial statistic that measures the number of different parkrun events a person has completed a specific number of times. To achieve a p-index of 10, you must have completed at least 10 different parkrun events 10 times each. This script calculate the p-index for a parkrunner and displays it on their results page.
+// @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
 // @grant        none
 // @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
+// @license      MIT
 // @match        *://www.parkrun.ca/parkrunner/*/all/
 // @match        *://www.parkrun.co.at/parkrunner/*/all/
 // @match        *://www.parkrun.co.nl/parkrunner/*/all/
@@ -28,9 +28,10 @@
 // @match        *://www.parkrun.se/parkrunner/*/all/
 // @match        *://www.parkrun.sg/parkrunner/*/all/
 // @match        *://www.parkrun.us/parkrunner/*/all/
+// @namespace    http://tampermonkey.net/
 // @run-at       document-end
-// @tag          parkrun
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
+// @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
 // @version      2025-04-22
 // ==/UserScript==
@@ -61,7 +62,7 @@
     const h2Element = document.querySelector('h2');
     if (h2Element) {
       const pIndexElement = document.createElement('div');
-      pIndexElement.textContent = `p-index: ${pIndex}`;
+      pIndexElement.textContent = 'p-index: ' + pIndex;
       pIndexElement.style.fontSize = '1.5em';
       pIndexElement.style.fontWeight = 'bold';
       pIndexElement.style.marginTop = '10px';
@@ -92,8 +93,8 @@
       setTimeout(() => {
         const rect = pIndexElement.getBoundingClientRect();
         const maxDimension = Math.max(rect.width, rect.height);
-        pIndexElement.style.width = `${maxDimension}px`;
-        pIndexElement.style.height = `${maxDimension}px`;
+        pIndexElement.style.width = maxDimension + 'px';
+        pIndexElement.style.height = maxDimension + 'px';
       }, 0);
     }
   }
@@ -157,7 +158,7 @@
       .slice(0, pIndex)
       .map(
         (event) =>
-          `${event.eventName} (${event.eventCount}): ${event.firstDate} (#${event.firstEventNumber}) - ${event.pIndexDate} (#${event.pIndexEventNumber})`
+          event.eventName + ' (' + event.eventCount + '): ' + event.firstDate + ' (#' + event.firstEventNumber + ') - ' + event.pIndexDate + ' (#' + event.pIndexEventNumber + ')'
       );
 
     return { pIndex, contributingEvents };

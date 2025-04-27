@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         parkrun Wilson index display
-// @namespace    http://tampermonkey.net/
-// @author       @johnsyweb
 // @description  The "Wilson index" in parkrun is the highest consecutive event number completed, starting from #1. This script calculates and displays a parkrunner's Wilson index on their results page.
+// @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.user.js
 // @grant        none
 // @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
+// @license      MIT
 // @match        *://www.parkrun.ca/parkrunner/*/all/
 // @match        *://www.parkrun.co.at/parkrunner/*/all/
 // @match        *://www.parkrun.co.nl/parkrunner/*/all/
@@ -28,6 +28,7 @@
 // @match        *://www.parkrun.se/parkrunner/*/all/
 // @match        *://www.parkrun.sg/parkrunner/*/all/
 // @match        *://www.parkrun.us/parkrunner/*/all/
+// @namespace    http://tampermonkey.net/
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/

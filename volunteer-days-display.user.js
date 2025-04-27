@@ -1,38 +1,39 @@
 // ==UserScript==
 // @name         parkrun Volunteer Days Display
-// @namespace    http://tampermonkey.net/
-// @version      2025-04-22
 // @description  Displays the number of volunteer days for parkrun finishers on results pages
-// @author       @johnsyweb
-// @match        *://www.parkrun.com.au/*/results/*
-// @match        *://www.parkrun.co.at/*/results/*
+// @author       Pete Johns (@johnsyweb)
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days.user.js
+// @grant        none
+// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
+// @license      MIT
 // @match        *://www.parkrun.ca/*/results/*
+// @match        *://www.parkrun.co.at/*/results/*
+// @match        *://www.parkrun.co.nl/*/results/*
+// @match        *://www.parkrun.co.nz/*/results/*
+// @match        *://www.parkrun.co.za/*/results/*
+// @match        *://www.parkrun.com.au/*/results/*
+// @match        *://www.parkrun.com.de/*/results/*
 // @match        *://www.parkrun.dk/*/results/*
 // @match        *://www.parkrun.fi/*/results/*
 // @match        *://www.parkrun.fr/*/results/*
-// @match        *://www.parkrun.com.de/*/results/*
 // @match        *://www.parkrun.ie/*/results/*
 // @match        *://www.parkrun.it/*/results/*
 // @match        *://www.parkrun.jp/*/results/*
 // @match        *://www.parkrun.lt/*/results/*
 // @match        *://www.parkrun.my/*/results/*
-// @match        *://www.parkrun.co.nl/*/results/*
-// @match        *://www.parkrun.co.nz/*/results/*
 // @match        *://www.parkrun.no/*/results/*
-// @match        *://www.parkrun.pl/*/results/*
-// @match        *://www.parkrun.sg/*/results/*
-// @match        *://www.parkrun.co.za/*/results/*
-// @match        *://www.parkrun.se/*/results/*
 // @match        *://www.parkrun.org.uk/*/results/*
+// @match        *://www.parkrun.pl/*/results/*
+// @match        *://www.parkrun.se/*/results/*
+// @match        *://www.parkrun.sg/*/results/*
 // @match        *://www.parkrun.us/*/results/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
-// @grant        none
-// @tag          parkrun
+// @namespace    http://tampermonkey.net/
 // @run-at       document-end
-// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
-// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days.user.js
+// @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days.user.js
+// @version      2025-04-22
 // ==/UserScript==
 
 (function () {
@@ -49,7 +50,7 @@
 
         if (volDays && parseInt(volDays) > 0) {
           const volSpan = document.createElement('span');
-          volSpan.textContent = `${volDays} volunteer day${volDays === '1' ? '' : 's'} | `;
+          volSpan.textContent = volDays + ' volunteer day' + (volDays === '1' ? '' : 's') + ' | ';
           volSpan.classList.add('volunteer-days');
           volSpan.style.color = '#d35226';
           div.insertBefore(volSpan, div.firstChild);

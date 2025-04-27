@@ -1,39 +1,40 @@
 // ==UserScript==
 // @name         parkrun Charts
-// @namespace    http://tampermonkey.net/
-// @version      2025-04-22
 // @description  Displays charts on parkrun pages: finishers per minute on results pages and event history on event history pages
-// @author       @johnsyweb
-// @match        *://www.parkrun.com.au/*/results/*
-// @match        *://www.parkrun.co.at/*/results/*
+// @author       Pete Johns (@johnsyweb)
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-charts.user.js
+// @grant        none
+// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
+// @license      MIT
 // @match        *://www.parkrun.ca/*/results/*
+// @match        *://www.parkrun.co.at/*/results/*
+// @match        *://www.parkrun.co.nl/*/results/*
+// @match        *://www.parkrun.co.nz/*/results/*
+// @match        *://www.parkrun.co.za/*/results/*
+// @match        *://www.parkrun.com.au/*/results/*
+// @match        *://www.parkrun.com.de/*/results/*
 // @match        *://www.parkrun.dk/*/results/*
 // @match        *://www.parkrun.fi/*/results/*
 // @match        *://www.parkrun.fr/*/results/*
-// @match        *://www.parkrun.com.de/*/results/*
 // @match        *://www.parkrun.ie/*/results/*
 // @match        *://www.parkrun.it/*/results/*
 // @match        *://www.parkrun.jp/*/results/*
 // @match        *://www.parkrun.lt/*/results/*
 // @match        *://www.parkrun.my/*/results/*
-// @match        *://www.parkrun.co.nl/*/results/*
-// @match        *://www.parkrun.co.nz/*/results/*
 // @match        *://www.parkrun.no/*/results/*
-// @match        *://www.parkrun.pl/*/results/*
-// @match        *://www.parkrun.sg/*/results/*
-// @match        *://www.parkrun.co.za/*/results/*
-// @match        *://www.parkrun.se/*/results/*
 // @match        *://www.parkrun.org.uk/*/results/*
+// @match        *://www.parkrun.pl/*/results/*
+// @match        *://www.parkrun.se/*/results/*
+// @match        *://www.parkrun.sg/*/results/*
 // @match        *://www.parkrun.us/*/results/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
-// @grant        none
-// @tag          parkrun
-// @run-at       document-end
+// @namespace    http://tampermonkey.net/
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun
+// @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
-// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-charts.user.js
+// @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-charts.user.js
+// @version      2025-04-22
 // ==/UserScript==
 
 (function () {
@@ -50,9 +51,9 @@
 
   function createChartContainer(title, id, width = 800) {
     const container = document.createElement('div');
-    container.className = `parkrun-chart-container ${id}-container`;
+    container.className = 'parkrun-chart-container ' + id + '-container';
     container.style.width = '100%';
-    container.style.maxWidth = `${width}px`;
+    container.style.maxWidth = width + 'px';
     container.style.margin = '20px auto';
     container.style.padding = '15px';
     container.style.backgroundColor = STYLES.backgroundColor;
