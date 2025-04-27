@@ -26,7 +26,7 @@ Now, you can click the bookmark while on a parkrun results page to run the scrip
 To update the `@version` field in all userscripts, run the following Node.js script:
 
 ```bash
-node scripts/update-version.js
+node scripts/update-version.cjs
 ```
 
 This will automatically update the `@version` field in all `.user.js` files based on the current date and time.

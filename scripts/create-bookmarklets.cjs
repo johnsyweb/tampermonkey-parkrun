@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const { exec } = require('child_process');
 const { glob } = require('glob');
 const { join, basename } = require('path');
@@ -62,14 +63,14 @@ function updateReadme(bookmarklets) {
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
 
 ${Object.entries(bookmarklets)
-  .map(
-    ([name, { code, description }]) => `### ${name}
+        .map(
+          ([name, { code, description }]) => `### ${name}
 ${description ? `\n${description}\n` : ''}
 \`\`\`javascript
 javascript:${code}
 \`\`\``
-  )
-  .join('\n\n')}
+        )
+        .join('\n\n')}
 ${BOOKMARKLETS_END_MARKER}
 `;
 
