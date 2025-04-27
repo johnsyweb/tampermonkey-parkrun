@@ -15,11 +15,13 @@ function extractScriptInfo(filepath) {
     const headerSection = content.split(USERSCRIPT_DELIMITER)[0];
     const nameMatch = headerSection.match(/@name\s+(.*)/);
     const descriptionMatch = headerSection.match(/@description\s+(.*)/);
+    const downloadURLMatch = headerSection.match(/@downloadURL\s+(.*)/);
 
     const name = nameMatch ? nameMatch[1].trim() : basename(filepath, '.user.js');
     const description = descriptionMatch ? descriptionMatch[1].trim() : '';
+    const downloadURL = downloadURLMatch ? downloadURLMatch[1].trim() : '';
 
-    return { name, description, content };
+    return { name, description, downloadURL, filepath, content };
   });
 }
 
@@ -64,8 +66,11 @@ You can also use these scripts as bookmarklets by creating bookmarks with the fo
 
 ${Object.entries(bookmarklets)
         .map(
-          ([name, { code, description }]) => `### ${name}
-${description ? `\n${description}\n` : ''}
+          ([name, { code, description, downloadURL, filepath }]) => `### ${name}
+${description ? `\n> ${description}\n` : ''}
+
+[${filepath}](${downloadURL})
+
 \`\`\`javascript
 javascript:${code}
 \`\`\``
@@ -109,17 +114,19 @@ function main() {
     .then((userScriptFiles) => {
       console.log(`Found ${userScriptFiles.length} userscripts: ${userScriptFiles.join(', ')}`);
 
-      const bookmarkletPromises = userScriptFiles.map((file) => {
-        return extractScriptInfo(file).then((scriptInfo) => {
-          return createBookmarklet(file).then((bookmarkletCode) => {
-            console.log(`Processed: ${file} (${scriptInfo.name})`);
-            return [
-              scriptInfo.name,
-              { code: bookmarkletCode, description: scriptInfo.description },
-            ];
+      const bookmarkletPromises = userScriptFiles
+        .sort()
+        .map((file) => {
+          return extractScriptInfo(file).then((scriptInfo) => {
+            return createBookmarklet(file).then((bookmarkletCode) => {
+              console.log(`Processed: ${file} (${scriptInfo.name})`);
+              return [
+                scriptInfo.name,
+                { code: bookmarkletCode, ...scriptInfo },
+              ];
+            });
           });
         });
-      });
 
       return Promise.all(bookmarkletPromises);
     })
