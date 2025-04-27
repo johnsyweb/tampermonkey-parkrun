@@ -2,8 +2,11 @@
 // @name         parkrun Position Bingo Challenge
 // @description  Tracks progress on the unofficial parkrun position bingo challenge (last two digits of position) with a 10x10 grid visualization and detailed event info.
 // @author       Pete Johns (@johnsyweb)
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/position-bingo.user.js
 // @grant        none
+// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
+// @license      MIT
 // @match        *://www.parkrun.ca/parkrunner/*/all*
 // @match        *://www.parkrun.co.at/parkrunner/*/all*
 // @match        *://www.parkrun.co.nl/parkrunner/*/all*
@@ -28,8 +31,10 @@
 // @namespace    http://tampermonkey.net/
 // @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
 // @run-at       document-end
+// @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @version      2025-04-22
+// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/position-bingo.user.js
+// @version      initial
 // ==/UserScript==
 
 (function () {
