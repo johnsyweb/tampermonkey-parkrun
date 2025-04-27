@@ -30,6 +30,7 @@
 // @match        *://www.parkrun.us/*/results/*
 // @namespace    http://tampermonkey.net/
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
+// @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
@@ -85,7 +86,7 @@
     }
   }
 
-  function addChartDownloadButton(container, canvas, chartType) {
+  function addChartDownloadButton(container) {
     const controlsContainer = document.createElement('div');
     controlsContainer.style.display = 'flex';
     controlsContainer.style.justifyContent = 'center';
@@ -114,28 +115,31 @@
     });
 
     downloadBtn.addEventListener('click', function () {
-      const link = document.createElement('a');
+      // Hide the download button temporarily for the screenshot
+      downloadBtn.style.display = 'none';
 
-      const date = new Date();
-      const dateStr = date.toISOString().split('T')[0];
+      // eslint-disable-next-line no-undef
+      html2canvas(container, {
+        backgroundColor: STYLES.backgroundColor,
+        scale: 2,
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+      }).then((canvas) => {
+        // Show the button again
+        downloadBtn.style.display = 'block';
 
-      const pathParts = window.location.pathname.split('/');
-      const parkrunName = pathParts[1];
-
-      let filename;
-      if (chartType === 'event-history') {
-        filename = `${parkrunName}-event-history-${dateStr}.png`;
-      } else {
-        const eventNumber = pathParts[3] || 'latest';
-        filename = `${parkrunName}-event-${eventNumber}-finishers-${dateStr}.png`;
-      }
-
-      link.download = filename;
-      link.href = canvas.toDataURL('image/png');
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().split('T')[0];
+        const pageUrl = window.location.pathname.split('/');
+        const eventName = pageUrl[1];
+        const chartType = container.classList.contains('eventHistoryChart-container')
+          ? 'event-history'
+          : 'finishers';
+        link.download = `${eventName}-${chartType}-${timestamp}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
     });
 
     controlsContainer.appendChild(downloadBtn);
@@ -233,7 +237,7 @@
     const { container, canvas } = createChartContainer('Finishers per Minute', 'finishersChart');
     insertAfterTitle(container);
 
-    addChartDownloadButton(container, canvas, 'finishers');
+    addChartDownloadButton(container);
 
     const ctx = canvas.getContext('2d');
     // eslint-disable-next-line no-undef
@@ -389,7 +393,7 @@
 
     insertAfterTitle(container);
 
-    addChartDownloadButton(container, canvas, 'event-history');
+    addChartDownloadButton(container);
 
     const ctx = canvas.getContext('2d');
     // eslint-disable-next-line no-undef
