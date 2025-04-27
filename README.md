@@ -102,6 +102,7 @@ javascript:(async()=>{var n,e,t;n="https://html2canvas.hertzen.com/dist/html2can
 
 
 
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
