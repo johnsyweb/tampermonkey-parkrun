@@ -1,13 +1,11 @@
 name: Update Bookmarklets
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '*.js'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
 
 jobs:
   update-readme:

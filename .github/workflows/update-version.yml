@@ -2,11 +2,11 @@
 name: Update Userscript Version
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '*.user.js'
+  workflow_run:
+    workflows:
+      - Update Bookmarklets
+    types:
+      - completed
 
 jobs:
   update-version:
