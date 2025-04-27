@@ -21,6 +21,16 @@ To use these scripts as bookmarklets, follow these steps:
 
 Now, you can click the bookmark while on a parkrun results page to run the script.
 
+## Updating Versions
+
+To update the `@version` field in all userscripts, run the following Node.js script:
+
+```bash
+node scripts/update-version.js
+```
+
+This will automatically update the `@version` field in all `.user.js` files based on the current date and time.
+
 ## Bookmarklets
 
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
@@ -98,4 +108,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contributing
 
 Contributions are welcome! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines.
-
