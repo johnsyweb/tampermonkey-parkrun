@@ -107,10 +107,16 @@
     const stats = document.createElement('div');
     stats.innerHTML =
       '<div style="font-size: 1.2em; margin-bottom: 10px;">' +
-      '<strong>' + data.completedCount + ' of 25</strong> letters completed' +
+      '<strong>' +
+      data.completedCount +
+      ' of 25</strong> letters completed' +
       '</div>' +
-      '<div>After ' + data.totalEvents + ' parkruns</div>' +
-      (data.dateOfCompletion ? '<div>🎉 Challenge completed on: ' + data.dateOfCompletion + '</div>' : '');
+      '<div>After ' +
+      data.totalEvents +
+      ' parkruns</div>' +
+      (data.dateOfCompletion
+        ? '<div>🎉 Challenge completed on: ' + data.dateOfCompletion + '</div>'
+        : '');
     container.appendChild(stats);
 
     const grid = document.createElement('div');
@@ -145,8 +151,11 @@
         const eventDetails = document.createElement('div');
         eventDetails.innerHTML =
           '<div style="font-size: 0.8em; text-align: left;">' +
-          data.completedLetters[letter].eventName + '<br>' +
-          '<span style="font-size: 0.7em;">(' + data.completedLetters[letter].date + ')</span>' +
+          data.completedLetters[letter].eventName +
+          '<br>' +
+          '<span style="font-size: 0.7em;">(' +
+          data.completedLetters[letter].date +
+          ')</span>' +
           '</div>';
         cell.appendChild(eventDetails);
       }

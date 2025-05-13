@@ -65,8 +65,8 @@ function updateReadme(bookmarklets) {
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
 
 ${Object.entries(bookmarklets)
-        .map(
-          ([name, { code, description, downloadURL, filepath }]) => `### ${name}
+  .map(
+    ([name, { code, description, downloadURL, filepath }]) => `### ${name}
 ${description ? `\n> ${description}\n` : ''}
 
 [${filepath}](${downloadURL})
@@ -74,8 +74,8 @@ ${description ? `\n> ${description}\n` : ''}
 \`\`\`javascript
 javascript:${code}
 \`\`\``
-        )
-        .join('\n\n')}
+  )
+  .join('\n\n')}
 ${BOOKMARKLETS_END_MARKER}
 `;
 
@@ -114,19 +114,14 @@ function main() {
     .then((userScriptFiles) => {
       console.log(`Found ${userScriptFiles.length} userscripts: ${userScriptFiles.join(', ')}`);
 
-      const bookmarkletPromises = userScriptFiles
-        .sort()
-        .map((file) => {
-          return extractScriptInfo(file).then((scriptInfo) => {
-            return createBookmarklet(file).then((bookmarkletCode) => {
-              console.log(`Processed: ${file} (${scriptInfo.name})`);
-              return [
-                scriptInfo.name,
-                { code: bookmarkletCode, ...scriptInfo },
-              ];
-            });
+      const bookmarkletPromises = userScriptFiles.sort().map((file) => {
+        return extractScriptInfo(file).then((scriptInfo) => {
+          return createBookmarklet(file).then((bookmarkletCode) => {
+            console.log(`Processed: ${file} (${scriptInfo.name})`);
+            return [scriptInfo.name, { code: bookmarkletCode, ...scriptInfo }];
           });
         });
+      });
 
       return Promise.all(bookmarkletPromises);
     })

@@ -158,7 +158,18 @@
       .slice(0, pIndex)
       .map(
         (event) =>
-          event.eventName + ' (' + event.eventCount + '): ' + event.firstDate + ' (#' + event.firstEventNumber + ') - ' + event.pIndexDate + ' (#' + event.pIndexEventNumber + ')'
+          event.eventName +
+          ' (' +
+          event.eventCount +
+          '): ' +
+          event.firstDate +
+          ' (#' +
+          event.firstEventNumber +
+          ') - ' +
+          event.pIndexDate +
+          ' (#' +
+          event.pIndexEventNumber +
+          ')'
       );
 
     return { pIndex, contributingEvents };

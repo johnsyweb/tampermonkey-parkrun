@@ -320,6 +320,7 @@
   }
 
   function extractEventHistoryData() {
+    const title = document.querySelector('h1')?.textContent.trim() ?? 'Event History';
     const eventNumbers = [];
     const dates = [];
     const finishers = [];
@@ -358,10 +359,72 @@
       });
 
     return {
+      title,
       eventNumbers,
       dates,
       finishers,
       volunteers,
+    };
+  }
+
+  function calculateRollingAverage(data, windowSize) {
+    const result = [];
+
+    for (let i = 0; i < data.length; i++) {
+      if (i < windowSize - 1) {
+        result.push(null);
+      } else {
+        let sum = 0;
+        for (let j = 0; j < windowSize; j++) {
+          sum += data[i - j];
+        }
+        result.push(parseFloat((sum / windowSize).toFixed(1)));
+      }
+    }
+
+    return result;
+  }
+
+  function findMinMaxPoints(data, eventNumbers, dates) {
+    let minValue = Infinity;
+    let maxValue = -Infinity;
+    let minIndex = -1;
+    let maxIndex = -1;
+
+    // Find min and max values
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] < minValue) {
+        minValue = data[i];
+        minIndex = i;
+      }
+      // If the same minimum value is found again, update to keep the latest one
+      if (data[i] === minValue) {
+        minIndex = i;
+      }
+
+      if (data[i] > maxValue) {
+        maxValue = data[i];
+        maxIndex = i;
+      }
+      // If the same maximum value is found again, update to keep the latest one
+      if (data[i] === maxValue) {
+        maxIndex = i;
+      }
+    }
+
+    return {
+      min: {
+        value: minValue,
+        eventNumber: eventNumbers[minIndex],
+        date: dates[minIndex],
+        index: minIndex,
+      },
+      max: {
+        value: maxValue,
+        eventNumber: eventNumbers[maxIndex],
+        date: dates[maxIndex],
+        index: maxIndex,
+      },
     };
   }
 
@@ -378,8 +441,30 @@
       return;
     }
 
+    const rollingAvgWindowSize = 12;
+    const finishersRollingAvg = calculateRollingAverage(
+      historyData.finishers,
+      rollingAvgWindowSize
+    );
+    const volunteersRollingAvg = calculateRollingAverage(
+      historyData.volunteers,
+      rollingAvgWindowSize
+    );
+
+    const finishersMinMax = findMinMaxPoints(
+      historyData.finishers,
+      historyData.eventNumbers,
+      historyData.dates
+    );
+
+    const volunteersMinMax = findMinMaxPoints(
+      historyData.volunteers,
+      historyData.eventNumbers,
+      historyData.dates
+    );
+
     const { container, canvas } = createChartContainer(
-      'Event History: Finishers & Volunteers',
+      `${historyData.title}: Finishers & Volunteers`,
       'eventHistoryChart',
       1000
     );
@@ -390,14 +475,32 @@
 
     insertAfterTitle(container);
 
-    addChartDownloadButton(container);
-
     const ctx = canvas.getContext('2d');
+
+    const statsFooter = document.createElement('div');
+    statsFooter.className = 'chart-stats-footer';
+    statsFooter.style.marginTop = '10px';
+    statsFooter.style.padding = '10px';
+    statsFooter.style.backgroundColor = STYLES.backgroundColor;
+    statsFooter.style.color = STYLES.textColor;
+    statsFooter.style.borderRadius = '4px';
+    statsFooter.style.fontSize = '14px';
+    statsFooter.style.textAlign = 'center';
+
+    statsFooter.innerHTML = `
+      <span style="color: ${STYLES.barColor}">Finishers:</span> Min: ${finishersMinMax.min.value} (${finishersMinMax.min.date}, Event #${finishersMinMax.min.eventNumber}) |
+      Max: ${finishersMinMax.max.value} (${finishersMinMax.max.date}, Event #${finishersMinMax.max.eventNumber})<br>
+      <span style="color: ${STYLES.lineColor}">Volunteers:</span> Min: ${volunteersMinMax.min.value} (${volunteersMinMax.min.date}, Event #${volunteersMinMax.min.eventNumber}) |
+      Max: ${volunteersMinMax.max.value} (${volunteersMinMax.max.date}, Event #${volunteersMinMax.max.eventNumber})
+    `;
+
+    container.appendChild(statsFooter);
+
     // eslint-disable-next-line no-undef
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: historyData.eventNumbers,
+        labels: historyData.dates,
         datasets: [
           {
             label: 'Finishers',
@@ -407,6 +510,19 @@
             borderWidth: 1,
             yAxisID: 'y-finishers',
             order: 1,
+          },
+          {
+            label: `${rollingAvgWindowSize}-Event Avg (Finishers)`,
+            data: finishersRollingAvg,
+            type: 'line',
+            borderColor: STYLES.barColor,
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            fill: false,
+            yAxisID: 'y-finishers',
+            order: 0,
           },
           {
             label: 'Volunteers',
@@ -420,7 +536,20 @@
             fill: false,
             tension: 0.2,
             yAxisID: 'y-volunteers',
-            order: 0,
+            order: 2,
+          },
+          {
+            label: `${rollingAvgWindowSize}-Event Avg (Volunteers)`,
+            data: volunteersRollingAvg,
+            type: 'line',
+            borderColor: STYLES.lineColor,
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            fill: false,
+            yAxisID: 'y-volunteers',
+            order: 3,
           },
         ],
       },
@@ -444,7 +573,7 @@
                 const index = tooltipItems[0].dataIndex;
                 const eventNumber = historyData.eventNumbers[index];
                 const date = historyData.dates[index];
-                return `Event #${eventNumber} (${date})`;
+                return `${date} (Event #${eventNumber})`;
               },
               label: function (tooltipItem) {
                 const datasetLabel = tooltipItem.dataset.label || '';
@@ -452,6 +581,8 @@
                   return `Finishers: ${tooltipItem.raw}`;
                 } else if (datasetLabel === 'Volunteers') {
                   return `Volunteers: ${tooltipItem.raw}`;
+                } else if (datasetLabel.includes('Avg')) {
+                  return `${datasetLabel}: ${tooltipItem.raw}`;
                 }
                 return tooltipItem.formattedValue;
               },
@@ -462,11 +593,34 @@
           x: {
             title: {
               display: true,
-              text: 'Event Number',
+              text: 'Date',
               color: STYLES.textColor,
             },
             ticks: {
               color: STYLES.subtleTextColor,
+              maxRotation: 45,
+              minRotation: 45,
+              callback: function (value, index) {
+                // Determine display frequency based on total number of events
+                const totalEvents = historyData.dates.length;
+                let showEvery = 1; // Default: show all dates
+
+                if (totalEvents > 100) {
+                  showEvery = 10; // Show every 10th date
+                } else if (totalEvents > 50) {
+                  showEvery = 5; // Show every 5th date
+                } else if (totalEvents > 20) {
+                  showEvery = 2; // Show every 2nd date
+                }
+
+                // Always show first and last date
+                if (index === 0 || index === historyData.dates.length - 1) {
+                  return historyData.dates[index];
+                }
+
+                // Show dates based on frequency
+                return index % showEvery === 0 ? historyData.dates[index] : '';
+              },
             },
             grid: {
               color: STYLES.gridColor,
@@ -509,6 +663,8 @@
         },
       },
     });
+
+    addChartDownloadButton(container);
   }
 
   function initCharts() {

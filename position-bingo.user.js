@@ -78,7 +78,9 @@
 
     return {
       completedPositions,
-      remainingPositions: Array.from({ length: GRID_SIZE }, (_, i) => i).filter(pos => !completedPositions[pos]),
+      remainingPositions: Array.from({ length: GRID_SIZE }, (_, i) => i).filter(
+        (pos) => !completedPositions[pos]
+      ),
       completedCount: Object.keys(completedPositions).length,
       totalEvents,
     };
@@ -102,11 +104,17 @@
     container.appendChild(heading);
 
     const stats = document.createElement('div');
-    stats.innerHTML = '<div style="font-size: 1.2em; margin-bottom: 10px;">' +
-      '<strong>' + data.completedCount + ' of ' + GRID_SIZE + '</strong> positions completed</div>' +
-      '<div>After ' + data.totalEvents + ' parkruns</div>';
+    stats.innerHTML =
+      '<div style="font-size: 1.2em; margin-bottom: 10px;">' +
+      '<strong>' +
+      data.completedCount +
+      ' of ' +
+      GRID_SIZE +
+      '</strong> positions completed</div>' +
+      '<div>After ' +
+      data.totalEvents +
+      ' parkruns</div>';
     container.appendChild(stats);
-
 
     const COLUMNS = 10;
     const ROWS = Math.ceil(GRID_SIZE / COLUMNS);
@@ -143,9 +151,15 @@
 
       if (data.completedPositions[i]) {
         const eventDetails = document.createElement('div');
-        eventDetails.innerHTML = '<div style="font-size: 0.8em; text-align: center;">' +
-          data.completedPositions[i][0].eventName + '<br>' +
-          '<span style="font-size: 0.7em;">' + data.completedPositions[i][0].date + ' (' + data.completedPositions[i][0].position + ')</span>' +
+        eventDetails.innerHTML =
+          '<div style="font-size: 0.8em; text-align: center;">' +
+          data.completedPositions[i][0].eventName +
+          '<br>' +
+          '<span style="font-size: 0.7em;">' +
+          data.completedPositions[i][0].date +
+          ' (' +
+          data.completedPositions[i][0].position +
+          ')</span>' +
           '</div>';
         cell.appendChild(eventDetails);
 
@@ -187,8 +201,15 @@
           data.completedPositions[i].forEach(({ eventName, date, position }) => {
             const entry = document.createElement('div');
             entry.style.marginBottom = '10px';
-            entry.innerHTML = '<strong>' + eventName + '</strong><br>' +
-              '<span style="font-size: 0.9em;">' + date + ' (' + position + ')</span>';
+            entry.innerHTML =
+              '<strong>' +
+              eventName +
+              '</strong><br>' +
+              '<span style="font-size: 0.9em;">' +
+              date +
+              ' (' +
+              position +
+              ')</span>';
             popup.appendChild(entry);
           });
 

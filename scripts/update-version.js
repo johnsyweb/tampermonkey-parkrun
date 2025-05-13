@@ -46,4 +46,3 @@ userScriptFiles.forEach((file) => {
   const filePath = path.join(require('process').cwd(), file);
   updateVersion(filePath);
 });
-
