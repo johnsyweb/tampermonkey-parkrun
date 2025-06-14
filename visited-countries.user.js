@@ -33,7 +33,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/visited-countries.user.js
-// @version      2025-06-02 02:17 01:28 07:20 11:14
+// @version      2025-06-14 02:17 01:28 07:20 11:14
 // ==/UserScript==
 
 (function () {
