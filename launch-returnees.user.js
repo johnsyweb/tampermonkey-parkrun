@@ -108,7 +108,7 @@
       // Cache the data
       const cacheData = {
         data: Array.from(participants.entries()), // Convert Map to array for serialization
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
 
@@ -206,7 +206,7 @@
     list.style.margin = '0';
     list.style.textAlign = 'center';
 
-    returnees.forEach(id => {
+    returnees.forEach((id) => {
       const listItem = createReturneeListItem(id, currentParticipants, launchParticipants, origin);
       list.appendChild(listItem);
     });
@@ -247,7 +247,9 @@
     container.appendChild(heading);
 
     if (returnees.length === 0) {
-      const message = createNoReturneesMessage('No attendees from the launch event were present at the latest event.');
+      const message = createNoReturneesMessage(
+        'No attendees from the launch event were present at the latest event.'
+      );
       container.appendChild(message);
     } else {
       const list = createReturneesList(returnees, currentParticipants, launchParticipants, origin);
@@ -270,7 +272,7 @@
     const currentParticipants = extractCurrentPageParticipants();
     const launchParticipants = await fetchEventParticipants(launchEventUrl);
 
-    const returnees = [...currentParticipants.keys()].filter(id => launchParticipants.has(id));
+    const returnees = [...currentParticipants.keys()].filter((id) => launchParticipants.has(id));
 
     displayReturnees(returnees, currentParticipants, launchParticipants, origin);
   }
