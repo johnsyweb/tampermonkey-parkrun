@@ -33,7 +33,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/launch-returnees.user.js
-// @version      2025-07-06 01:53 02:17 01:28
+// @version      2025-07-06 18:29 01:53 02:17 01:28
 // ==/UserScript==
 
 (async function () {
