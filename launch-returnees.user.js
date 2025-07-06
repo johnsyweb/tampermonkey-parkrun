@@ -264,7 +264,7 @@
    */
   async function init() {
     const pathname = window.location.pathname;
-    const locationMatch = pathname.match(/\/([^\/]+)\/results\/latestresults/);
+    const locationMatch = pathname.match(/\/([^/]+)\/results\/latestresults/);
     const location = locationMatch[1];
     const origin = window.location.origin;
     const launchEventUrl = `${origin}/${location}/results/1/`;

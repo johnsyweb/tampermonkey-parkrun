@@ -272,7 +272,7 @@
 
     const ctx = canvas.getContext('2d');
     // eslint-disable-next-line no-undef
-    const chart = new Chart(ctx, {
+    new Chart(ctx, {
       type: 'bar',
       data: {
         labels: chartData.labels,
@@ -542,7 +542,7 @@
     container.appendChild(statsFooter);
 
     // eslint-disable-next-line no-undef
-    const chart = new Chart(ctx, {
+    new Chart(ctx, {
       type: 'bar',
       data: {
         labels: historyData.dates,
