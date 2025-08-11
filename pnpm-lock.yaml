@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@eslint/js':
-        specifier: ^9.32.0
-        version: 9.32.0
+        specifier: ^9.33.0
+        version: 9.33.0
       eslint:
         specifier: ^9.31.0
         version: 9.31.0
@@ -280,8 +280,8 @@ packages:
     resolution: {integrity: sha512-LOm5OVt7D4qiKCqoiPbA7LWmI+tbw1VbTUowBcUMgQSuM6poJufkFkYDcQpo5KfgD39TnNySV26QjOh7VFpSyw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@eslint/js@9.32.0':
-    resolution: {integrity: sha512-BBpRFZK3eX6uMLKz8WxFOBIFFcGFJ/g8XuwjTHCqHROSIsopI+ddn/d5Cfh36+7+e5edVS8dbSHnBNhrLEX0zg==}
+  '@eslint/js@9.33.0':
+    resolution: {integrity: sha512-5K1/mKhWaMfreBGJTwval43JJmkip0RmM+3+IuqupeSKNC/Th2Kc7ucaq5ovTSra/OOKB9c58CGSz3QMVbWt0A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/object-schema@2.1.6':
@@ -508,6 +508,9 @@ packages:
 
   '@types/node@24.1.0':
     resolution: {integrity: sha512-ut5FthK5moxFKH2T1CUOC6ctR67rQRvvHdFLCD2Ql6KXmMuCrjsSsRI9UsLCm9M18BMwClv4pn327UvB7eeO1w==}
+
+  '@types/node@24.2.1':
+    resolution: {integrity: sha512-DRh5K+ka5eJic8CjH7td8QpYEV6Zo10gfRkjHCO3weqZHWDtAaSTFtl4+VMqOJ4N5jcuhZ9/l+yy8rVgw7BQeQ==}
 
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
@@ -1704,6 +1707,9 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
 
+  undici-types@7.10.0:
+    resolution: {integrity: sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag==}
+
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
@@ -2085,7 +2091,7 @@ snapshots:
 
   '@eslint/js@9.31.0': {}
 
-  '@eslint/js@9.32.0': {}
+  '@eslint/js@9.33.0': {}
 
   '@eslint/object-schema@2.1.6': {}
 
@@ -2185,7 +2191,7 @@ snapshots:
       '@jest/fake-timers': 30.0.4
       '@jest/types': 30.0.1
       '@types/jsdom': 21.1.7
-      '@types/node': 24.1.0
+      '@types/node': 24.2.1
       jest-mock: 30.0.2
       jest-util: 30.0.2
       jsdom: 26.1.0
@@ -2194,7 +2200,7 @@ snapshots:
     dependencies:
       '@jest/fake-timers': 30.0.4
       '@jest/types': 30.0.1
-      '@types/node': 24.1.0
+      '@types/node': 24.2.1
       jest-mock: 30.0.2
 
   '@jest/environment@30.0.5':
@@ -2219,7 +2225,7 @@ snapshots:
     dependencies:
       '@jest/types': 30.0.1
       '@sinonjs/fake-timers': 13.0.5
-      '@types/node': 24.1.0
+      '@types/node': 24.2.1
       jest-message-util: 30.0.2
       jest-mock: 30.0.2
       jest-util: 30.0.2
@@ -2338,7 +2344,7 @@ snapshots:
       '@jest/schemas': 30.0.1
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 24.1.0
+      '@types/node': 24.2.1
       '@types/yargs': 17.0.33
       chalk: 4.1.2
 
@@ -2428,7 +2434,7 @@ snapshots:
 
   '@types/jsdom@21.1.7':
     dependencies:
-      '@types/node': 24.1.0
+      '@types/node': 24.2.1
       '@types/tough-cookie': 4.0.5
       parse5: 7.3.0
 
@@ -2437,6 +2443,10 @@ snapshots:
   '@types/node@24.1.0':
     dependencies:
       undici-types: 7.8.0
+
+  '@types/node@24.2.1':
+    dependencies:
+      undici-types: 7.10.0
 
   '@types/stack-utils@2.0.3': {}
 
@@ -3138,7 +3148,7 @@ snapshots:
       '@jest/environment': 30.0.4
       '@jest/environment-jsdom-abstract': 30.0.4(jsdom@26.1.0)
       '@types/jsdom': 21.1.7
-      '@types/node': 24.1.0
+      '@types/node': 24.2.1
       jsdom: 26.1.0
     transitivePeerDependencies:
       - bufferutil
@@ -3213,7 +3223,7 @@ snapshots:
   jest-mock@30.0.2:
     dependencies:
       '@jest/types': 30.0.1
-      '@types/node': 24.1.0
+      '@types/node': 24.2.1
       jest-util: 30.0.2
 
   jest-mock@30.0.5:
@@ -3329,7 +3339,7 @@ snapshots:
   jest-util@30.0.2:
     dependencies:
       '@jest/types': 30.0.1
-      '@types/node': 24.1.0
+      '@types/node': 24.2.1
       chalk: 4.1.2
       ci-info: 4.3.0
       graceful-fs: 4.2.11
@@ -3751,6 +3761,8 @@ snapshots:
   type-fest@0.21.3: {}
 
   uglify-js@3.19.3: {}
+
+  undici-types@7.10.0: {}
 
   undici-types@7.8.0: {}
 
