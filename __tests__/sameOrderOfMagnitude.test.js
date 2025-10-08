@@ -9,6 +9,7 @@ describe('sameOrderOfMagnitude', () => {
 
   test('returns false for numbers in different orders of magnitude', () => {
     expect(sameOrderOfMagnitude(10, 1000)).toBe(false);
+    expect(sameOrderOfMagnitude(173, 19)).toBe(false);
     expect(sameOrderOfMagnitude(1, 100)).toBe(false);
   });
 

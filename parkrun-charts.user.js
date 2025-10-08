@@ -478,18 +478,15 @@
     };
   }
 
-
-
   function sameOrderOfMagnitude(a, b) {
     if (a === 0 || b === 0) return false;
-    return Math.abs(Math.log10(a) - Math.log10(b)) < 1;
+    return Math.floor(Math.log10(a)) === Math.floor(Math.log10(b));
   }
 
   // Export for Node.js testing
   if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports.sameOrderOfMagnitude = sameOrderOfMagnitude;
   }
-
 
   function createEventHistoryChart() {
     if (document.getElementById('eventHistoryChart')) {
@@ -524,37 +521,36 @@
       historyData.dates
     );
 
-  const axisDefs = {
-    'y-parkrunners': {
-      type: 'linear',
-      position: 'left',
-      beginAtZero: true,
-      title: { display: true, text: 'parkrunners', color: STYLES.textColor },
-      ticks: { precision: 0, color: STYLES.subtleTextColor },
-      grid: { color: STYLES.gridColor },
-    },
-    'y-finishers': {
-      type: 'linear',
-      position: 'left',
-      beginAtZero: true,
-      title: { display: true, text: 'Number of Finishers', color: STYLES.barColor },
-      ticks: { precision: 0, color: STYLES.barColor },
-      grid: { color: STYLES.gridColor },
-    },
-    'y-volunteers': {
-      type: 'linear',
-      position: 'right',
-      beginAtZero: true,
-      title: { display: true, text: 'Number of Volunteers', color: STYLES.lineColor },
-      ticks: { precision: 0, color: STYLES.lineColor },
-      grid: { display: false },
-    },
-  };
+    const axisDefs = {
+      'y-parkrunners': {
+        type: 'linear',
+        position: 'left',
+        beginAtZero: true,
+        title: { display: true, text: 'parkrunners', color: STYLES.textColor },
+        ticks: { precision: 0, color: STYLES.subtleTextColor },
+        grid: { color: STYLES.gridColor },
+      },
+      'y-finishers': {
+        type: 'linear',
+        position: 'left',
+        beginAtZero: true,
+        title: { display: true, text: 'Number of Finishers', color: STYLES.barColor },
+        ticks: { precision: 0, color: STYLES.barColor },
+        grid: { color: STYLES.gridColor },
+      },
+      'y-volunteers': {
+        type: 'linear',
+        position: 'right',
+        beginAtZero: true,
+        title: { display: true, text: 'Number of Volunteers', color: STYLES.lineColor },
+        ticks: { precision: 0, color: STYLES.lineColor },
+        grid: { display: false },
+      },
+    };
 
     const finishersMax = finishersMinMax.max.value;
     const volunteersMax = volunteersMinMax.max.value;
     const useSingleYAxis = sameOrderOfMagnitude(finishersMax, volunteersMax);
-    console.log('[parkrun-charts] finishersMax:', finishersMax, 'volunteersMax:', volunteersMax, 'useSingleYAxis:', useSingleYAxis);
     const finishersAxisId = useSingleYAxis ? 'y-parkrunners' : 'y-finishers';
     const volunteersAxisId = useSingleYAxis ? 'y-parkrunners' : 'y-volunteers';
 
@@ -617,7 +613,7 @@
       },
     };
 
-  const datasets = [
+    const datasets = [
       {
         label: 'Finishers',
         data: historyData.finishers,
