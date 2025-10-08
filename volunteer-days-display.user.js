@@ -33,7 +33,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days-display.user.js
-// @version      2025-10-08 04:54
+// @version      1.0.1
 // ==/UserScript==
 
 (function () {
