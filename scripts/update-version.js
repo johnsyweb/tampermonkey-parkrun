@@ -3,7 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 
+
 const execSync = require('child_process').execSync;
+const process = require('process');
 
 function getCurrentVersion(fileContent) {
   // Match @version x.y.z
@@ -31,7 +33,7 @@ function getCommitsSinceVersion(version) {
     // Get all commit messages since that commit (exclusive)
     const log = execSync(`git log ${versionCommit}..HEAD --pretty=format:"%s"`).toString().trim();
     return log ? log.split('\n') : [];
-  } catch (e) {
+  } catch {
     return [];
   }
 }
