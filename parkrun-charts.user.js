@@ -483,11 +483,6 @@
     return Math.floor(Math.log10(a)) === Math.floor(Math.log10(b));
   }
 
-  // Export for Node.js testing
-  if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-    module.exports.sameOrderOfMagnitude = sameOrderOfMagnitude;
-  }
-
   function createEventHistoryChart() {
     if (document.getElementById('eventHistoryChart')) {
       console.log('Event history chart already exists, skipping render');
@@ -756,5 +751,9 @@
     }
   }
 
-  initCharts();
+  if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports.sameOrderOfMagnitude = sameOrderOfMagnitude;
+  } else {
+    initCharts();
+  }
 })();
