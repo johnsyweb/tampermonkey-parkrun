@@ -66,8 +66,13 @@
     let volunteerStatus = 'Yet to Volunteer';
     let volunteerMilestone = 0;
     if (!isNaN(vols) && vols > 0) {
-      volunteerStatus = 'Has Volunteered';
-      
+      if (vols === 1) {
+        volunteerStatus = 'Volunteered once';
+      } else if (vols > 1 && vols < 10) {
+        volunteerStatus = 'Volunteered multiple times';
+      } else {
+        volunteerStatus = 'Has Volunteered';
+      }
       const milestones = [1000, 500, 250, 100, 50, 25, 10];
       for (const m of milestones) {
         if (vols >= m) {
@@ -311,14 +316,37 @@
     if (!summaryDiv) {
       summaryDiv = document.createElement('div');
       summaryDiv.id = 'walkerRunnerSummaryTable';
-      summaryDiv.style.background = '#fffbe6';
-      summaryDiv.style.border = '2px solid #f0c36d';
-      summaryDiv.style.padding = '1em';
-      summaryDiv.style.margin = '1em 0';
-      summaryDiv.style.fontSize = '1.1em';
     }
     summaryDiv.innerHTML = buildTable();
-    chartDiv.parentNode.insertBefore(summaryDiv, chartDiv.nextSibling);
+
+    // Group all Walker Analysis elements in a single container
+    let walkerContainer = document.getElementById('walkerAnalysisContainer');
+    if (!walkerContainer) {
+      walkerContainer = document.createElement('div');
+      walkerContainer.id = 'walkerAnalysisContainer';
+      walkerContainer.style.width = '100%';
+      walkerContainer.style.maxWidth = '900px';
+      walkerContainer.style.margin = '20px auto';
+    }
+    // Clear and append in order: chart, controls, table
+    walkerContainer.innerHTML = '';
+    walkerContainer.appendChild(chartDiv);
+    walkerContainer.appendChild(controlDiv);
+    walkerContainer.appendChild(summaryDiv);
+
+    // Insert container below first h3
+    const firstH3 = document.querySelector('h3');
+    if (firstH3 && firstH3.parentNode) {
+      if (walkerContainer.parentNode !== firstH3.parentNode || walkerContainer.previousSibling !== firstH3) {
+        if (firstH3.nextSibling) {
+          firstH3.parentNode.insertBefore(walkerContainer, firstH3.nextSibling);
+        } else {
+          firstH3.parentNode.appendChild(walkerContainer);
+        }
+      }
+    } else {
+      document.body.appendChild(walkerContainer);
+    }
   }
 
   
@@ -396,6 +424,8 @@
       
       const milestoneOrder = [
         'Yet to Volunteer',
+        'Volunteered once',
+        'Volunteered multiple times',
         'Volunteer Club 10',
         'Volunteer Club 25',
         'Volunteer Club 50',
@@ -407,10 +437,9 @@
       const milestoneIndex = v => {
         const idx = milestoneOrder.indexOf(v);
         if (idx !== -1) return idx;
-        
         const m = v.match(/(\d+)/);
-        if (m) return 100 + parseInt(m[1], 10);
-        if (v === 'Has Volunteered') return 99;
+        if (m) return 200 + parseInt(m[1], 10);
+        if (v === 'Has Volunteered') return 150;
         if (v === 'Unknown') return 9999;
         return 999;
       };
@@ -418,15 +447,14 @@
     } else {
       valueList.sort();
     }
-    let html = `<table style="border-collapse:collapse;width:100%;max-width:900px;margin:1em auto;background:#fffbe6;border:2px solid #f0c36d;font-size:1.1em;">
-      <thead><tr style="background:#ffe066;"><th>${breakdowns.find(b=>b.key===currentBreakdown).label}</th><th>Walkers (n)</th><th>Walkers (%)</th><th>Runners (n)</th><th>Runners (%)</th></tr></thead><tbody>`;
+    let html = `<table class="Results-table" style="margin:1em auto;font-size:1.1em;">
+      <thead><tr><th>${breakdowns.find(b=>b.key===currentBreakdown).label}</th><th>Walkers (n)</th><th>Walkers (%)</th><th>Runners (n)</th><th>Runners (%)</th></tr></thead><tbody>`;
     valueList.forEach(val => {
       const w = walkers.filter(f => (f[currentBreakdown]||'Unknown') === val).length;
       const r = runners.filter(f => (f[currentBreakdown]||'Unknown') === val).length;
       html += `<tr><td>${val}</td><td style="text-align:right">${w}</td><td style="text-align:right">${totalWalkers ? ((w/totalWalkers)*100).toFixed(1) : '0.0'}%</td><td style="text-align:right">${r}</td><td style="text-align:right">${totalRunners ? ((r/totalRunners)*100).toFixed(1) : '0.0'}%</td></tr>`;
     });
-    
-    html += `<tr style=\"font-weight:bold;background:#ffe066;\"><td>Total</td><td style=\"text-align:right\">${totalWalkers}</td><td style=\"text-align:right\">100.0%</td><td style=\"text-align:right\">${totalRunners}</td><td style=\"text-align:right\">100.0%</td></tr>`;
+    html += `<tr style=\"font-weight:bold;\"><td>Total</td><td style=\"text-align:right\">${totalWalkers}</td><td style=\"text-align:right\">100.0%</td><td style=\"text-align:right\">${totalRunners}</td><td style=\"text-align:right\">100.0%</td></tr>`;
     html += `</tbody></table>`;
     return html;
   }
