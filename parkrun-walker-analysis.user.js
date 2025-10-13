@@ -48,6 +48,16 @@
   const rows = Array.from(document.querySelectorAll('tr.Results-table-row'));
   if (!rows.length) return;
 
+  function getMilestoneClub(count, prefix) {
+    const milestones = [1000, 500, 250, 100, 50, 25, 10];
+    for (const m of milestones) {
+      if (count >= m) {
+        return { status: `${prefix} ${m} Club`, milestone: m };
+      }
+    }
+    return { status: null, milestone: 0 };
+  }
+
   const finishers = rows.map((row, idx) => {
     const timeCell = row.querySelector('.Results-table-td--time .compact');
     const timeStr = timeCell ? timeCell.textContent.trim() : '';
@@ -56,9 +66,21 @@
     const runs = parseInt(row.getAttribute('data-runs'), 10);
     const vols = parseInt(row.getAttribute('data-vols'), 10);
     const achievement = (row.getAttribute('data-achievement') || '').trim();
-    let firstTimerStatus = 'Established';
-    if (runs === 1) firstTimerStatus = 'First Timer (Anywhere)';
-    else if (achievement === 'First Timer!') firstTimerStatus = 'First Timer (Here)';
+
+    let parkrunExperience = 'Unknown';
+    if (!isNaN(runs)) {
+      if (runs === 1) {
+        parkrunExperience = 'First Timer (anywhere)';
+      } else if (achievement === 'First Timer!') {
+        parkrunExperience = 'First Timer (to this event)';
+      } else if (runs > 1 && runs < 10) {
+        parkrunExperience = 'Multiple parkruns';
+      } else {
+        const club = getMilestoneClub(runs, 'parkrun');
+        parkrunExperience = club.status || 'Multiple parkruns';
+      }
+    }
+
     let volunteerStatus = 'Unknown';
     let volunteerMilestone = 0;
     if (!isNaN(vols)) {
@@ -69,15 +91,9 @@
       } else if (vols > 1 && vols < 10) {
         volunteerStatus = 'Volunteered multiple times';
       } else {
-        volunteerStatus = 'Has Volunteered';
-      }
-      const milestones = [1000, 500, 250, 100, 50, 25, 10];
-      for (const m of milestones) {
-        if (vols >= m) {
-          volunteerStatus = `Volunteer ${m} Club`;
-          volunteerMilestone = m;
-          break;
-        }
+        const club = getMilestoneClub(vols, 'Volunteer');
+        volunteerStatus = club.status || 'Has Volunteered';
+        volunteerMilestone = club.milestone;
       }
     }
     const clubMatch = row.innerHTML.match(/milestone-v(\d+)/);
@@ -118,7 +134,7 @@
       timeStr,
       timeSec,
       gender: normGender,
-      firstTimerStatus,
+      parkrunExperience,
       volunteerStatus,
       volunteerMilestone,
       ageGrade,
@@ -185,6 +201,20 @@
           return milestoneColours[m] || '#cccccc';
         }
         return milestoneColours[key] || '#cccccc';
+      }
+      if (breakdownKey === 'parkrunExperience') {
+        const match = key.match(/(\d+)/);
+        if (match) {
+          const m = parseInt(match[1], 10);
+          return milestoneColours[m] || '#cccccc';
+        }
+        const experienceColours = {
+          'First Timer (anywhere)': '#FFE049',
+          'First Timer (to this event)': '#FFA300',
+          'Multiple parkruns': '#00CEAE',
+          Unknown: '#A1B6B7',
+        };
+        return experienceColours[key] || '#cccccc';
       }
       if (breakdownKey === 'gender') {
         const genderColours = {
@@ -396,7 +426,7 @@
 
   const breakdowns = [
     { key: 'gender', label: 'Gender' },
-    { key: 'firstTimerStatus', label: 'First Timer Status' },
+    { key: 'parkrunExperience', label: 'parkrun Experience' },
     { key: 'volunteerStatus', label: 'Volunteer Status' },
     { key: 'ageGroup', label: 'Age Group' },
   ];
@@ -480,6 +510,28 @@
       });
 
       if (allValues.has('Unknown')) valueList.push('Unknown');
+    } else if (currentBreakdown === 'parkrunExperience') {
+      const experienceOrder = [
+        'First Timer (anywhere)',
+        'First Timer (to this event)',
+        'Multiple parkruns',
+        'parkrun 10 Club',
+        'parkrun 25 Club',
+        'parkrun 50 Club',
+        'parkrun 100 Club',
+        'parkrun 250 Club',
+        'parkrun 500 Club',
+        'parkrun 1000 Club',
+      ];
+      const experienceIndex = (v) => {
+        const idx = experienceOrder.indexOf(v);
+        if (idx !== -1) return idx;
+        const m = v.match(/(\d+)/);
+        if (m) return 200 + parseInt(m[1], 10);
+        if (v === 'Unknown') return 9999;
+        return 999;
+      };
+      valueList.sort((a, b) => experienceIndex(a) - experienceIndex(b));
     } else if (currentBreakdown === 'volunteerStatus') {
       const milestoneOrder = [
         'Yet to Volunteer',
