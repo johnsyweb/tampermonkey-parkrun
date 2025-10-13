@@ -99,12 +99,12 @@
     const achievement = (row.getAttribute('data-achievement') || '').trim();
 
     let parkrunExperience = 'Unknown';
-    if (!isNaN(runs)) {
+    if (!isNaN(runs) && runs > 0) {
       if (runs === 1) {
         parkrunExperience = 'First Timer (anywhere)';
       } else if (achievement === 'First Timer!') {
         parkrunExperience = 'First Timer (to this event)';
-      } else if (runs > 1 && runs < 10) {
+      } else if (runs < 10) {
         parkrunExperience = 'Multiple parkruns';
       } else {
         const club = getMilestoneClub(runs, 'parkrun');
@@ -218,7 +218,81 @@
 
     const allKeys = new Set();
     Object.values(bins).forEach((obj) => Object.keys(obj).forEach((k) => allKeys.add(k)));
-    const keyList = Array.from(allKeys);
+    let keyList = Array.from(allKeys);
+
+    function sortKeyList(keys, breakdownType) {
+      if (breakdownType === 'ageGroup') {
+        const sorted = keys.filter((v) => v && v !== 'Unknown' && v !== 'Not specified');
+        sorted.sort((a, b) => {
+          const aLow = parseInt((a || '').split('-')[0], 10);
+          const bLow = parseInt((b || '').split('-')[0], 10);
+          if (isNaN(aLow)) return 1;
+          if (isNaN(bLow)) return -1;
+          return aLow - bLow;
+        });
+        if (keys.includes('Not specified')) sorted.push('Not specified');
+        if (keys.includes('Unknown')) sorted.push('Unknown');
+        return sorted;
+      }
+
+      if (breakdownType === 'parkrunExperience') {
+        const experienceOrder = [
+          'First Timer (anywhere)',
+          'First Timer (to this event)',
+          'Multiple parkruns',
+          'parkrun 10 Club',
+          'parkrun 25 Club',
+          'parkrun 50 Club',
+          'parkrun 100 Club',
+          'parkrun 250 Club',
+          'parkrun 500 Club',
+          'parkrun 1000 Club',
+        ];
+        const experienceIndex = (v) => {
+          const idx = experienceOrder.indexOf(v);
+          if (idx !== -1) return idx;
+          const m = v.match(/parkrun (\d+) Club/);
+          if (m) {
+            const milestones = [10, 25, 50, 100, 250, 500, 1000];
+            const num = parseInt(m[1], 10);
+            const milestoneIdx = milestones.indexOf(num);
+            return milestoneIdx !== -1 ? 3 + milestoneIdx : 200 + num;
+          }
+          if (v === 'Unknown') return 9999;
+          return 999;
+        };
+        return keys.slice().sort((a, b) => experienceIndex(a) - experienceIndex(b));
+      }
+
+      if (breakdownType === 'volunteerStatus') {
+        const milestoneOrder = [
+          'Yet to Volunteer',
+          'Volunteered once',
+          'Volunteered multiple times',
+          'Volunteer 10 Club',
+          'Volunteer 25 Club',
+          'Volunteer 50 Club',
+          'Volunteer 100 Club',
+          'Volunteer 250 Club',
+          'Volunteer 500 Club',
+          'Volunteer 1000 Club',
+        ];
+        const milestoneIndex = (v) => {
+          const idx = milestoneOrder.indexOf(v);
+          if (idx !== -1) return idx;
+          const m = v.match(/(\d+)/);
+          if (m) return 200 + parseInt(m[1], 10);
+          if (v === 'Has Volunteered') return 150;
+          if (v === 'Unknown') return 9999;
+          return 999;
+        };
+        return keys.slice().sort((a, b) => milestoneIndex(a) - milestoneIndex(b));
+      }
+
+      return keys.slice().sort();
+    }
+
+    keyList = sortKeyList(keyList, breakdownKey);
 
     function getColour(key) {
       if (breakdownKey === 'volunteerStatus') {
