@@ -58,6 +58,37 @@
     return { status: null, milestone: 0 };
   }
 
+  function findPreviousKnownTime(finishers, startIndex) {
+    const previousFinisher = finishers
+      .slice(0, startIndex)
+      .reverse()
+      .find((f) => f.timeStr && f.timeSec > 0);
+    return previousFinisher ? previousFinisher.timeSec : null;
+  }
+
+  function findNextKnownTime(finishers, startIndex) {
+    const nextFinisher = finishers.slice(startIndex + 1).find((f) => f.timeStr && f.timeSec > 0);
+    return nextFinisher ? nextFinisher.timeSec : null;
+  }
+
+  function assignUnknownFinishTimes(finishers) {
+    return finishers.map((finisher, index) => {
+      if (finisher.timeStr && finisher.timeSec > 0) {
+        return finisher;
+      }
+
+      const prevTime = findPreviousKnownTime(finishers, index);
+      const nextTime = findNextKnownTime(finishers, index);
+      const estimatedTime = prevTime || nextTime || 0;
+
+      return {
+        ...finisher,
+        timeSec: estimatedTime,
+        estimatedTime: estimatedTime > 0,
+      };
+    });
+  }
+
   const finishers = rows.map((row, idx) => {
     const timeCell = row.querySelector('.Results-table-td--time .compact');
     const timeStr = timeCell ? timeCell.textContent.trim() : '';
@@ -147,21 +178,14 @@
     };
   });
 
-  let firstWalkerIdx = finishers.findIndex((f) => f.timeSec >= 3000);
-  if (firstWalkerIdx !== -1) {
-    for (let i = firstWalkerIdx; i < finishers.length; ++i) {
-      if (!finishers[i].timeStr || finishers[i].timeSec < 3000) {
-        finishers[i].timeSec = finishers[i - 1].timeSec;
-      }
-    }
-  }
+  const finishersWithEstimatedTimes = assignUnknownFinishTimes(finishers);
 
   function groupByMinute(breakdownKey) {
     const bins = {};
     let minMinute = Infinity,
       maxMinute = 0;
-    finishers.forEach((f) => {
-      if (!f.timeStr) return;
+    finishersWithEstimatedTimes.forEach((f) => {
+      if (f.timeSec === 0) return;
       const min = Math.floor(f.timeSec / 60);
       minMinute = Math.min(minMinute, min);
       maxMinute = Math.max(maxMinute, min);
@@ -522,8 +546,8 @@
   }
 
   function buildTable() {
-    const walkers = finishers.filter((f) => f.timeSec >= 3000);
-    const runners = finishers.filter((f) => f.timeSec > 0 && f.timeSec < 3000);
+    const walkers = finishersWithEstimatedTimes.filter((f) => f.timeSec >= 3000);
+    const runners = finishersWithEstimatedTimes.filter((f) => f.timeSec > 0 && f.timeSec < 3000);
     const totalWalkers = walkers.length;
     const totalRunners = runners.length;
 
