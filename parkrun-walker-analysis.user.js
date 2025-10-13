@@ -109,14 +109,17 @@
       if (ag) ageGrade = ag.replace('%', '');
     }
 
-    let ageGroup = '';
+    let ageGroup = 'Unknown';
     let agRaw = row.getAttribute('data-agegroup') || '';
     if (agRaw) {
       ageGroup = agRaw.replace(/^[A-Z]+/, '');
     } else {
       const ageGroupCell = row.querySelector('.Results-table-td--agegroup');
       if (ageGroupCell) {
-        ageGroup = ageGroupCell.textContent.trim().replace(/^[A-Z]+/, '');
+        const cellText = ageGroupCell.textContent.trim().replace(/^[A-Z]+/, '');
+        ageGroup = cellText || (timeStr ? 'Not specified' : 'Unknown');
+      } else if (timeStr) {
+        ageGroup = 'Not specified';
       }
     }
 
@@ -224,6 +227,36 @@
           Unknown: '#A1B6B7',
         };
         return genderColours[key] || '#FFA300';
+      }
+      if (breakdownKey === 'ageGroup') {
+        if (key === 'Not specified') return '#F2F2F2';
+        if (key === 'Unknown') return '#A1B6B7';
+        const match = key.match(/^(\d+)-/);
+        if (match) {
+          const age = parseInt(match[1], 10);
+          const gradient = [
+            '#DA70D6',
+            '#9370DB',
+            '#6495ED',
+            '#4169E1',
+            '#1E90FF',
+            '#00BFFF',
+            '#00CED1',
+            '#20B2AA',
+            '#3CB371',
+            '#32CD32',
+            '#9ACD32',
+            '#FFD700',
+            '#FFA500',
+            '#FF8C00',
+            '#FF6347',
+            '#DC143C',
+            '#DB7093',
+          ];
+          const index = Math.floor((age - 10) / 5);
+          return gradient[Math.min(index, gradient.length - 1)] || '#cccccc';
+        }
+        return '#cccccc';
       }
       return [
         '#FFA300',
@@ -500,7 +533,7 @@
     let valueList = Array.from(allValues);
 
     if (currentBreakdown === 'ageGroup') {
-      valueList = valueList.filter((v) => v && v !== 'Unknown');
+      valueList = valueList.filter((v) => v && v !== 'Unknown' && v !== 'Not specified');
       valueList.sort((a, b) => {
         const aLow = parseInt((a || '').split('-')[0], 10);
         const bLow = parseInt((b || '').split('-')[0], 10);
@@ -509,6 +542,7 @@
         return aLow - bLow;
       });
 
+      if (allValues.has('Not specified')) valueList.push('Not specified');
       if (allValues.has('Unknown')) valueList.push('Unknown');
     } else if (currentBreakdown === 'parkrunExperience') {
       const experienceOrder = [
@@ -526,8 +560,13 @@
       const experienceIndex = (v) => {
         const idx = experienceOrder.indexOf(v);
         if (idx !== -1) return idx;
-        const m = v.match(/(\d+)/);
-        if (m) return 200 + parseInt(m[1], 10);
+        const m = v.match(/parkrun (\d+) Club/);
+        if (m) {
+          const milestones = [10, 25, 50, 100, 250, 500, 1000];
+          const num = parseInt(m[1], 10);
+          const milestoneIdx = milestones.indexOf(num);
+          return milestoneIdx !== -1 ? 3 + milestoneIdx : 200 + num;
+        }
         if (v === 'Unknown') return 9999;
         return 999;
       };
