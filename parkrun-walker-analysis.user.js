@@ -59,10 +59,12 @@
     let firstTimerStatus = 'Established';
     if (runs === 1) firstTimerStatus = 'First Timer (Anywhere)';
     else if (achievement === 'First Timer!') firstTimerStatus = 'First Timer (Here)';
-    let volunteerStatus = 'Yet to Volunteer';
+    let volunteerStatus = 'Unknown';
     let volunteerMilestone = 0;
-    if (!isNaN(vols) && vols > 0) {
-      if (vols === 1) {
+    if (!isNaN(vols)) {
+      if (vols === 0) {
+        volunteerStatus = 'Yet to Volunteer';
+      } else if (vols === 1) {
         volunteerStatus = 'Volunteered once';
       } else if (vols > 1 && vols < 10) {
         volunteerStatus = 'Volunteered multiple times';
@@ -72,7 +74,7 @@
       const milestones = [1000, 500, 250, 100, 50, 25, 10];
       for (const m of milestones) {
         if (vols >= m) {
-          volunteerStatus = `Volunteer Club ${m}`;
+          volunteerStatus = `Volunteer ${m} Club`;
           volunteerMilestone = m;
           break;
         }
@@ -80,7 +82,7 @@
     }
     const clubMatch = row.innerHTML.match(/milestone-v(\d+)/);
     if (clubMatch) {
-      volunteerStatus = `Volunteer Club ${clubMatch[1]}`;
+      volunteerStatus = `Volunteer ${clubMatch[1]} Club`;
       volunteerMilestone = parseInt(clubMatch[1], 10);
     }
 
@@ -152,15 +154,18 @@
   }
 
   const milestoneColours = {
-    10: '#FFFFFF',
+    10: '#EBE9F0',
     25: '#6D5698',
     50: '#C81D31',
-    100: '#000000',
+    100: '#2E393B',
     250: '#2C504A',
     500: '#2E4DA7',
     1000: '#FFE049',
+    'Volunteered once': '#90EE90',
+    'Volunteered multiple times': '#00CEAE',
     'Has Volunteered': '#00CEAE',
-    'Yet to Volunteer': '#A1B6B7',
+    'Yet to Volunteer': '#FFA300',
+    Unknown: '#A1B6B7',
   };
 
   function renderStackedChart(breakdownKey, breakdownLabel, containerId) {
@@ -480,13 +485,13 @@
         'Yet to Volunteer',
         'Volunteered once',
         'Volunteered multiple times',
-        'Volunteer Club 10',
-        'Volunteer Club 25',
-        'Volunteer Club 50',
-        'Volunteer Club 100',
-        'Volunteer Club 250',
-        'Volunteer Club 500',
-        'Volunteer Club 1000',
+        'Volunteer 10 Club',
+        'Volunteer 25 Club',
+        'Volunteer 50 Club',
+        'Volunteer 100 Club',
+        'Volunteer 250 Club',
+        'Volunteer 500 Club',
+        'Volunteer 1000 Club',
       ];
       const milestoneIndex = (v) => {
         const idx = milestoneOrder.indexOf(v);
