@@ -103,9 +103,15 @@
     }
 
     let normGender = gender.toLowerCase();
-    if (normGender === 'male' || normGender === 'm') normGender = 'Male';
-    else if (normGender === 'female' || normGender === 'f') normGender = 'Female';
-    else normGender = 'Other';
+    if (normGender === 'male' || normGender === 'm') {
+      normGender = 'Male';
+    } else if (normGender === 'female' || normGender === 'f') {
+      normGender = 'Female';
+    } else if (timeStr) {
+      normGender = 'Not specified';
+    } else {
+      normGender = 'Unknown';
+    }
     return {
       timeStr,
       timeSec,
@@ -175,18 +181,26 @@
         }
         return milestoneColours[key] || '#cccccc';
       }
+      if (breakdownKey === 'gender') {
+        const genderColours = {
+          Male: '#00CEAE',
+          Female: '#E21145',
+          'Not specified': '#FFE049',
+          Unknown: '#A1B6B7',
+        };
+        return genderColours[key] || '#FFA300';
+      }
       return [
         '#FFA300',
         '#00CEAE',
         '#E21145',
-        '#3E3E78',
         '#EBE9F0',
         '#FFE049',
         '#2C504A',
         '#6D5698',
         '#C81D31',
         '#A1B6B7',
-      ][keyList.indexOf(key) % 10];
+      ][keyList.indexOf(key) % 9];
     }
     const datasets = keyList.map((key, i) => ({
       label: key,
