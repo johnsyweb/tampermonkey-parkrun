@@ -29,6 +29,8 @@
 // @match        *://www.parkrun.sg/*/results/latestresults/
 // @match        *://www.parkrun.us/*/results/latestresults/
 // @namespace    http://tampermonkey.net/
+// @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
+// @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
