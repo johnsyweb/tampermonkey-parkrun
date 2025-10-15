@@ -37,7 +37,71 @@
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-walker-analysis.user.js
 // @version      1.0.8
 // ==/UserScript==
-(function parkrunWalkerAnalysisMain() {
+
+/* global Chart, html2canvas */
+
+function assignUnknownFinishTimes(finishers) {
+  function findPreviousKnownTime(finishers, startIndex) {
+    const previousFinisher = finishers
+      .slice(0, startIndex)
+      .reverse()
+      .find((f) => f.timeStr && f.timeSec > 0);
+    return previousFinisher ? previousFinisher.timeSec : null;
+  }
+  function findNextKnownTime(finishers, startIndex) {
+    const nextFinisher = finishers.slice(startIndex + 1).find((f) => f.timeStr && f.timeSec > 0);
+    return nextFinisher ? nextFinisher.timeSec : null;
+  }
+  return finishers.map((finisher, index) => {
+    if (finisher.timeStr && finisher.timeSec > 0) {
+      return finisher;
+    }
+    const prevTime = findPreviousKnownTime(finishers, index);
+    const nextTime = findNextKnownTime(finishers, index);
+    const estimatedTime = prevTime || nextTime || 0;
+    return {
+      ...finisher,
+      timeSec: estimatedTime,
+      estimatedTime: estimatedTime > 0,
+    };
+  });
+}
+
+function getEventMetadata() {
+  let eventName = '';
+  let eventDate = '';
+  let eventNumber = '';
+  const h1 = typeof document !== 'undefined' ? document.querySelector('h1') : null;
+  if (h1) {
+    eventName = h1.textContent.trim();
+  } else if (typeof document !== 'undefined' && document.title) {
+    eventName = document.title.split('-')[0].trim();
+  }
+  const h3 = typeof document !== 'undefined' ? document.querySelector('h3') : null;
+  if (h3) {
+    const h3Text = h3.textContent;
+    const dateMatch = h3Text.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})/);
+    if (dateMatch) eventDate = dateMatch[1];
+    const numMatch = h3Text.match(/#(\d+)/);
+    if (numMatch) eventNumber = numMatch[1];
+  }
+  return { eventName, eventDate, eventNumber };
+}
+
+function generateExportFilename(metadata, chartName) {
+  let eventPart = metadata.eventName ? metadata.eventName.replace(/[^a-z0-9]+/gi, '').toLowerCase() : 'event';
+  let datePart = metadata.eventDate ? metadata.eventDate.replace(/\//g, '_') : 'date';
+  let numPart = metadata.eventNumber ? metadata.eventNumber : 'num';
+  return `${eventPart}_${datePart}_${numPart}_${chartName}.png`;
+}
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports.assignUnknownFinishTimes = assignUnknownFinishTimes;
+  module.exports.getEventMetadata = getEventMetadata;
+  module.exports.generateExportFilename = generateExportFilename;
+}
+
+function parkrunWalkerAnalysisMain() {
   'use strict';
   function timeToSeconds(timeStr) {
     if (!timeStr) return 0;
@@ -59,41 +123,7 @@
     return { status: null, milestone: 0 };
   }
 
-  function findPreviousKnownTime(finishers, startIndex) {
-    const previousFinisher = finishers
-      .slice(0, startIndex)
-      .reverse()
-      .find((f) => f.timeStr && f.timeSec > 0);
-    return previousFinisher ? previousFinisher.timeSec : null;
-  }
 
-  function findNextKnownTime(finishers, startIndex) {
-    const nextFinisher = finishers.slice(startIndex + 1).find((f) => f.timeStr && f.timeSec > 0);
-    return nextFinisher ? nextFinisher.timeSec : null;
-  }
-
-  function assignUnknownFinishTimes(finishers) {
-    return finishers.map((finisher, index) => {
-      if (finisher.timeStr && finisher.timeSec > 0) {
-        return finisher;
-      }
-
-      const prevTime = findPreviousKnownTime(finishers, index);
-      const nextTime = findNextKnownTime(finishers, index);
-      const estimatedTime = prevTime || nextTime || 0;
-
-      return {
-        ...finisher,
-        timeSec: estimatedTime,
-        estimatedTime: estimatedTime > 0,
-      };
-    });
-  }
-
-  
-  if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-    module.exports.assignUnknownFinishTimes = assignUnknownFinishTimes;
-  }
 
   const finishers = rows.map((row, idx) => {
     const timeCell = row.querySelector('.Results-table-td--time .compact');
@@ -217,383 +247,6 @@
     Unknown: '#A1B6B7',
   };
 
-  function renderStackedChart(breakdownKey, breakdownLabel, containerId) {
-    const { bins, minMinute, maxMinute } = groupByMinute(breakdownKey);
-    const minutes = [];
-    for (let m = minMinute; m <= maxMinute; m++) minutes.push(m);
-
-    const allKeys = new Set();
-    Object.values(bins).forEach((obj) => Object.keys(obj).forEach((k) => allKeys.add(k)));
-    let keyList = Array.from(allKeys);
-
-    function sortKeyList(keys, breakdownType) {
-      if (breakdownType === 'ageGroup') {
-        const sorted = keys.filter((v) => v && v !== 'Unknown' && v !== 'Not specified');
-        sorted.sort((a, b) => {
-          const aLow = parseInt((a || '').split('-')[0], 10);
-          const bLow = parseInt((b || '').split('-')[0], 10);
-          if (isNaN(aLow)) return 1;
-          if (isNaN(bLow)) return -1;
-          return aLow - bLow;
-        });
-        if (keys.includes('Not specified')) sorted.push('Not specified');
-        if (keys.includes('Unknown')) sorted.push('Unknown');
-        return sorted;
-      }
-
-      if (breakdownType === 'parkrunExperience') {
-        const experienceOrder = [
-          'First Timer (anywhere)',
-          'First Timer (to this event)',
-          'Multiple parkruns',
-          'parkrun 10 Club',
-          'parkrun 25 Club',
-          'parkrun 50 Club',
-          'parkrun 100 Club',
-          'parkrun 250 Club',
-          'parkrun 500 Club',
-          'parkrun 1000 Club',
-        ];
-        const experienceIndex = (v) => {
-          const idx = experienceOrder.indexOf(v);
-          if (idx !== -1) return idx;
-          const m = v.match(/parkrun (\d+) Club/);
-          if (m) {
-            const milestones = [10, 25, 50, 100, 250, 500, 1000];
-            const num = parseInt(m[1], 10);
-            const milestoneIdx = milestones.indexOf(num);
-            return milestoneIdx !== -1 ? 3 + milestoneIdx : 200 + num;
-          }
-          if (v === 'Unknown') return 9999;
-          return 999;
-        };
-        return keys.slice().sort((a, b) => experienceIndex(a) - experienceIndex(b));
-      }
-
-      if (breakdownType === 'volunteerStatus') {
-        const milestoneOrder = [
-          'Yet to Volunteer',
-          'Volunteered once',
-          'Volunteered multiple times',
-          'Volunteer 10 Club',
-          'Volunteer 25 Club',
-          'Volunteer 50 Club',
-          'Volunteer 100 Club',
-          'Volunteer 250 Club',
-          'Volunteer 500 Club',
-          'Volunteer 1000 Club',
-        ];
-        const milestoneIndex = (v) => {
-          const idx = milestoneOrder.indexOf(v);
-          if (idx !== -1) return idx;
-          const m = v.match(/(\d+)/);
-          if (m) return 200 + parseInt(m[1], 10);
-          if (v === 'Has Volunteered') return 150;
-          if (v === 'Unknown') return 9999;
-          return 999;
-        };
-        return keys.slice().sort((a, b) => milestoneIndex(a) - milestoneIndex(b));
-      }
-
-      return keys.slice().sort();
-    }
-
-    keyList = sortKeyList(keyList, breakdownKey);
-
-    function getColour(key) {
-      if (breakdownKey === 'volunteerStatus') {
-        const match = key.match(/(\d+)/);
-        if (match) {
-          const m = parseInt(match[1], 10);
-          return milestoneColours[m] || '#cccccc';
-        }
-        return milestoneColours[key] || '#cccccc';
-      }
-      if (breakdownKey === 'parkrunExperience') {
-        const match = key.match(/(\d+)/);
-        if (match) {
-          const m = parseInt(match[1], 10);
-          return milestoneColours[m] || '#cccccc';
-        }
-        const experienceColours = {
-          'First Timer (anywhere)': '#FFE049',
-          'First Timer (to this event)': '#FFA300',
-          'Multiple parkruns': '#00CEAE',
-          Unknown: '#A1B6B7',
-        };
-        return experienceColours[key] || '#cccccc';
-      }
-      if (breakdownKey === 'gender') {
-        const genderColours = {
-          Male: '#00CEAE',
-          Female: '#E21145',
-          'Not specified': '#FFE049',
-          Unknown: '#A1B6B7',
-        };
-        return genderColours[key] || '#FFA300';
-      }
-      if (breakdownKey === 'ageGroup') {
-        if (key === 'Not specified') return '#F2F2F2';
-        if (key === 'Unknown') return '#A1B6B7';
-        const match = key.match(/^(\d+)-/);
-        if (match) {
-          const age = parseInt(match[1], 10);
-          const gradient = [
-            '#DA70D6',
-            '#9370DB',
-            '#6495ED',
-            '#4169E1',
-            '#1E90FF',
-            '#00BFFF',
-            '#00CED1',
-            '#20B2AA',
-            '#3CB371',
-            '#32CD32',
-            '#9ACD32',
-            '#FFD700',
-            '#FFA500',
-            '#FF8C00',
-            '#FF6347',
-            '#DC143C',
-            '#DB7093',
-          ];
-          const index = Math.floor((age - 10) / 5);
-          return gradient[Math.min(index, gradient.length - 1)] || '#cccccc';
-        }
-        return '#cccccc';
-      }
-      return [
-        '#FFA300',
-        '#00CEAE',
-        '#E21145',
-        '#EBE9F0',
-        '#FFE049',
-        '#2C504A',
-        '#6D5698',
-        '#C81D31',
-        '#A1B6B7',
-      ][keyList.indexOf(key) % 9];
-    }
-    const datasets = keyList.map((key, i) => ({
-      label: key,
-      data: minutes.map((m) => (bins[m] && bins[m][key] ? bins[m][key] : 0)),
-      backgroundColor: getColour(key),
-      stack: 'stack1',
-    }));
-    const labels = minutes.map((min) => {
-      const h = Math.floor(min / 60);
-      const m = min % 60;
-      return `${h}:${m.toString().padStart(2, '0')}`;
-    });
-    let chartDiv = document.getElementById(containerId);
-    if (!chartDiv) {
-      chartDiv = document.createElement('div');
-      chartDiv.id = containerId;
-    } else {
-      chartDiv.innerHTML = '';
-    }
-    chartDiv.style.background = '#2b223d';
-    chartDiv.style.borderRadius = '8px';
-    chartDiv.style.margin = '20px auto';
-    chartDiv.style.padding = '15px';
-    chartDiv.style.maxWidth = '900px';
-    chartDiv.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-    const heading = document.createElement('h3');
-    heading.textContent = `Finishers per Minute by ${breakdownLabel}`;
-    heading.style.textAlign = 'center';
-    heading.style.marginBottom = '15px';
-    heading.style.color = '#FFA300';
-    chartDiv.appendChild(heading);
-    const canvas = document.createElement('canvas');
-    chartDiv.appendChild(canvas);
-
-    let saveBtn = document.createElement('button');
-    saveBtn.textContent = '💾 Save as Image';
-    saveBtn.style.padding = '6px 12px';
-    saveBtn.style.backgroundColor = '#FFA300';
-    saveBtn.style.color = '#2b223d';
-    saveBtn.style.border = 'none';
-    saveBtn.style.borderRadius = '4px';
-    saveBtn.style.cursor = 'pointer';
-    saveBtn.style.fontWeight = 'bold';
-    saveBtn.style.display = 'inline-block';
-    saveBtn.style.margin = '10px auto 0 auto';
-    saveBtn.title = 'Download chart as PNG image';
-    saveBtn.addEventListener('mouseover', function () {
-      this.style.backgroundColor = '#e59200';
-    });
-    saveBtn.addEventListener('mouseout', function () {
-      this.style.backgroundColor = '#FFA300';
-    });
-    saveBtn.addEventListener('click', async function () {
-      const prevDisplay = saveBtn.style.display;
-      saveBtn.style.display = 'none';
-      await new Promise((r) => requestAnimationFrame(r));
-      const metadata = getEventMetadata();
-      const heading = chartDiv.querySelector('h3');
-      let chartName = heading ? heading.textContent.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() : 'chart';
-      const filename = generateExportFilename(metadata, chartName);
-      if (typeof html2canvas === 'undefined') {
-        alert('html2canvas is not loaded.');
-        saveBtn.style.display = prevDisplay;
-        return;
-      }
-      try {
-        const snapCanvas = await html2canvas(chartDiv, {
-          backgroundColor: '#2b223d',
-          scale: 2,
-          logging: false,
-          allowTaint: true,
-          useCORS: true,
-        });
-        snapCanvas.toBlob(function(blob) {
-          saveBtn.style.display = prevDisplay;
-          if (!blob) {
-            alert('Failed to create image blob.');
-            return;
-          }
-          const link = document.createElement('a');
-          link.download = filename;
-          link.href = URL.createObjectURL(blob);
-          document.body.appendChild(link);
-          link.click();
-          setTimeout(() => {
-            URL.revokeObjectURL(link.href);
-            document.body.removeChild(link);
-          }, 100);
-        }, 'image/png');
-      } catch (err) {
-        saveBtn.style.display = prevDisplay;
-        alert('Failed to export image: ' + err);
-      }
-    });
-    let controlsFooter = chartDiv.querySelector('.walker-controls-footer');
-    if (!controlsFooter) {
-      controlsFooter = document.createElement('div');
-      controlsFooter.className = 'walker-controls-footer';
-      controlsFooter.style.display = 'flex';
-      controlsFooter.style.justifyContent = 'center';
-      controlsFooter.style.marginTop = '12px';
-      chartDiv.appendChild(controlsFooter);
-    }
-    controlsFooter.innerHTML = '';
-    controlsFooter.appendChild(saveBtn);
-
-    let inserted = false;
-    const titleSelectors = ['h1', 'h3'];
-    for (const sel of titleSelectors) {
-      const title = document.querySelector(sel);
-      if (title && title.parentNode) {
-        if (title.nextSibling) {
-          title.parentNode.insertBefore(chartDiv, title.nextSibling);
-        } else {
-          title.parentNode.appendChild(chartDiv);
-        }
-        inserted = true;
-        break;
-      }
-    }
-    if (!inserted) document.body.prepend(chartDiv);
-    setTimeout(() => {
-      if (typeof Chart === 'undefined') return;
-      const _chart = new Chart(canvas.getContext('2d'), {
-        type: 'bar',
-        data: { labels, datasets },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { labels: { color: '#e0e0e0' } },
-            title: { display: false },
-            annotation: {
-              annotations: {
-                line1: {
-                  type: 'line',
-                  xMin: 50,
-                  xMax: 50,
-                  borderColor: '#FFE049',
-                  borderWidth: 5,
-                  borderDash: [0],
-                  borderDashOffset: 0,
-                  label: {
-                    content: '50:00 (Walker Threshold)',
-                    enabled: true,
-                    position: 'start',
-                    color: '#2b223d',
-                    backgroundColor: '#FFE049',
-                    font: {
-                      size: 16,
-                      weight: 'bold',
-                      family: 'inherit',
-                    },
-                    padding: 8,
-                    cornerRadius: 6,
-                    textAlign: 'center',
-                  },
-                  z: 100,
-                },
-              },
-            },
-          },
-          scales: {
-            x: {
-              stacked: true,
-              title: { display: true, text: 'Finish Time', color: '#e0e0e0' },
-              ticks: { color: '#cccccc' },
-              grid: { color: 'rgba(200,200,200,0.2)' },
-            },
-            y: {
-              stacked: true,
-              beginAtZero: true,
-              title: { display: true, text: 'Number of Finishers', color: '#e0e0e0' },
-              ticks: { color: '#cccccc', precision: 0 },
-              grid: { color: 'rgba(200,200,200,0.2)' },
-            },
-          },
-        },
-      });
-      
-      canvas._walkerChart = _chart;
-    }, 0);
-
-    let summaryDiv = document.getElementById('walkerRunnerSummaryTable');
-    if (!summaryDiv) {
-      summaryDiv = document.createElement('div');
-      summaryDiv.id = 'walkerRunnerSummaryTable';
-    }
-    summaryDiv.innerHTML = buildTable();
-
-    
-    let walkerContainer = document.getElementById('walkerAnalysisContainer');
-    if (!walkerContainer) {
-      walkerContainer = document.createElement('div');
-      walkerContainer.id = 'walkerAnalysisContainer';
-      walkerContainer.style.width = '100%';
-      walkerContainer.style.maxWidth = '900px';
-      walkerContainer.style.margin = '20px auto';
-    }
-    
-    walkerContainer.innerHTML = '';
-    walkerContainer.appendChild(chartDiv);
-    walkerContainer.appendChild(controlDiv);
-    walkerContainer.appendChild(summaryDiv);
-
-    
-    const firstH3 = document.querySelector('h3');
-    if (firstH3 && firstH3.parentNode) {
-      if (
-        walkerContainer.parentNode !== firstH3.parentNode ||
-        walkerContainer.previousSibling !== firstH3
-      ) {
-        if (firstH3.nextSibling) {
-          firstH3.parentNode.insertBefore(walkerContainer, firstH3.nextSibling);
-        } else {
-          firstH3.parentNode.appendChild(walkerContainer);
-        }
-      }
-    } else {
-      document.body.appendChild(walkerContainer);
-    }
-  }
 
   const breakdowns = [
     { key: 'parkrunExperience', label: 'parkrun Experience' },
@@ -707,7 +360,7 @@
       const t = w + r;
       html += `<tr><td>${val}</td><td style="text-align:right">${w}</td><td style="text-align:right">${totalWalkers ? ((w / totalWalkers) * 100).toFixed(1) : '0.0'}%</td><td style="text-align:right">${r}</td><td style="text-align:right">${totalRunners ? ((r / totalRunners) * 100).toFixed(1) : '0.0'}%</td><td style="text-align:right">${t}</td><td style="text-align:right">${totalFinishers ? ((t / totalFinishers) * 100).toFixed(1) : '0.0'}%</td></tr>`;
     });
-    html += `<tr style=\"font-weight:bold;\"><td>Total</td><td style=\"text-align:right\">${totalWalkers}</td><td style=\"text-align:right\">100.0%</td><td style=\"text-align:right\">${totalRunners}</td><td style=\"text-align:right\">100.0%</td><td style=\"text-align:right\">${totalFinishers}</td><td style=\"text-align:right\">100.0%</td></tr>`;
+    html += `<tr style="font-weight:bold;"><td>Total</td><td style="text-align:right">${totalWalkers}</td><td style="text-align:right">100.0%</td><td style="text-align:right">${totalRunners}</td><td style="text-align:right">100.0%</td><td style="text-align:right">${totalFinishers}</td><td style="text-align:right">100.0%</td></tr>`;
     html += `</tbody></table>`;
     return html;
   }
@@ -718,11 +371,11 @@
       breakdowns
         .map(
           (b) =>
-            `<button style=\"margin:0 8px;padding:6px 12px;border-radius:4px;border:none;background:${currentBreakdown === b.key ? '#FFA300' : '#00CEAE'};color:#2b223d;font-weight:bold;cursor:pointer;\" data-key=\"${b.key}\">${b.label}</button>`
+            `<button style="margin:0 8px;padding:6px 12px;border-radius:4px;border:none;background:${currentBreakdown === b.key ? '#FFA300' : '#00CEAE'};color:#2b223d;font-weight:bold;cursor:pointer;" data-key="${b.key}">${b.label}</button>`
         )
         .join('');
     controlDiv.querySelectorAll('button').forEach((btn) => {
-      btn.onclick = (e) => {
+      btn.onclick = () => {
         setBreakdown(btn.getAttribute('data-key'));
       };
     });
@@ -942,18 +595,18 @@
         '#A1B6B7',
       ][keyList.indexOf(key) % 9];
     }
-    const datasets = keyList.map((key, i) => ({
+    const datasets = keyList.map((key) => ({
       label: key,
       data: minutes.map((m) => (bins[m] && bins[m][key] ? bins[m][key] : 0)),
       backgroundColor: getColour(key),
       stack: 'stack1',
     }));
-    const labels = minutes.map((min) => {
+    let labels = minutes.map((min) => {
       const h = Math.floor(min / 60);
       const m = min % 60;
       return `${h}:${m.toString().padStart(2, '0')}`;
     });
-    let chartDiv = document.getElementById(containerId);
+       let chartDiv = document.getElementById(containerId);
     if (!chartDiv) {
       chartDiv = document.createElement('div');
       chartDiv.id = containerId;
@@ -975,7 +628,7 @@
     chartDiv.appendChild(heading);
     const canvas = document.createElement('canvas');
     chartDiv.appendChild(canvas);
-    let saveBtn = document.createElement('button');
+  let saveBtn = document.createElement('button');
     saveBtn.textContent = '💾 Save as Image';
     saveBtn.style.padding = '6px 12px';
     saveBtn.style.backgroundColor = '#FFA300';
@@ -997,10 +650,10 @@
       const prevDisplay = saveBtn.style.display;
       saveBtn.style.display = 'none';
       await new Promise((r) => requestAnimationFrame(r));
-  const metadata = getEventMetadata();
-  const heading = chartDiv.querySelector('h3');
-  let chartName = heading ? heading.textContent.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() : 'chart';
-  const filename = generateExportFilename(metadata, chartName);
+      const metadata = getEventMetadata();
+      const heading = chartDiv.querySelector('h3');
+      let chartName = heading ? heading.textContent.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() : 'chart';
+      const filename = generateExportFilename(metadata, chartName);
       if (typeof html2canvas === 'undefined') {
         alert('html2canvas is not loaded.');
         saveBtn.style.display = prevDisplay;
@@ -1035,39 +688,7 @@
         alert('Failed to export image: ' + err);
       }
     });
-  function getEventMetadata() {
-    let eventName = '';
-    let eventDate = '';
-    let eventNumber = '';
-    const h1 = document.querySelector('h1');
-    if (h1) {
-      eventName = h1.textContent.trim();
-    } else if (document.title) {
-      eventName = document.title.split('-')[0].trim();
-    }
-    const h3 = document.querySelector('h3');
-    if (h3) {
-      const h3Text = h3.textContent;
-      const dateMatch = h3Text.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})/);
-      if (dateMatch) eventDate = dateMatch[1];
-      const numMatch = h3Text.match(/#(\d+)/);
-      if (numMatch) eventNumber = numMatch[1];
-    }
-    return { eventName, eventDate, eventNumber };
-  }
 
-  function generateExportFilename(metadata, chartName) {
-    let eventPart = metadata.eventName ? metadata.eventName.replace(/[^a-z0-9]+/gi, '').toLowerCase() : 'event';
-    let datePart = metadata.eventDate ? metadata.eventDate.replace(/\//g, '_') : 'date';
-    let numPart = metadata.eventNumber ? metadata.eventNumber : 'num';
-    return `${eventPart}_${datePart}_${numPart}_${chartName}.png`;
-  }
-
-  if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-    module.exports.assignUnknownFinishTimes = assignUnknownFinishTimes;
-    module.exports.getEventMetadata = getEventMetadata;
-    module.exports.generateExportFilename = generateExportFilename;
-  }
     
     let controlsFooter = chartDiv.querySelector('.walker-controls-footer');
     if (!controlsFooter) {
@@ -1091,27 +712,17 @@
         data: { labels, datasets },
         options: {
           responsive: true,
+          layout: {
+            padding: {
+              left: 60,
+              right: 60,
+              top: 40,
+              bottom: 40,
+            },
+          },
           plugins: {
             legend: { labels: { color: '#e0e0e0' } },
             title: { display: false },
-            annotation: {
-              annotations: {
-                line1: {
-                  type: 'line',
-                  xMin: 50,
-                  xMax: 50,
-                  borderColor: 'red',
-                  borderWidth: 2,
-                  label: {
-                    content: '50:00',
-                    enabled: true,
-                    position: 'start',
-                    color: 'red',
-                    backgroundColor: '#2b223d',
-                  },
-                },
-              },
-            },
           },
           scales: {
             x: {
@@ -1136,4 +747,6 @@
 
 
   renderAll();
-})();
+}
+
+parkrunWalkerAnalysisMain();
