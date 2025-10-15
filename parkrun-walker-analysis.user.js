@@ -1,3 +1,4 @@
+
 // ==UserScript==
 // @name         parkrun Walker Analysis
 // @description  Highlight and summarize walkers (>=50:00) and compare with faster participants on parkrun results pages.
@@ -37,6 +38,7 @@
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-walker-analysis.user.js
 // @version      1.0.8
 // ==/UserScript==
+
 
 (function () {
   'use strict';
@@ -430,29 +432,53 @@
     saveBtn.addEventListener('mouseout', function () {
       this.style.backgroundColor = '#FFA300';
     });
-    saveBtn.addEventListener('click', function () {
+    saveBtn.addEventListener('click', async function () {
+      // Mirror the approach used in parkrun-charts: capture the container with html2canvas
+      // Hide the button immediately
       saveBtn.style.display = 'none';
+      // Ensure chart has finished any pending animations/layout before capture
+      try {
+        if (canvas && canvas._walkerChart) {
+          const ch = canvas._walkerChart;
+          // Disable animations and update synchronously
+          ch.options.animation = false;
+          ch.update('none');
+        }
+      } catch (_) {}
       if (typeof html2canvas === 'undefined') {
         alert('html2canvas is not loaded.');
         saveBtn.style.display = 'block';
         return;
       }
+      // Give Chart.js a frame to complete rendering/layout before capture
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       html2canvas(chartDiv, {
         backgroundColor: '#2b223d',
         scale: 2,
         logging: false,
         allowTaint: true,
         useCORS: true,
-      }).then((canvas) => {
+      }).then((snapCanvas) => {
+        // Restore the button only after the image has been created
         saveBtn.style.display = 'block';
         const link = document.createElement('a');
         const timestamp = new Date().toISOString().split('T')[0];
         link.download = `parkrun-walker-analysis-${breakdownKey}-${timestamp}.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.href = snapCanvas.toDataURL('image/png');
         link.click();
       });
     });
-    chartDiv.appendChild(saveBtn);
+    // Place the save button inside a controls footer under the chart for visibility but exclude from capture
+    let controlsFooter = chartDiv.querySelector('.walker-controls-footer');
+    if (!controlsFooter) {
+      controlsFooter = document.createElement('div');
+      controlsFooter.className = 'walker-controls-footer';
+      controlsFooter.style.display = 'flex';
+      controlsFooter.style.justifyContent = 'center';
+      controlsFooter.style.marginTop = '12px';
+      chartDiv.appendChild(controlsFooter);
+    }
+    controlsFooter.appendChild(saveBtn);
 
     let inserted = false;
     const titleSelectors = ['h1', 'h3'];
@@ -471,7 +497,7 @@
     if (!inserted) document.body.prepend(chartDiv);
     setTimeout(() => {
       if (typeof Chart === 'undefined') return;
-      new Chart(canvas.getContext('2d'), {
+      const _chart = new Chart(canvas.getContext('2d'), {
         type: 'bar',
         data: { labels, datasets },
         options: {
@@ -515,6 +541,8 @@
           },
         },
       });
+      // Keep a handle for export stability
+      canvas._walkerChart = _chart;
     }, 0);
 
     let summaryDiv = document.getElementById('walkerRunnerSummaryTable');
@@ -697,14 +725,21 @@
     } else {
       valueList.sort();
     }
-    let html = `<table class="Results-table" style="margin:1em auto;font-size:1.1em;">
-      <thead><tr><th>${breakdowns.find((b) => b.key === currentBreakdown).label}</th><th>Walkers (n)</th><th>Walkers (%)</th><th>Runners (n)</th><th>Runners (%)</th></tr></thead><tbody>`;
+    const totalFinishers = totalWalkers + totalRunners;
+    const walkerPercent = totalFinishers ? ((totalWalkers / totalFinishers) * 100).toFixed(1) : '0.0';
+    const runnerPercent = totalFinishers ? ((totalRunners / totalFinishers) * 100).toFixed(1) : '0.0';
+    let html = `<div style="text-align:center;margin-bottom:0.5em;font-size:1.08em;">
+      <strong>Walkers:</strong> ${totalWalkers} (${walkerPercent}%) &nbsp; | &nbsp; <strong>Runners:</strong> ${totalRunners} (${runnerPercent}%) &nbsp; | &nbsp; <strong>Total finishers:</strong> ${totalFinishers}
+    </div>`;
+    html += `<table class="Results-table" style="margin:1em auto;font-size:1.1em;">
+      <thead><tr><th>${breakdowns.find((b) => b.key === currentBreakdown).label}</th><th>Walkers (n)</th><th>Walkers (%)</th><th>Runners (n)</th><th>Runners (%)</th><th>Total (n)</th><th>Total (%)</th></tr></thead><tbody>`;
     valueList.forEach((val) => {
       const w = walkers.filter((f) => (f[currentBreakdown] || 'Unknown') === val).length;
       const r = runners.filter((f) => (f[currentBreakdown] || 'Unknown') === val).length;
-      html += `<tr><td>${val}</td><td style="text-align:right">${w}</td><td style="text-align:right">${totalWalkers ? ((w / totalWalkers) * 100).toFixed(1) : '0.0'}%</td><td style="text-align:right">${r}</td><td style="text-align:right">${totalRunners ? ((r / totalRunners) * 100).toFixed(1) : '0.0'}%</td></tr>`;
+      const t = w + r;
+      html += `<tr><td>${val}</td><td style="text-align:right">${w}</td><td style="text-align:right">${totalWalkers ? ((w / totalWalkers) * 100).toFixed(1) : '0.0'}%</td><td style="text-align:right">${r}</td><td style="text-align:right">${totalRunners ? ((r / totalRunners) * 100).toFixed(1) : '0.0'}%</td><td style="text-align:right">${t}</td><td style="text-align:right">${totalFinishers ? ((t / totalFinishers) * 100).toFixed(1) : '0.0'}%</td></tr>`;
     });
-    html += `<tr style=\"font-weight:bold;\"><td>Total</td><td style=\"text-align:right\">${totalWalkers}</td><td style=\"text-align:right\">100.0%</td><td style=\"text-align:right\">${totalRunners}</td><td style=\"text-align:right\">100.0%</td></tr>`;
+    html += `<tr style=\"font-weight:bold;\"><td>Total</td><td style=\"text-align:right\">${totalWalkers}</td><td style=\"text-align:right\">100.0%</td><td style=\"text-align:right\">${totalRunners}</td><td style=\"text-align:right\">100.0%</td><td style=\"text-align:right\">${totalFinishers}</td><td style=\"text-align:right\">100.0%</td></tr>`;
     html += `</tbody></table>`;
     return html;
   }
