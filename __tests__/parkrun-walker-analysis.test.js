@@ -1,6 +1,7 @@
 // __tests__/parkrun-walker-analysis.test.js
 
 const { assignUnknownFinishTimes } = require('../parkrun-walker-analysis.user');
+const { computeWalkerThreshold } = require('../parkrun-walker-analysis.user');
 
 describe('assignUnknownFinishTimes', () => {
   it('should assign estimated times to finishers with missing time', () => {
@@ -33,5 +34,23 @@ describe('assignUnknownFinishTimes', () => {
     expect(result[0].timeSec).toBe(1200);
     expect(result[1].timeSec).toBe(1260);
     expect(result[0].estimatedTime).toBeUndefined();
+  });
+
+  describe('computeWalkerThreshold', () => {
+    it('returns 1200 seconds for junior event URLs', () => {
+      const url =
+        'https://www.parkrun.com.au/eynesburyheritagetrail-juniors/results/latestresults/';
+      expect(computeWalkerThreshold(url)).toBe(20 * 60);
+    });
+
+    it('returns 3000 seconds for normal event URLs', () => {
+      const url = 'https://www.parkrun.org.uk/some-event/results/latestresults/';
+      expect(computeWalkerThreshold(url)).toBe(50 * 60);
+    });
+
+    it('returns default 3000 for non-string or empty input', () => {
+      expect(computeWalkerThreshold(null)).toBe(50 * 60);
+      expect(computeWalkerThreshold('')).toBe(50 * 60);
+    });
   });
 });

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun Walker Analysis
-// @description  Highlight and summarize walkers (>=50:00) and compare with faster participants on parkrun results pages.
+// @description  Highlight and summarize walkers (>=10:00/km) and compare with faster participants on parkrun results pages.
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-walker-analysis.user.js
 // @grant        none
@@ -38,7 +38,9 @@
 // @version      1.0.9
 // ==/UserScript==
 
-/* global Chart, html2canvas */
+const ChartRef = typeof window !== 'undefined' && window.Chart ? window.Chart : undefined;
+const html2canvasRef =
+  typeof window !== 'undefined' && window.html2canvas ? window.html2canvas : undefined;
 
 function assignUnknownFinishTimes(finishers) {
   function findPreviousKnownTime(finishers, startIndex) {
@@ -89,16 +91,27 @@ function getEventMetadata() {
 }
 
 function generateExportFilename(metadata, chartName) {
-  let eventPart = metadata.eventName ? metadata.eventName.replace(/[^a-z0-9]+/gi, '').toLowerCase() : 'event';
+  let eventPart = metadata.eventName
+    ? metadata.eventName.replace(/[^a-z0-9]+/gi, '').toLowerCase()
+    : 'event';
   let datePart = metadata.eventDate ? metadata.eventDate.replace(/\//g, '_') : 'date';
   let numPart = metadata.eventNumber ? metadata.eventNumber : 'num';
   return `${eventPart}_${datePart}_${numPart}_${chartName}.png`;
 }
 
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-  module.exports.assignUnknownFinishTimes = assignUnknownFinishTimes;
-  module.exports.getEventMetadata = getEventMetadata;
-  module.exports.generateExportFilename = generateExportFilename;
+function computeWalkerThreshold(url) {
+  const DEFAULT = 5;
+  const JUNIOR = 2;
+  let courseLength = DEFAULT;
+  try {
+    if (typeof url === 'string' && url && url.toLowerCase().includes('-juniors')) {
+      courseLength = JUNIOR;
+    }
+  } catch (ignore) {
+    void ignore;
+  }
+
+  return courseLength * 10 * 60;
 }
 
 function parkrunWalkerAnalysisMain() {
@@ -122,8 +135,6 @@ function parkrunWalkerAnalysisMain() {
     }
     return { status: null, milestone: 0 };
   }
-
-
 
   const finishers = rows.map((row, idx) => {
     const timeCell = row.querySelector('.Results-table-td--time .compact');
@@ -247,14 +258,13 @@ function parkrunWalkerAnalysisMain() {
     Unknown: '#A1B6B7',
   };
 
-
   const breakdowns = [
     { key: 'parkrunExperience', label: 'parkrun Experience' },
     { key: 'volunteerStatus', label: 'Volunteer Experience' },
     { key: 'gender', label: 'Gender' },
     { key: 'ageGroup', label: 'Age Group' },
   ];
-  
+
   let currentBreakdown = 'parkrunExperience';
   let chartContainerId = 'finishersStackedChart';
   let walkerChartInstance = null;
@@ -274,8 +284,13 @@ function parkrunWalkerAnalysisMain() {
   }
 
   function buildTable(breakdownKey) {
-    const walkers = finishersWithEstimatedTimes.filter((f) => f.timeSec >= 3000);
-    const runners = finishersWithEstimatedTimes.filter((f) => f.timeSec > 0 && f.timeSec < 3000);
+    const threshold = computeWalkerThreshold(
+      typeof document !== 'undefined' && document.location ? document.location.href : ''
+    );
+    const walkers = finishersWithEstimatedTimes.filter((f) => f.timeSec >= threshold);
+    const runners = finishersWithEstimatedTimes.filter(
+      (f) => f.timeSec > 0 && f.timeSec < threshold
+    );
     const totalWalkers = walkers.length;
     const totalRunners = runners.length;
     const allValues = new Set();
@@ -347,8 +362,12 @@ function parkrunWalkerAnalysisMain() {
       valueList.sort();
     }
     const totalFinishers = totalWalkers + totalRunners;
-    const walkerPercent = totalFinishers ? ((totalWalkers / totalFinishers) * 100).toFixed(1) : '0.0';
-    const runnerPercent = totalFinishers ? ((totalRunners / totalFinishers) * 100).toFixed(1) : '0.0';
+    const walkerPercent = totalFinishers
+      ? ((totalWalkers / totalFinishers) * 100).toFixed(1)
+      : '0.0';
+    const runnerPercent = totalFinishers
+      ? ((totalRunners / totalFinishers) * 100).toFixed(1)
+      : '0.0';
     let html = `<div style="text-align:center;margin-bottom:0.5em;font-size:1.08em;">
       <strong>Walkers:</strong> ${totalWalkers} (${walkerPercent}%) &nbsp; | &nbsp; <strong>Runners:</strong> ${totalRunners} (${runnerPercent}%) &nbsp; | &nbsp; <strong>Total finishers:</strong> ${totalFinishers}
     </div>`;
@@ -426,8 +445,12 @@ function parkrunWalkerAnalysisMain() {
     } else {
       document.body.appendChild(walkerContainer);
     }
-    
-    renderStackedChart(currentBreakdown, breakdowns.find((b) => b.key === currentBreakdown).label, chartContainerId);
+
+    renderStackedChart(
+      currentBreakdown,
+      breakdowns.find((b) => b.key === currentBreakdown).label,
+      chartContainerId
+    );
     insertControlsBelowChart();
   }
 
@@ -444,7 +467,6 @@ function parkrunWalkerAnalysisMain() {
     }
   }
 
-  
   function renderStackedChart(breakdownKey, breakdownLabel, containerId) {
     const { bins, minMinute, maxMinute } = groupByMinute(breakdownKey);
     const minutes = [];
@@ -606,14 +628,14 @@ function parkrunWalkerAnalysisMain() {
       const m = min % 60;
       return `${h}:${m.toString().padStart(2, '0')}`;
     });
-       let chartDiv = document.getElementById(containerId);
+    let chartDiv = document.getElementById(containerId);
     if (!chartDiv) {
       chartDiv = document.createElement('div');
       chartDiv.id = containerId;
     } else {
       chartDiv.innerHTML = '';
     }
-    
+
     chartDiv.style.background = '#2b223d';
     chartDiv.style.borderRadius = '8px';
     chartDiv.style.margin = '20px auto';
@@ -628,7 +650,7 @@ function parkrunWalkerAnalysisMain() {
     chartDiv.appendChild(heading);
     const canvas = document.createElement('canvas');
     chartDiv.appendChild(canvas);
-  let saveBtn = document.createElement('button');
+    let saveBtn = document.createElement('button');
     saveBtn.textContent = '💾 Save as Image';
     saveBtn.style.padding = '6px 12px';
     saveBtn.style.backgroundColor = '#FFA300';
@@ -652,22 +674,27 @@ function parkrunWalkerAnalysisMain() {
       await new Promise((r) => requestAnimationFrame(r));
       const metadata = getEventMetadata();
       const heading = chartDiv.querySelector('h3');
-      let chartName = heading ? heading.textContent.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() : 'chart';
+      let chartName = heading
+        ? heading.textContent
+            .replace(/[^a-z0-9]+/gi, '-')
+            .replace(/^-+|-+$/g, '')
+            .toLowerCase()
+        : 'chart';
       const filename = generateExportFilename(metadata, chartName);
-      if (typeof html2canvas === 'undefined') {
+      if (!html2canvasRef) {
         alert('html2canvas is not loaded.');
         saveBtn.style.display = prevDisplay;
         return;
       }
       try {
-        const snapCanvas = await html2canvas(chartDiv, {
+        const snapCanvas = await html2canvasRef(chartDiv, {
           backgroundColor: '#2b223d',
           scale: 2,
           logging: false,
           allowTaint: true,
           useCORS: true,
         });
-        snapCanvas.toBlob(function(blob) {
+        snapCanvas.toBlob(function (blob) {
           saveBtn.style.display = prevDisplay;
           if (!blob) {
             alert('Failed to create image blob.');
@@ -689,7 +716,6 @@ function parkrunWalkerAnalysisMain() {
       }
     });
 
-    
     let controlsFooter = chartDiv.querySelector('.walker-controls-footer');
     if (!controlsFooter) {
       controlsFooter = document.createElement('div');
@@ -706,8 +732,8 @@ function parkrunWalkerAnalysisMain() {
       walkerChartInstance = null;
     }
     setTimeout(() => {
-      if (typeof Chart === 'undefined') return;
-      walkerChartInstance = new Chart(canvas.getContext('2d'), {
+      if (!ChartRef) return;
+      walkerChartInstance = new ChartRef(canvas.getContext('2d'), {
         type: 'bar',
         data: { labels, datasets },
         options: {
@@ -744,9 +770,17 @@ function parkrunWalkerAnalysisMain() {
     }, 0);
   }
 
-
-
   renderAll();
 }
 
 parkrunWalkerAnalysisMain();
+
+// Consolidated exports for Node/Jest tests
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = {
+    assignUnknownFinishTimes,
+    getEventMetadata,
+    generateExportFilename,
+    computeWalkerThreshold,
+  };
+}
