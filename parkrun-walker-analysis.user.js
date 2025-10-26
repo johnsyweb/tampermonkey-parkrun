@@ -669,49 +669,50 @@ function parkrunWalkerAnalysisMain() {
       this.style.backgroundColor = '#FFA300';
     });
     saveBtn.addEventListener('click', async function () {
-      const prevDisplay = saveBtn.style.display;
-      saveBtn.style.display = 'none';
-      await new Promise((r) => requestAnimationFrame(r));
-      const metadata = getEventMetadata();
-      const heading = chartDiv.querySelector('h3');
-      let chartName = heading
-        ? heading.textContent
-            .replace(/[^a-z0-9]+/gi, '-')
-            .replace(/^-+|-+$/g, '')
-            .toLowerCase()
-        : 'chart';
-      const filename = generateExportFilename(metadata, chartName);
-      if (!html2canvasRef) {
-        alert('html2canvas is not loaded.');
-        saveBtn.style.display = prevDisplay;
-        return;
-      }
       try {
-        const snapCanvas = await html2canvasRef(chartDiv, {
-          backgroundColor: '#2b223d',
-          scale: 2,
-          logging: false,
-          allowTaint: true,
-          useCORS: true,
-        });
-        snapCanvas.toBlob(function (blob) {
-          saveBtn.style.display = prevDisplay;
-          if (!blob) {
-            alert('Failed to create image blob.');
-            return;
-          }
-          const link = document.createElement('a');
-          link.download = filename;
-          link.href = URL.createObjectURL(blob);
-          document.body.appendChild(link);
-          link.click();
-          setTimeout(() => {
-            URL.revokeObjectURL(link.href);
-            document.body.removeChild(link);
-          }, 100);
-        }, 'image/png');
+        const metadata = getEventMetadata();
+        const heading = chartDiv.querySelector('h3');
+        let chartName = heading
+          ? heading.textContent
+              .replace(/[^a-z0-9]+/gi, '-')
+              .replace(/^-+|-+$/g, '')
+              .toLowerCase()
+          : 'chart';
+        const filename = generateExportFilename(metadata, chartName);
+
+        // Add title and background to the chart canvas
+        const chartCanvas = canvas;
+        const chartWidth = chartCanvas.width;
+        const chartHeight = chartCanvas.height;
+        const titleHeight = 100;
+        const totalWidth = chartWidth;
+        const totalHeight = chartHeight + titleHeight;
+
+        const out = document.createElement('canvas');
+        out.width = totalWidth;
+        out.height = totalHeight;
+        const ctx = out.getContext('2d');
+
+        // Background
+        ctx.fillStyle = '#2b223d';
+        ctx.fillRect(0, 0, totalWidth, totalHeight);
+
+        // Title
+        ctx.fillStyle = '#FFA300';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 56px Arial';
+        const titleText = heading ? heading.textContent : 'Finishers per Minute';
+        ctx.fillText(titleText, totalWidth / 2, titleHeight / 2);
+
+        // Chart
+        ctx.drawImage(chartCanvas, 0, titleHeight);
+
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = out.toDataURL('image/png');
+        link.click();
       } catch (err) {
-        saveBtn.style.display = prevDisplay;
         alert('Failed to export image: ' + err);
       }
     });
