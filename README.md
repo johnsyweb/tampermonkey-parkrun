@@ -5,6 +5,90 @@
 You'll need something like [Tampermonkey](https://www.tampermonkey.net) if
 you'd like to enjoy them. Or you can use the bookmarklet versions.
 
+## Development Setup
+
+This project uses [mise](https://mise.jdx.dev/) for development environment management.
+
+### Prerequisites
+
+- [mise](https://mise.jdx.dev/) - for managing development tools
+
+### Setup
+
+1. Install dependencies with mise (installs Ruby, Node, and pnpm):
+   ```bash
+   mise install
+   ```
+
+2. Install npm dependencies:
+   ```bash
+   pnpm install
+   ```
+   
+The `mise.toml` file specifies the required versions:
+- Ruby 3.4.7 (for Jekyll)
+- Node LTS (for development tools)
+- pnpm latest (for package management)
+
+3. For microsite development, install Ruby/Jekyll dependencies:
+   ```bash
+   cd docs
+   bundle install
+   ```
+
+### Previewing the Microsite Locally
+
+The microsite documentation is built with Jekyll and served from the `docs/` directory.
+
+1. Start the Jekyll server:
+   ```bash
+   cd docs
+   bundle exec jekyll serve --port 4000 --host 0.0.0.0
+   ```
+
+2. Visit http://localhost:4000/tampermonkey-parkrun/ in your browser
+
+### Generating Screenshots
+
+To generate screenshots for the microsite:
+
+```bash
+pnpm screenshots
+```
+
+This will create screenshots of all userscripts in `docs/images/`.
+
+### Building the Microsite
+
+The microsite is automatically deployed to GitHub Pages on every push to `main`. 
+
+To build the site locally:
+
+```bash
+pnpm docs:build
+```
+
+To serve the site locally:
+
+```bash
+pnpm docs:serve
+```
+
+The site will be available at http://localhost:4000/tampermonkey-parkrun/
+
+### GitHub Actions Workflow
+
+The project includes a GitHub Actions workflow that:
+
+1. Sets up Ruby (for Jekyll) and Node.js (for scripts)
+2. Installs dependencies (via mise, pnpm, and bundler)
+3. Generates screenshots using Puppeteer
+4. Updates the scripts data file from userscript metadata
+5. Builds the Jekyll site
+6. Deploys to GitHub Pages
+
+This workflow runs on every push to `main` and automatically keeps the microsite up to date with the latest scripts and screenshots.
+
 ## Why?
 
 Why not?

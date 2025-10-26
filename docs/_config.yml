@@ -1,0 +1,16 @@
+---
+title: parkrun Userscripts
+description: A collection of Tampermonkey userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges
+baseurl: /tampermonkey-parkrun
+url: https://johnsy.com
+
+include:
+  - icons
+  - images
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+

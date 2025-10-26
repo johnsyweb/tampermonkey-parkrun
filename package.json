@@ -10,7 +10,12 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "create-bookmarklets": "node scripts/create-bookmarklets.js",
-    "update-version": "node scripts/update-version.js"
+    "update-version": "node scripts/update-version.js",
+    "screenshots": "ts-node scripts/generate-screenshots.ts",
+    "update-scripts-data": "node scripts/extract-script-info.js > docs/_data/scripts.json && node scripts/generate-scripts-yml.js",
+    "docs:build": "cd docs && bundle exec jekyll build",
+    "docs:install": "cd docs && bundle install",
+    "docs:serve": "cd docs && bundle exec jekyll serve"
   },
   "keywords": [
     "parkrun",
@@ -22,7 +27,8 @@
   "license": "MIT",
   "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971",
   "devDependencies": {
-    "@eslint/js": "^9.38.0",
+    "@eslint/js": "^9.37.0",
+    "@types/node": "^24.9.1",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -31,6 +37,8 @@
     "jest": "^30.2.0",
     "jest-fixed-jsdom": "^0.0.10",
     "prettier": "^3.6.2",
+    "puppeteer": "^24.26.1",
+    "ts-node": "^10.9.2",
     "uglify-js": "^3.19.3"
   },
   "jest": {
