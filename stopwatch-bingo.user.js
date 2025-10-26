@@ -34,7 +34,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/stopwatch-bingo.user.js
-// @version      1.0.14
+// @version      1.0.15
 // ==/UserScript==
 
 (function () {
