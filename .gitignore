@@ -1,2 +1,4 @@
 /node_modules/
 docs/_site/
+pnpm-workspace.yaml
+screenshots.log
