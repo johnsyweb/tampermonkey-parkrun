@@ -35,7 +35,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-walker-analysis.user.js
-// @version      1.0.12
+// @version      1.0.13
 // ==/UserScript==
 
 const ChartRef = typeof window !== 'undefined' && window.Chart ? window.Chart : undefined;
