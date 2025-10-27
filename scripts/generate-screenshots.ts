@@ -144,7 +144,20 @@ async function generateScreenshots(): Promise<void> {
       }
 
       console.log(`🌐 Navigating to ${config.url}...`);
-      await page.goto(config.url, { waitUntil: 'networkidle2', timeout: 60000 });
+      const response = await page.goto(config.url, { waitUntil: 'networkidle2', timeout: 60000 });
+      
+      if (!response) {
+        console.error(`❌ Failed to load page: ${config.url}`);
+        return;
+      }
+      
+      const status = response.status();
+      if (status < 200 || status >= 300) {
+        console.error(`❌ Page returned status ${status}: ${config.url}`);
+        return;
+      }
+      
+      console.log(`✅ Page loaded successfully (status: ${status})`);
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
@@ -210,7 +223,21 @@ async function generateScreenshots(): Promise<void> {
         }
       }
 
-      console.log('🧹 Cleaning up third-party content...');
+      console.log('🧹 Configuring page and cleaning up third-party content...');
+      await page.evaluate(() => {
+        // Set display to "detailed" if the select exists
+        const displaySelect = document.querySelector('select[name="display"]') as HTMLSelectElement;
+        if (displaySelect && displaySelect.value !== 'detailed') {
+          displaySelect.value = 'detailed';
+          // Trigger change event for any listeners
+          const changeEvent = new Event('change', { bubbles: true });
+          displaySelect.dispatchEvent(changeEvent);
+        }
+      });
+      
+      // Wait for any updates after changing the display
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       await page.evaluate(() => {
         const selectorsToHide = [
           'iframe[src*="close"]',
