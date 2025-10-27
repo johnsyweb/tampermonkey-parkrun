@@ -39,8 +39,6 @@
 // ==/UserScript==
 
 const ChartRef = typeof window !== 'undefined' && window.Chart ? window.Chart : undefined;
-const html2canvasRef =
-  typeof window !== 'undefined' && window.html2canvas ? window.html2canvas : undefined;
 
 function assignUnknownFinishTimes(finishers) {
   function findPreviousKnownTime(finishers, startIndex) {

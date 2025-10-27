@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 
 function extractUserscriptMetadata(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
