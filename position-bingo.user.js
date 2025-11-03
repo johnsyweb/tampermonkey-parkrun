@@ -4,7 +4,7 @@
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/position-bingo.user.js
 // @grant        none
-// @homepage     https://github.com/johnsyweb/tampermonkey-parkrun/
+// @homepage     https://johnsy.com/tampermonkey-parkrun//
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
 // @license      MIT
 // @match        *://www.parkrun.ca/parkrunner/*/all*
