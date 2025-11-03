@@ -147,6 +147,7 @@
 
   function createClockContainer(title) {
     const container = document.createElement('div');
+    if (!container.id) container.id = 'stopwatchBingoContainer';
     container.className = 'parkrun-bingo-container';
     container.style.width = '100%';
     container.style.maxWidth = '800px';
@@ -195,6 +196,13 @@
     clockContainer.style.backgroundColor = STYLES.clockFaceColor;
     clockContainer.style.boxSizing = 'content-box';
 
+    // Determine maximum frequency to scale segment lengths
+    let maxOccurrences = 1;
+    for (let i = 0; i < 60; i++) {
+      const occ = data.timeData[i] ? data.timeData[i].length : 0;
+      if (occ > maxOccurrences) maxOccurrences = occ;
+    }
+
     // Add the second segments first (so they're at the bottom layer)
     for (let i = 0; i < 60; i++) {
       const hasSecond = i in data.seconds;
@@ -213,8 +221,9 @@
       segment.style.height = '100%';
       segment.style.pointerEvents = 'none'; // Make it non-blocking for clicks
 
-      // Calculate path for pie slice - go all the way to center
-      const outerRadius = 220; // Leave space for indices
+      // Base radii
+      const maxRadius = 220; // Leave space for indices
+      const innerHoleRadius = 50; // Matches the visual centre (100px diameter)
       const centerX = 250;
       const centerY = 250;
 
@@ -230,51 +239,37 @@
       // Create the path for the pie slice
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
-      // Calculate the points for the path - with innerRadius 0, we go to center
-      // For segments from center, we simplify the path
-      const x2 = centerX + outerRadius * Math.cos(startAngle);
-      const y2 = centerY + outerRadius * Math.sin(startAngle);
-      const x3 = centerX + outerRadius * Math.cos(endAngle);
-      const y3 = centerY + outerRadius * Math.sin(endAngle);
+      // Calculate the points for the path as a ring sector clearing the centre
+      // Vary the outer radius for collected seconds proportional to the distance from innerHoleRadius to maxRadius
+      const ringSpan = maxRadius - innerHoleRadius;
+      const outerRadius = hasSecond
+        ? innerHoleRadius + Math.max(0, Math.round((occurrences / maxOccurrences) * ringSpan))
+        : maxRadius;
 
-      // Path goes from center to outer edge, arcs around, then back to center
+      const innerStartX = centerX + innerHoleRadius * Math.cos(startAngle);
+      const innerStartY = centerY + innerHoleRadius * Math.sin(startAngle);
+      const outerStartX = centerX + outerRadius * Math.cos(startAngle);
+      const outerStartY = centerY + outerRadius * Math.sin(startAngle);
+      const outerEndX = centerX + outerRadius * Math.cos(endAngle);
+      const outerEndY = centerY + outerRadius * Math.sin(endAngle);
+      const innerEndX = centerX + innerHoleRadius * Math.cos(endAngle);
+      const innerEndY = centerY + innerHoleRadius * Math.sin(endAngle);
+
+      // Path goes from inner arc start to outer arc, around, then back along inner arc to close
       const pathData = [
-        `M ${centerX},${centerY}`,
-        `L ${x2},${y2}`,
-        `A ${outerRadius},${outerRadius} 0 0,1 ${x3},${y3}`,
+        `M ${innerStartX},${innerStartY}`,
+        `L ${outerStartX},${outerStartY}`,
+        `A ${outerRadius},${outerRadius} 0 0,1 ${outerEndX},${outerEndY}`,
+        `L ${innerEndX},${innerEndY}`,
+        `A ${innerHoleRadius},${innerHoleRadius} 0 0,0 ${innerStartX},${innerStartY}`,
         'Z',
       ].join(' ');
 
       path.setAttribute('d', pathData);
 
-      // Vary color intensity based on frequency
+      // Use a single colour for collected segments; vary length only
       if (hasSecond) {
-        // Calculate color intensity - darker as frequency increases
-        // Start with base orange color (STYLES.completedColor) and adjust saturation/lightness
-        // Max intensity at around 5+ occurrences
-        const intensity = Math.min(occurrences, 5) / 5; // 0.2 per occurrence up to 1.0
-
-        // Either darken the orange or make it more saturated based on frequency
-        const baseColor = STYLES.completedColor; // '#FFA300'
-        const r = parseInt(baseColor.slice(1, 3), 16);
-        const g = parseInt(baseColor.slice(3, 5), 16);
-        const b = parseInt(baseColor.slice(5, 7), 16);
-
-        // Darken the color as frequency increases (multiply RGB values)
-        const darkenFactor = 1 - intensity * 0.3; // Ranges from 1.0 to 0.7
-        const newR = Math.floor(r * darkenFactor)
-          .toString(16)
-          .padStart(2, '0');
-        const newG = Math.floor(g * darkenFactor)
-          .toString(16)
-          .padStart(2, '0');
-        const newB = Math.floor(b * darkenFactor)
-          .toString(16)
-          .padStart(2, '0');
-
-        const frequencyColor = `#${newR}${newG}${newB}`;
-
-        path.setAttribute('fill', frequencyColor);
+        path.setAttribute('fill', STYLES.completedColor);
         path.setAttribute('opacity', '1');
 
         // Update title to include frequency information
