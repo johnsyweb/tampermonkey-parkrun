@@ -6,21 +6,17 @@
     <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="application-name" content="parkrun Userscripts" />
-    
-    {% include enhanced-meta.html %}
-    {% include meta.html %} 
-    {% include styles.html %}
+
+    {% include enhanced-meta.html %} {% include meta.html %} {% include styles.html %}
     <link rel="canonical" href="{{ site.url }}{{ page.url }}" />
     <title>
-      {{ page.title | default: "parkrun Userscripts - Enhance your parkrun experience" }} | johnsy.com/tampermonkey-parkrun/
+      {{ page.title | default: "parkrun Userscripts - Enhance your parkrun experience" }} |
+      johnsy.com/tampermonkey-parkrun/
     </title>
   </head>
   <body>
     <div id="page">
-      <div id="content">
-        {% include header.html %} {{ content }} {% include footer.html %}
-      </div>
+      <div id="content">{% include header.html %} {{ content }} {% include footer.html %}</div>
     </div>
   </body>
 </html>
-

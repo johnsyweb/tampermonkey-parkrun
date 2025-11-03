@@ -63,7 +63,7 @@
     "install_url": "https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/visited-countries.user.js"
   },
   {
-    "description": "Displays the number of volunteer days for parkrun finishers on results pages",
+    "description": "Displays the number of volunteer days for parkrun finishers on results pages, for celebration purposes (and let's not make assumptions about ratios)",
     "name": "parkrun Volunteer Days Display",
     "filename": "volunteer-days-display.user.js",
     "screenshot": "/tampermonkey-parkrun/images/volunteer-days-display.png",

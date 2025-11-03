@@ -107,4 +107,3 @@
 **Demo page**: [https://www.parkrun.org.uk/parkrunner/507/all/](https://www.parkrun.org.uk/parkrunner/507/all/)
 
 [Install w-index.user.js](https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/w-index.user.js)
-

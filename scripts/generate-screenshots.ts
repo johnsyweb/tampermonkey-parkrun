@@ -90,7 +90,7 @@ const screenshotConfigs: ScreenshotConfig[] = [
     name: 'volunteer-days-display',
     url: 'https://www.parkrun.org.uk/fountainsabbey/results/latestresults/',
     script: 'volunteer-days-display.user.js',
-    waitForSelector: '#volunteerDaysChart',
+    waitForSelector: '.volunteer-days',
     waitForTimeout: 8000,
     viewport: { width: 1200, height: 800 },
   },
@@ -109,8 +109,7 @@ async function generateScreenshots(): Promise<void> {
 
   try {
     console.log('🚀 Starting screenshot generation...');
-    const isCI =
-      process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+    const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
     if (isCI) {
       console.log('📝 Running in CI mode (headless browser)');
     } else {
@@ -145,27 +144,24 @@ async function generateScreenshots(): Promise<void> {
 
       console.log(`🌐 Navigating to ${config.url}...`);
       const response = await page.goto(config.url, { waitUntil: 'networkidle2', timeout: 60000 });
-      
+
       if (!response) {
         console.error(`❌ Failed to load page: ${config.url}`);
         return;
       }
-      
+
       const status = response.status();
       if (status < 200 || status >= 300) {
         console.error(`❌ Page returned status ${status}: ${config.url}`);
         return;
       }
-      
+
       console.log(`✅ Page loaded successfully (status: ${status})`);
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       console.log('💉 Injecting userscript...');
-      const scriptContent = fs.readFileSync(
-        path.join(process.cwd(), config.script),
-        'utf8'
-      );
+      const scriptContent = fs.readFileSync(path.join(process.cwd(), config.script), 'utf8');
 
       // Extract @require URLs and inject them first
       const requireMatches = scriptContent.matchAll(/@require\s+(https:\/\/[^\s]+)/g);
@@ -182,7 +178,10 @@ async function generateScreenshots(): Promise<void> {
       }
 
       // Remove @require and other metadata from script before injecting
-      const cleanScript = scriptContent.replace(/^\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==\n\n?/gm, '');
+      const cleanScript = scriptContent.replace(
+        /^\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==\n\n?/gm,
+        ''
+      );
 
       try {
         await page.evaluate(cleanScript);
@@ -196,16 +195,12 @@ async function generateScreenshots(): Promise<void> {
             timeout: 15000,
           });
         } catch {
-          console.warn(
-            `⚠️  Selector ${config.waitForSelector} not found, continuing...`
-          );
+          console.warn(`⚠️  Selector ${config.waitForSelector} not found, continuing...`);
         }
       }
 
       if (config.waitForTimeout) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, config.waitForTimeout)
-        );
+        await new Promise((resolve) => setTimeout(resolve, config.waitForTimeout));
       }
 
       // Scroll to the target element for better screenshot composition
@@ -234,7 +229,7 @@ async function generateScreenshots(): Promise<void> {
           displaySelect.dispatchEvent(changeEvent);
         }
       });
-      
+
       // Wait for any updates after changing the display
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -286,12 +281,7 @@ async function generateScreenshots(): Promise<void> {
         console.log(`Hidden ${hiddenCount} third-party elements`);
       });
 
-      const screenshotPath = path.join(
-        process.cwd(),
-        'docs',
-        'images',
-        `${config.name}.png`
-      );
+      const screenshotPath = path.join(process.cwd(), 'docs', 'images', `${config.name}.png`);
 
       await page.screenshot({
         path: screenshotPath as `${string}.png`,
@@ -320,6 +310,4 @@ if (require.main === module) {
 
 declare const require: any;
 
-
 export { generateScreenshots };
-

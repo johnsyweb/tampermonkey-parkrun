@@ -32,6 +32,7 @@ Each script can be installed directly via any userscript manager:
 ## Available Scripts
 
 {% assign scripts = site.data.scripts %}
+
 <div class="scripts-grid">
 {% for script in scripts %}
 <div class="script-item">
@@ -42,4 +43,3 @@ Each script can be installed directly via any userscript manager:
 </div>
 {% endfor %}
 </div>
-
