@@ -50,10 +50,14 @@
 
         if (volDays && parseInt(volDays) > 0) {
           const volSpan = document.createElement('span');
-          volSpan.textContent = volDays + ' volunteer day' + (volDays === '1' ? '' : 's') + ' | ';
+          volSpan.textContent = ' | ' + volDays + ' volunteer day' + (volDays === '1' ? '' : 's');
           volSpan.classList.add('volunteer-days');
-          volSpan.style.color = '#d35226';
-          div.insertBefore(volSpan, div.firstChild);
+          const firstElement = div.firstElementChild;
+          if (firstElement) {
+            firstElement.insertAdjacentElement('afterend', volSpan);
+          } else {
+            div.appendChild(volSpan);
+          }
         }
       });
   }
