@@ -375,6 +375,7 @@
 
     if (h2Element) {
       const container = document.createElement('div');
+      container.id = 'w-index-display';
       container.style.marginTop = '20px';
       container.style.backgroundColor = '#2b223d';
       container.style.padding = '20px';

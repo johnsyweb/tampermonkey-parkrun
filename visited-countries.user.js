@@ -143,6 +143,7 @@
     }
 
     const flagsContainer = document.createElement('div');
+    flagsContainer.id = 'countries-visited';
     flagsContainer.style.marginLeft = '10px';
     flagsContainer.style.fontSize = '1.8em';
     flagsContainer.style.marginTop = '5px';

@@ -88,6 +88,7 @@
 
   function createPositionBingoContainer(data) {
     const container = document.createElement('div');
+    container.id = 'positionBingoContainer';
     container.className = 'parkrun-position-bingo-container';
     container.style.margin = '20px auto'; // Center the container and add space below
     container.style.padding = '10px'; // Add padding inside the container
