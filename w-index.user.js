@@ -193,8 +193,8 @@
       form: {
         marginBottom: '20px',
         input: {
-          width: '200px',
-          maxWidth: '200px',
+          width: '300px',
+          maxWidth: '300px',
           padding: '5px',
           marginRight: '10px',
         },
