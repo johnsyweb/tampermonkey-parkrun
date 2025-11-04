@@ -218,10 +218,17 @@
 
   function createWilsonGraph(indices, container, athleteInfo) {
     const responsive = getResponsiveConfig();
+    const chartContainer = document.createElement('div');
+    chartContainer.style.width = '100%';
+    chartContainer.style.maxWidth = '100%';
+    chartContainer.style.height = responsive.chart.height;
+    chartContainer.style.position = 'relative';
+    chartContainer.style.boxSizing = 'border-box';
+    chartContainer.style.overflow = 'hidden';
+
     const canvas = document.createElement('canvas');
-    canvas.style.width = '100%';
-    canvas.style.height = responsive.chart.height;
-    container.appendChild(canvas);
+    chartContainer.appendChild(canvas);
+    container.appendChild(chartContainer);
 
     const ctx = canvas.getContext('2d');
     // eslint-disable-next-line no-undef
