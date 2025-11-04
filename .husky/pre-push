@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Pre-push hook to generate screenshots if userscripts have been modified
+# This prevents pushing without updating screenshots when userscripts change
+
+set -e
+
+# Get the list of files being pushed
+while read local_ref local_sha remote_ref remote_sha; do
+  if [ "$local_sha" != "0000000000000000000000000000000000000000" ]; then
+    # Check if this is a new branch or if we're pushing updates
+    if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+      # New branch - check all commits
+      range="$local_sha"
+    else
+      # Existing branch - check commits between remote and local
+      range="$remote_sha..$local_sha"
+    fi
+
+    # Check if any .user.js files have been modified
+    modified_files=$(git diff --name-only --diff-filter=ACMR "$range" | grep -E '\.user\.js$' || true)
+
+    if [ -n "$modified_files" ]; then
+      echo "📸 Detected modified userscript files:"
+      echo "$modified_files" | sed 's/^/  - /'
+      echo ""
+      echo "🔄 Generating screenshots locally..."
+      
+      if ! pnpm screenshots; then
+        echo ""
+        echo "❌ Screenshot generation failed!"
+        echo "Please fix any issues and try again."
+        exit 1
+      fi
+      
+      echo ""
+      echo "✅ Screenshots generated successfully!"
+      echo "💡 Remember to commit the updated screenshots before pushing."
+    fi
+  fi
+done
+
+exit 0
+

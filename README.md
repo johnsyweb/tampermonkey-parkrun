@@ -76,18 +76,40 @@ pnpm docs:serve
 
 The site will be available at http://localhost:4000/tampermonkey-parkrun/
 
+### Git Hooks
+
+This project uses [husky](https://typicode.github.io/husky/) to manage git hooks. Hooks are automatically installed when you run `pnpm install`.
+
+#### Pre-commit Hook
+
+The pre-commit hook ensures code quality by running:
+- `pnpm check-format` - Checks code formatting with Prettier
+- `pnpm test` - Runs all Jest tests
+- `pnpm lint` - Runs ESLint to check for linting errors
+
+All checks must pass before a commit is allowed. This ensures all code is properly formatted, tested, and linted before being committed.
+
+#### Pre-push Hook
+
+The pre-push hook automatically generates screenshots when userscripts are modified:
+
+- Checks if any `.user.js` files have been modified in the commits being pushed
+- Automatically runs `pnpm screenshots` if userscripts were changed
+- Prevents the push if screenshot generation fails
+
+**Note:** Screenshots must be generated locally because parkrun websites block automated agents from accessing them in CI environments.
+
 ### GitHub Actions Workflow
 
 The project includes a GitHub Actions workflow that:
 
 1. Sets up Ruby (for Jekyll) and Node.js (for scripts)
 2. Installs dependencies (via mise, pnpm, and bundler)
-3. Generates screenshots using Puppeteer
-4. Updates the scripts data file from userscript metadata
-5. Builds the Jekyll site
-6. Deploys to GitHub Pages
+3. Updates the scripts data file from userscript metadata
+4. Builds the Jekyll site
+5. Deploys to GitHub Pages
 
-This workflow runs on every push to `main` and automatically keeps the microsite up to date with the latest scripts and screenshots.
+This workflow runs on every push to `main` and automatically keeps the microsite up to date with the latest scripts.
 
 ## Why?
 
