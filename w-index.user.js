@@ -116,9 +116,10 @@
   }
 
   function createWilsonGraph(indices, container, athleteInfo) {
+    const isMobile = window.innerWidth < 768;
     const canvas = document.createElement('canvas');
     canvas.style.width = '100%';
-    canvas.style.height = '300px';
+    canvas.style.height = isMobile ? '250px' : '300px';
     container.appendChild(canvas);
 
     const ctx = canvas.getContext('2d');
@@ -142,12 +143,21 @@
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
           y: {
             beginAtZero: true,
             title: {
               display: true,
               text: 'Wilson Index',
+              font: {
+                size: isMobile ? 12 : 14,
+              },
+            },
+            ticks: {
+              font: {
+                size: isMobile ? 10 : 12,
+              },
             },
             suggestedMax: Math.ceil(Math.max(...indices.map((i) => i.wilsonIndex)) * 1.1), // Add 10% padding
           },
@@ -155,6 +165,14 @@
             title: {
               display: true,
               text: 'parkruns',
+              font: {
+                size: isMobile ? 12 : 14,
+              },
+            },
+            ticks: {
+              font: {
+                size: isMobile ? 10 : 12,
+              },
             },
             min: 0,
             suggestedMax: Math.ceil(indices.length * 1.1), // Initial padding
@@ -164,6 +182,16 @@
           title: {
             display: true,
             text: 'Wilson Index Progress',
+            font: {
+              size: isMobile ? 14 : 16,
+            },
+          },
+          legend: {
+            labels: {
+              font: {
+                size: isMobile ? 11 : 12,
+              },
+            },
           },
           tooltip: {
             callbacks: {
@@ -171,6 +199,12 @@
                 const point = context.raw;
                 return [`Wilson Index: ${point.y}`, `Event: ${point.event}`];
               },
+            },
+            titleFont: {
+              size: isMobile ? 12 : 14,
+            },
+            bodyFont: {
+              size: isMobile ? 11 : 12,
             },
           },
         },
@@ -251,29 +285,42 @@
   }
 
   function createComparisonUI(container, onCompare) {
+    const isMobile = window.innerWidth < 768;
     const form = document.createElement('form');
-    form.style.marginBottom = '20px';
+    form.style.marginBottom = isMobile ? '10px' : '20px';
     form.style.textAlign = 'center';
+    if (isMobile) {
+      form.style.display = 'flex';
+      form.style.flexDirection = 'column';
+      form.style.gap = '10px';
+      form.style.alignItems = 'center';
+    }
 
     const input = document.createElement('input');
-    input.style.width = '200px';
+    input.style.width = isMobile ? 'calc(100% - 20px)' : '200px';
+    input.style.maxWidth = isMobile ? '300px' : '200px';
     input.type = 'text';
     input.placeholder = "Enter friend's athlete ID (e.g. A507)";
-    input.style.padding = '5px';
-    input.style.marginRight = '10px';
+    input.style.padding = isMobile ? '8px' : '5px';
+    input.style.marginRight = isMobile ? '0' : '10px';
     input.style.borderRadius = '3px';
     input.style.border = '1px solid #ffa300';
     input.style.backgroundColor = '#2b223d';
     input.style.color = '#ffa300';
+    input.style.fontSize = isMobile ? '16px' : 'inherit';
 
     const button = document.createElement('button');
     button.textContent = 'Compare';
-    button.style.padding = '5px 10px';
+    button.style.padding = isMobile ? '8px 15px' : '5px 10px';
+    button.style.width = isMobile ? 'calc(100% - 20px)' : 'auto';
+    button.style.maxWidth = isMobile ? '300px' : 'none';
     button.style.backgroundColor = '#ffa300';
     button.style.color = '#2b223d';
     button.style.border = 'none';
     button.style.borderRadius = '3px';
     button.style.cursor = 'pointer';
+    button.style.fontSize = isMobile ? '16px' : 'inherit';
+    button.style.fontWeight = 'bold';
 
     form.appendChild(input);
     form.appendChild(button);
@@ -374,19 +421,20 @@
     const wilsonIndices = calculateWilsonIndexOverTime(eventDetails);
 
     if (h2Element) {
+      const isMobile = window.innerWidth < 768;
       const container = document.createElement('div');
       container.id = 'w-index-display';
-      container.style.marginTop = '20px';
+      container.style.marginTop = isMobile ? '10px' : '20px';
       container.style.backgroundColor = '#2b223d';
-      container.style.padding = '20px';
+      container.style.padding = isMobile ? '10px' : '20px';
       container.style.borderRadius = '5px';
 
       const wilsonElement = document.createElement('div');
       wilsonElement.textContent = `Wilson index: ${wilsonIndex}`;
-      wilsonElement.style.fontSize = '1.5em';
+      wilsonElement.style.fontSize = isMobile ? '1.2em' : '1.5em';
       wilsonElement.style.color = '#ffa300';
       wilsonElement.style.fontWeight = 'bold';
-      wilsonElement.style.marginBottom = '20px';
+      wilsonElement.style.marginBottom = isMobile ? '10px' : '20px';
       wilsonElement.style.textAlign = 'center';
       container.appendChild(wilsonElement);
 
