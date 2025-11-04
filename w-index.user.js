@@ -116,54 +116,104 @@
   }
 
   function getResponsiveConfig() {
-    const isMobile = window.innerWidth < 768;
-    return {
-      isMobile,
+    const mobileConfig = {
+      isMobile: true,
       spacing: {
-        small: isMobile ? '10px' : '20px',
-        medium: isMobile ? '15px' : '20px',
+        small: '10px',
+        medium: '15px',
       },
       container: {
-        padding: isMobile ? '10px' : '20px',
-        marginTop: isMobile ? '10px' : '20px',
+        padding: '10px',
+        marginTop: '10px',
       },
       typography: {
-        wilsonIndex: isMobile ? '1.2em' : '1.5em',
-        input: isMobile ? '16px' : 'inherit',
-        button: isMobile ? '16px' : 'inherit',
+        wilsonIndex: '1.2em',
+        input: '16px',
+        button: '16px',
       },
       chart: {
-        height: isMobile ? '250px' : '300px',
+        height: '250px',
         fonts: {
-          title: isMobile ? 14 : 16,
-          axisTitle: isMobile ? 12 : 14,
-          axisTicks: isMobile ? 10 : 12,
-          legend: isMobile ? 11 : 12,
-          tooltipTitle: isMobile ? 12 : 14,
-          tooltipBody: isMobile ? 11 : 12,
+          title: 14,
+          axisTitle: 12,
+          axisTicks: 10,
+          legend: 11,
+          tooltipTitle: 12,
+          tooltipBody: 11,
         },
       },
       form: {
-        marginBottom: isMobile ? '10px' : '20px',
+        marginBottom: '10px',
         input: {
-          width: isMobile ? 'calc(100% - 20px)' : '200px',
-          maxWidth: isMobile ? '300px' : '200px',
-          padding: isMobile ? '8px' : '5px',
-          marginRight: isMobile ? '0' : '10px',
+          width: 'calc(100% - 20px)',
+          maxWidth: '300px',
+          padding: '8px',
+          marginRight: '0',
         },
         button: {
-          padding: isMobile ? '8px 15px' : '5px 10px',
-          width: isMobile ? 'calc(100% - 20px)' : 'auto',
-          maxWidth: isMobile ? '300px' : 'none',
+          padding: '8px 15px',
+          width: 'calc(100% - 20px)',
+          maxWidth: '300px',
         },
         layout: {
-          display: isMobile ? 'flex' : 'block',
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? '10px' : '0',
-          alignItems: isMobile ? 'center' : 'flex-start',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          alignItems: 'center',
         },
       },
     };
+
+    const desktopConfig = {
+      isMobile: false,
+      spacing: {
+        small: '20px',
+        medium: '20px',
+      },
+      container: {
+        padding: '20px',
+        marginTop: '20px',
+      },
+      typography: {
+        wilsonIndex: '1.5em',
+        input: 'inherit',
+        button: 'inherit',
+      },
+      chart: {
+        height: '300px',
+        fonts: {
+          title: 16,
+          axisTitle: 14,
+          axisTicks: 12,
+          legend: 12,
+          tooltipTitle: 14,
+          tooltipBody: 12,
+        },
+      },
+      form: {
+        marginBottom: '20px',
+        input: {
+          width: '200px',
+          maxWidth: '200px',
+          padding: '5px',
+          marginRight: '10px',
+        },
+        button: {
+          padding: '5px 10px',
+          width: 'auto',
+          maxWidth: 'none',
+        },
+        layout: {
+          display: 'block',
+          flexDirection: 'row',
+          gap: '0',
+          alignItems: 'flex-start',
+        },
+      },
+    };
+
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? mobileConfig : desktopConfig;
   }
 
   function createWilsonGraph(indices, container, athleteInfo) {
