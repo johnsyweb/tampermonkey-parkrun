@@ -247,6 +247,15 @@ async function generateScreenshots(scriptName?: string): Promise<void> {
           const changeEvent = new Event('change', { bubbles: true });
           displaySelect.dispatchEvent(changeEvent);
         }
+
+        // Set sort to "vols-desc" if the select exists
+        const sortSelect = document.querySelector('select[name="sort"]') as HTMLSelectElement;
+        if (sortSelect && sortSelect.value !== 'vols-desc') {
+          sortSelect.value = 'vols-desc';
+          // Trigger change event for any listeners
+          const changeEvent = new Event('change', { bubbles: true });
+          sortSelect.dispatchEvent(changeEvent);
+        }
       });
 
       // Wait for any updates after changing the display
