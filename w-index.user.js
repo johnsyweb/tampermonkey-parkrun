@@ -523,7 +523,9 @@
       const responsive = getResponsiveConfig();
       const container = document.createElement('div');
       container.id = 'w-index-display';
-      container.style.marginTop = responsive.container.marginTop;
+      container.style.width = '100%';
+      container.style.maxWidth = '800px';
+      container.style.margin = `${responsive.container.marginTop} auto`;
       container.style.backgroundColor = '#2b223d';
       container.style.padding = responsive.container.padding;
       container.style.borderRadius = '5px';
