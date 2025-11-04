@@ -57,6 +57,67 @@
     west: /west/i,
   };
 
+  function getResponsiveConfig() {
+    const mobileConfig = {
+      isMobile: true,
+      spacing: {
+        small: '10px',
+        medium: '15px',
+        statsMarginBottom: '8px',
+        completionMarginTop: '8px',
+      },
+      container: {
+        padding: '10px',
+        marginTop: '10px',
+      },
+      typography: {
+        heading: '1.1em',
+        stats: '1em',
+        statsSubtext: '0.9em',
+        completion: '0.95em',
+      },
+      compass: {
+        baseSize: 320,
+      },
+      button: {
+        padding: '6px 12px',
+        fontSize: '0.9em',
+        marginTop: '10px',
+      },
+    };
+
+    const desktopConfig = {
+      isMobile: false,
+      spacing: {
+        small: '20px',
+        medium: '20px',
+        statsMarginBottom: '10px',
+        completionMarginTop: '10px',
+      },
+      container: {
+        padding: '20px',
+        marginTop: '20px',
+      },
+      typography: {
+        heading: '1.3em',
+        stats: '1.2em',
+        statsSubtext: '1em',
+        completion: '1.1em',
+      },
+      compass: {
+        baseSize: 700,
+      },
+      button: {
+        padding: '8px 15px',
+        fontSize: '1em',
+        marginTop: '15px',
+      },
+    };
+
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? mobileConfig : desktopConfig;
+  }
+
   function findResultsTable() {
     const tables = document.querySelectorAll('#results');
     return tables[tables.length - 1];
@@ -134,12 +195,13 @@
   }
 
   function createCompassContainer(title) {
+    const responsive = getResponsiveConfig();
     const container = document.createElement('div');
     container.className = 'parkrun-compass-container';
     container.style.width = '100%';
     container.style.maxWidth = '800px';
-    container.style.margin = '20px auto';
-    container.style.padding = '20px';
+    container.style.margin = `${responsive.container.marginTop} auto`;
+    container.style.padding = responsive.container.padding;
     container.style.backgroundColor = STYLES.backgroundColor;
     container.style.borderRadius = '8px';
     container.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
@@ -147,36 +209,44 @@
 
     const heading = document.createElement('h3');
     heading.textContent = title;
-    heading.style.marginBottom = '15px';
+    heading.style.marginBottom = responsive.spacing.small;
     heading.style.color = STYLES.accentColor;
+    heading.style.fontSize = responsive.typography.heading;
     container.appendChild(heading);
 
     return container;
   }
 
   function createCompass(data) {
+    const responsive = getResponsiveConfig();
     const container = createCompassContainer('Compass Challenge');
 
     // Add stats
     const statsContainer = document.createElement('div');
-    statsContainer.style.marginBottom = '20px';
+    statsContainer.style.marginBottom = responsive.spacing.small;
     statsContainer.style.color = STYLES.textColor;
 
-    let statsText = `<div style="font-size: 1.2em; margin-bottom: 10px;"><strong>${data.completedCount} of 4</strong> compass directions completed</div>`;
-    statsText += `<div>After ${data.totalEvents} parkruns</div>`;
+    let statsText = `<div style="font-size: ${responsive.typography.stats}; margin-bottom: ${responsive.spacing.statsMarginBottom};"><strong>${data.completedCount} of 4</strong> compass directions completed</div>`;
+    statsText += `<div style="font-size: ${responsive.typography.statsSubtext};">After ${data.totalEvents} parkruns</div>`;
 
     if (data.dateOfCompletion) {
-      statsText += `<div style="margin-top: 10px; font-size: 1.1em;">🧭 Challenge completed on ${data.dateOfCompletion}</div>`;
+      statsText += `<div style="margin-top: ${responsive.spacing.completionMarginTop}; font-size: ${responsive.typography.completion};">🧭 Challenge completed on ${data.dateOfCompletion}</div>`;
     }
 
     statsContainer.innerHTML = statsText;
     container.appendChild(statsContainer);
 
+    // Calculate responsive compass size
+    const baseSize = responsive.isMobile
+      ? Math.min(responsive.compass.baseSize, window.innerWidth - 40)
+      : responsive.compass.baseSize;
+    const scale = baseSize / responsive.compass.baseSize; // Scale factor for all dimensions
+
     // Create compass visual
     const compassContainer = document.createElement('div');
     compassContainer.style.position = 'relative';
-    compassContainer.style.width = '700px';
-    compassContainer.style.height = '700px';
+    compassContainer.style.width = `${baseSize}px`;
+    compassContainer.style.height = `${baseSize}px`;
     compassContainer.style.margin = '0 auto';
     compassContainer.style.boxSizing = 'content-box';
 
@@ -184,16 +254,16 @@
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '100%');
     svg.setAttribute('height', '100%');
-    svg.setAttribute('viewBox', '0 0 700 700');
+    svg.setAttribute('viewBox', `0 0 ${baseSize} ${baseSize}`);
     svg.style.position = 'absolute';
     svg.style.top = '0';
     svg.style.left = '0';
 
-    // Define centers and radius
-    const centerX = 350;
-    const centerY = 350;
-    const innerRadius = 30;
-    const outerRadius = 230;
+    // Define centers and radius (scaled for responsive sizing)
+    const centerX = (baseSize / 700) * 350;
+    const centerY = (baseSize / 700) * 350;
+    const innerRadius = 30 * scale;
+    const outerRadius = 230 * scale;
 
     // Create the main compass circle
     const compassCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -202,7 +272,7 @@
     compassCircle.setAttribute('r', outerRadius);
     compassCircle.setAttribute('fill', '#334');
     compassCircle.setAttribute('stroke', STYLES.accentColor);
-    compassCircle.setAttribute('stroke-width', '5');
+    compassCircle.setAttribute('stroke-width', `${5 * scale}`);
     svg.appendChild(compassCircle);
 
     // First add directions and paths - we'll add the center rose later to ensure higher z-index
@@ -259,10 +329,10 @@
       dirLabel.setAttribute('text-anchor', 'middle');
       dirLabel.setAttribute('dominant-baseline', 'middle');
       dirLabel.setAttribute('fill', '#fff');
-      dirLabel.setAttribute('font-size', '28px');
+      dirLabel.setAttribute('font-size', `${28 * scale}px`);
       dirLabel.setAttribute('font-weight', 'bold');
       dirLabel.setAttribute('stroke', '#000');
-      dirLabel.setAttribute('stroke-width', '1');
+      dirLabel.setAttribute('stroke-width', `${1 * scale}`);
       dirLabel.setAttribute('paint-order', 'stroke');
       dirLabel.textContent = dir.label;
       svg.appendChild(dirLabel);
@@ -282,24 +352,25 @@
 
         // Create curved path for each direction that follows the circle circumference
         let pathD = '';
-        const adjustedOffset = outerRadius + 15; // Match the offset used for other directions
+        const adjustedOffset = outerRadius + 15 * scale; // Match the offset used for other directions
+        const pathWidth = 170 * scale;
 
         switch (dir.name) {
           case 'north':
-            pathD = `M ${centerX - 170} ${centerY - adjustedOffset} A ${adjustedOffset} ${adjustedOffset} 0 0 1 ${centerX + 170} ${centerY - adjustedOffset}`;
+            pathD = `M ${centerX - pathWidth} ${centerY - adjustedOffset} A ${adjustedOffset} ${adjustedOffset} 0 0 1 ${centerX + pathWidth} ${centerY - adjustedOffset}`;
             break;
 
           case 'east':
-            pathD = `M ${centerX + adjustedOffset} ${centerY - 170} A ${adjustedOffset} ${adjustedOffset} 0 0 1 ${centerX + adjustedOffset} ${centerY + 170}`;
+            pathD = `M ${centerX + adjustedOffset} ${centerY - pathWidth} A ${adjustedOffset} ${adjustedOffset} 0 0 1 ${centerX + adjustedOffset} ${centerY + pathWidth}`;
             break;
 
           case 'south':
             // Arc from left to right across the bottom (text curves anticlockwise)
-            pathD = `M ${centerX - 170} ${centerY + adjustedOffset} A ${adjustedOffset} ${adjustedOffset} 0 0 0 ${centerX + 170} ${centerY + adjustedOffset}`;
+            pathD = `M ${centerX - pathWidth} ${centerY + adjustedOffset} A ${adjustedOffset} ${adjustedOffset} 0 0 0 ${centerX + pathWidth} ${centerY + adjustedOffset}`;
             break;
 
           case 'west':
-            pathD = `M ${centerX - adjustedOffset} ${centerY + 170} A ${adjustedOffset} ${adjustedOffset} 0 0 1 ${centerX - adjustedOffset} ${centerY - 170}`;
+            pathD = `M ${centerX - adjustedOffset} ${centerY + pathWidth} A ${adjustedOffset} ${adjustedOffset} 0 0 1 ${centerX - adjustedOffset} ${centerY - pathWidth}`;
             break;
 
           default:
@@ -315,7 +386,7 @@
         // Create the text element
         const eventText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         eventText.setAttribute('fill', '#FFFFFF');
-        eventText.setAttribute('font-size', '14px');
+        eventText.setAttribute('font-size', `${14 * scale}px`);
         eventText.setAttribute('font-weight', 'bold');
 
         // Create the textPath element
@@ -373,7 +444,7 @@
     percentageText.setAttribute('text-anchor', 'middle');
     percentageText.setAttribute('dominant-baseline', 'middle');
     percentageText.setAttribute('fill', STYLES.backgroundColor);
-    percentageText.setAttribute('font-size', '24px');
+    percentageText.setAttribute('font-size', `${24 * scale}px`);
     percentageText.setAttribute('font-weight', 'bold');
     percentageText.textContent = `${Math.round((data.completedCount / 4) * 100)}%`;
     svg.appendChild(percentageText);
@@ -388,19 +459,21 @@
   }
 
   function addDownloadButton(container) {
+    const responsive = getResponsiveConfig();
     const btnContainer = document.createElement('div');
-    btnContainer.style.marginTop = '15px';
+    btnContainer.style.marginTop = responsive.button.marginTop;
     btnContainer.id = 'compass-download-btn-container';
 
     const downloadBtn = document.createElement('button');
     downloadBtn.textContent = '💾 Save as Image';
-    downloadBtn.style.padding = '8px 15px';
+    downloadBtn.style.padding = responsive.button.padding;
     downloadBtn.style.backgroundColor = STYLES.accentColor;
     downloadBtn.style.color = STYLES.backgroundColor;
     downloadBtn.style.border = 'none';
     downloadBtn.style.borderRadius = '4px';
     downloadBtn.style.cursor = 'pointer';
     downloadBtn.style.fontWeight = 'bold';
+    downloadBtn.style.fontSize = responsive.button.fontSize;
 
     // Add hover effect
     downloadBtn.addEventListener('mouseover', function () {
