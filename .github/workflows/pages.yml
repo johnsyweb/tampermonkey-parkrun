@@ -59,7 +59,7 @@ jobs:
           run_install: true
 
       - name: Install mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
 
       - name: Update scripts data
         run: pnpm update-scripts-data
