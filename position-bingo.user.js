@@ -226,6 +226,10 @@
           data.completedPositions[i][0].position +
           ')</span>' +
           '</div>';
+        // Hide event details on mobile to prevent text overflow
+        if (responsive.isMobile) {
+          eventDetails.style.display = 'none';
+        }
         cell.appendChild(eventDetails);
 
         // Add click handler for popup
