@@ -237,10 +237,11 @@
     container.appendChild(statsContainer);
 
     // Calculate responsive compass size
+    const desktopBaseSize = 700; // Reference size for scaling calculations
     const baseSize = responsive.isMobile
       ? Math.min(responsive.compass.baseSize, window.innerWidth - 40)
       : responsive.compass.baseSize;
-    const scale = baseSize / responsive.compass.baseSize; // Scale factor for all dimensions
+    const scale = baseSize / desktopBaseSize; // Scale factor for all dimensions
 
     // Create compass visual
     const compassContainer = document.createElement('div');
@@ -254,16 +255,16 @@
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '100%');
     svg.setAttribute('height', '100%');
-    svg.setAttribute('viewBox', `0 0 ${baseSize} ${baseSize}`);
+    svg.setAttribute('viewBox', `0 0 ${desktopBaseSize} ${desktopBaseSize}`);
     svg.style.position = 'absolute';
     svg.style.top = '0';
     svg.style.left = '0';
 
-    // Define centers and radius (scaled for responsive sizing)
-    const centerX = (baseSize / 700) * 350;
-    const centerY = (baseSize / 700) * 350;
-    const innerRadius = 30 * scale;
-    const outerRadius = 230 * scale;
+    // Define centers and radius (using fixed coordinate system - viewBox handles scaling)
+    const centerX = 350;
+    const centerY = 350;
+    const innerRadius = 30;
+    const outerRadius = 230;
 
     // Create the main compass circle
     const compassCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -272,7 +273,7 @@
     compassCircle.setAttribute('r', outerRadius);
     compassCircle.setAttribute('fill', '#334');
     compassCircle.setAttribute('stroke', STYLES.accentColor);
-    compassCircle.setAttribute('stroke-width', `${5 * scale}`);
+    compassCircle.setAttribute('stroke-width', '5');
     svg.appendChild(compassCircle);
 
     // First add directions and paths - we'll add the center rose later to ensure higher z-index
@@ -329,10 +330,10 @@
       dirLabel.setAttribute('text-anchor', 'middle');
       dirLabel.setAttribute('dominant-baseline', 'middle');
       dirLabel.setAttribute('fill', '#fff');
-      dirLabel.setAttribute('font-size', `${28 * scale}px`);
+      dirLabel.setAttribute('font-size', '28px');
       dirLabel.setAttribute('font-weight', 'bold');
       dirLabel.setAttribute('stroke', '#000');
-      dirLabel.setAttribute('stroke-width', `${1 * scale}`);
+      dirLabel.setAttribute('stroke-width', '1');
       dirLabel.setAttribute('paint-order', 'stroke');
       dirLabel.textContent = dir.label;
       svg.appendChild(dirLabel);
@@ -352,8 +353,8 @@
 
         // Create curved path for each direction that follows the circle circumference
         let pathD = '';
-        const adjustedOffset = outerRadius + 15 * scale; // Match the offset used for other directions
-        const pathWidth = 170 * scale;
+        const adjustedOffset = outerRadius + 15; // Match the offset used for other directions
+        const pathWidth = 170;
 
         switch (dir.name) {
           case 'north':
@@ -386,7 +387,7 @@
         // Create the text element
         const eventText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         eventText.setAttribute('fill', '#FFFFFF');
-        eventText.setAttribute('font-size', `${14 * scale}px`);
+        eventText.setAttribute('font-size', '14px');
         eventText.setAttribute('font-weight', 'bold');
 
         // Create the textPath element
@@ -444,7 +445,7 @@
     percentageText.setAttribute('text-anchor', 'middle');
     percentageText.setAttribute('dominant-baseline', 'middle');
     percentageText.setAttribute('fill', STYLES.backgroundColor);
-    percentageText.setAttribute('font-size', `${24 * scale}px`);
+    percentageText.setAttribute('font-size', '24px');
     percentageText.setAttribute('font-weight', 'bold');
     percentageText.textContent = `${Math.round((data.completedCount / 4) * 100)}%`;
     svg.appendChild(percentageText);
