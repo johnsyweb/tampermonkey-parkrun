@@ -104,11 +104,30 @@ const screenshotConfigs: ScreenshotConfig[] = [
   },
 ];
 
-async function generateScreenshots(): Promise<void> {
+async function generateScreenshots(scriptName?: string): Promise<void> {
   let browser: Browser | null = null;
 
   try {
+    // Filter configs if a specific script name is provided
+    let configsToProcess = screenshotConfigs;
+    if (scriptName) {
+      configsToProcess = screenshotConfigs.filter(
+        (config) => config.name === scriptName || config.script === scriptName
+      );
+      if (configsToProcess.length === 0) {
+        console.error(`❌ Script not found: ${scriptName}`);
+        console.log('Available scripts:');
+        screenshotConfigs.forEach((config) => {
+          console.log(`  - ${config.name} (${config.script})`);
+        });
+        process.exit(1);
+      }
+    }
+
     console.log('🚀 Starting screenshot generation...');
+    if (scriptName) {
+      console.log(`📸 Generating screenshot for: ${scriptName}`);
+    }
     const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
     if (isCI) {
       console.log('📝 Running in CI mode (headless browser)');
@@ -135,7 +154,7 @@ async function generateScreenshots(): Promise<void> {
 
     const page = await browser.newPage();
 
-    for (const config of screenshotConfigs) {
+    for (const config of configsToProcess) {
       console.log(`📸 Capturing screenshot: ${config.name}`);
 
       if (config.viewport) {
@@ -290,7 +309,11 @@ async function generateScreenshots(): Promise<void> {
       console.log(`✅ Screenshot saved: ${screenshotPath}`);
     }
 
-    console.log('🎉 All screenshots generated successfully!');
+    if (scriptName) {
+      console.log(`🎉 Screenshot generated successfully for: ${scriptName}!`);
+    } else {
+      console.log('🎉 All screenshots generated successfully!');
+    }
   } catch (error) {
     console.error('❌ Error generating screenshots:', error);
     process.exit(1);
@@ -302,7 +325,8 @@ async function generateScreenshots(): Promise<void> {
 }
 
 if (require.main === module) {
-  generateScreenshots().catch((error) => {
+  const scriptName = process.argv[2];
+  generateScreenshots(scriptName).catch((error) => {
     console.error('❌ Script failed:', error);
     process.exit(1);
   });
