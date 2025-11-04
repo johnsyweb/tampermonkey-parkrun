@@ -42,6 +42,65 @@
 
   const GRID_SIZE = 100;
 
+  function getResponsiveConfig() {
+    const mobileConfig = {
+      isMobile: true,
+      container: {
+        padding: '10px',
+        marginTop: '10px',
+      },
+      typography: {
+        heading: '1.1em',
+        stats: '1em',
+        statsSubtext: '0.9em',
+      },
+      grid: {
+        boxSize: 28,
+        gapSize: 3,
+        cellFontSize: '0.7em',
+        cellPadding: '1px',
+        positionFontSize: '0.9em',
+        eventFontSize: '0.65em',
+        dateFontSize: '0.6em',
+      },
+      button: {
+        padding: '6px 12px',
+        fontSize: '0.9em',
+        marginTop: '10px',
+      },
+    };
+
+    const desktopConfig = {
+      isMobile: false,
+      container: {
+        padding: '20px',
+        marginTop: '20px',
+      },
+      typography: {
+        heading: '1.3em',
+        stats: '1.2em',
+        statsSubtext: '1em',
+      },
+      grid: {
+        boxSize: 100,
+        gapSize: 5,
+        cellFontSize: '0.9em',
+        cellPadding: '2px',
+        positionFontSize: '1.2em',
+        eventFontSize: '0.8em',
+        dateFontSize: '0.7em',
+      },
+      button: {
+        padding: '8px 15px',
+        fontSize: '1em',
+        marginTop: '15px',
+      },
+    };
+
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? mobileConfig : desktopConfig;
+  }
+
   function findResultsTable() {
     const tables = document.querySelectorAll('#results');
     return tables[tables.length - 1];
@@ -87,11 +146,14 @@
   }
 
   function createPositionBingoContainer(data) {
+    const responsive = getResponsiveConfig();
     const container = document.createElement('div');
     container.id = 'positionBingoContainer';
     container.className = 'parkrun-position-bingo-container';
-    container.style.margin = '20px auto'; // Center the container and add space below
-    container.style.padding = '10px'; // Add padding inside the container
+    container.style.width = '100%';
+    container.style.maxWidth = '1200px';
+    container.style.margin = `${responsive.container.marginTop} auto`;
+    container.style.padding = responsive.container.padding;
     container.style.backgroundColor = '#2b223d';
     container.style.borderRadius = '8px';
     container.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
@@ -100,27 +162,28 @@
 
     const heading = document.createElement('h3');
     heading.textContent = 'Position Bingo Challenge';
-    heading.style.marginBottom = '10px';
+    heading.style.marginBottom = responsive.isMobile ? '8px' : '10px';
     heading.style.color = '#FFA300';
+    heading.style.fontSize = responsive.typography.heading;
     container.appendChild(heading);
 
     const stats = document.createElement('div');
     stats.innerHTML =
-      '<div style="font-size: 1.2em; margin-bottom: 10px;">' +
+      `<div style="font-size: ${responsive.typography.stats}; margin-bottom: ${responsive.isMobile ? '8px' : '10px'};">` +
       '<strong>' +
       data.completedCount +
       ' of ' +
       GRID_SIZE +
       '</strong> positions completed</div>' +
-      '<div>After ' +
+      `<div style="font-size: ${responsive.typography.statsSubtext};">After ` +
       data.totalEvents +
       ' parkruns</div>';
     container.appendChild(stats);
 
     const COLUMNS = 10;
     const ROWS = Math.ceil(GRID_SIZE / COLUMNS);
-    const BOX_SIZE = 100; // Size of each box in pixels
-    const GAP_SIZE = 5; // Gap between boxes in pixels
+    const BOX_SIZE = responsive.grid.boxSize;
+    const GAP_SIZE = responsive.grid.gapSize;
 
     const grid = document.createElement('div');
     grid.style.display = 'grid';
@@ -128,6 +191,7 @@
     grid.style.gridTemplateRows = `repeat(${ROWS}, ${BOX_SIZE}px)`;
     grid.style.gap = `${GAP_SIZE}px`;
     grid.style.margin = '0 auto';
+    grid.style.justifyContent = 'center';
 
     for (let i = 0; i < GRID_SIZE; i++) {
       const cell = document.createElement('div');
@@ -138,25 +202,25 @@
       cell.style.color = '#fff';
 
       cell.style.textAlign = 'left';
-      cell.style.padding = '2px';
+      cell.style.padding = responsive.grid.cellPadding;
       cell.style.fontWeight = 'bold';
-      cell.style.fontSize = '0.9em';
+      cell.style.fontSize = responsive.grid.cellFontSize;
       cell.style.cursor = data.completedPositions[i] ? 'pointer' : 'default';
       cell.style.aspectRatio = '1'; // Ensure cells are square
 
       const positionText = document.createElement('div');
       positionText.textContent = i.toString().padStart(2, '0'); // Display as two-digit number
-      positionText.style.fontSize = '1.2em';
-      positionText.style.marginBottom = '5px';
+      positionText.style.fontSize = responsive.grid.positionFontSize;
+      positionText.style.marginBottom = responsive.isMobile ? '2px' : '5px';
       cell.appendChild(positionText);
 
       if (data.completedPositions[i]) {
         const eventDetails = document.createElement('div');
         eventDetails.innerHTML =
-          '<div style="font-size: 0.8em; text-align: center;">' +
+          `<div style="font-size: ${responsive.grid.eventFontSize}; text-align: center;">` +
           data.completedPositions[i][0].eventName +
           '<br>' +
-          '<span style="font-size: 0.7em;">' +
+          `<span style="font-size: ${responsive.grid.dateFontSize};">` +
           data.completedPositions[i][0].date +
           ' (' +
           data.completedPositions[i][0].position +
@@ -166,6 +230,7 @@
 
         // Add click handler for popup
         cell.addEventListener('click', () => {
+          const popupResponsive = getResponsiveConfig();
           const overlay = document.createElement('div');
           overlay.style.position = 'fixed';
           overlay.style.top = '0';
@@ -185,13 +250,15 @@
           popup.style.transform = 'translate(-50%, -50%)';
           popup.style.backgroundColor = '#2b223d';
           popup.style.color = '#fff';
-          popup.style.padding = '20px';
+          const popupPadding = popupResponsive.isMobile ? '15px' : '20px';
+          popup.style.padding = popupPadding;
           popup.style.borderRadius = '8px';
           popup.style.boxShadow = '0 2px 4px rgba(0,0,0,0.5)';
           popup.style.zIndex = '1000';
-          popup.style.maxWidth = '90%';
-          popup.style.maxHeight = '80%';
+          popup.style.maxWidth = popupResponsive.isMobile ? '95%' : '90%';
+          popup.style.maxHeight = popupResponsive.isMobile ? '85%' : '80%';
           popup.style.overflowY = 'auto';
+          popup.style.fontSize = popupResponsive.isMobile ? '0.9em' : '1em';
 
           const popupHeading = document.createElement('h4');
           popupHeading.textContent = `Position ${i.toString().padStart(2, '0')}`;
@@ -229,19 +296,21 @@
   }
 
   function addDownloadButton(container) {
+    const responsive = getResponsiveConfig();
     const btnContainer = document.createElement('div');
-    btnContainer.style.marginTop = '15px';
+    btnContainer.style.marginTop = responsive.button.marginTop;
     btnContainer.id = 'position-bingo-download-btn-container';
 
     const downloadBtn = document.createElement('button');
     downloadBtn.textContent = '💾 Save as Image';
-    downloadBtn.style.padding = '8px 15px';
+    downloadBtn.style.padding = responsive.button.padding;
     downloadBtn.style.backgroundColor = '#FFA300';
     downloadBtn.style.color = '#2b223d';
     downloadBtn.style.border = 'none';
     downloadBtn.style.borderRadius = '4px';
     downloadBtn.style.cursor = 'pointer';
     downloadBtn.style.fontWeight = 'bold';
+    downloadBtn.style.fontSize = responsive.button.fontSize;
 
     // Add hover effect
     downloadBtn.addEventListener('mouseover', function () {
