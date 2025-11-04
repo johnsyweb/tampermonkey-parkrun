@@ -5,6 +5,12 @@
 
 set -e
 
+# Skip screenshot generation in CI environments
+if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
+  echo "⏭️  Skipping screenshot generation in CI environment"
+  exit 0
+fi
+
 # Get the list of files being pushed
 while read local_ref local_sha remote_ref remote_sha; do
   if [ "$local_sha" != "0000000000000000000000000000000000000000" ]; then
