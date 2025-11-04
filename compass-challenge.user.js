@@ -241,7 +241,6 @@
     const baseSize = responsive.isMobile
       ? Math.min(responsive.compass.baseSize, window.innerWidth - 40)
       : responsive.compass.baseSize;
-    const scale = baseSize / desktopBaseSize; // Scale factor for all dimensions
 
     // Create compass visual
     const compassContainer = document.createElement('div');
