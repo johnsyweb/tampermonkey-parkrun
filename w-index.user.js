@@ -115,11 +115,62 @@
     return wilsonIndices;
   }
 
-  function createWilsonGraph(indices, container, athleteInfo) {
+  function getResponsiveConfig() {
     const isMobile = window.innerWidth < 768;
+    return {
+      isMobile,
+      spacing: {
+        small: isMobile ? '10px' : '20px',
+        medium: isMobile ? '15px' : '20px',
+      },
+      container: {
+        padding: isMobile ? '10px' : '20px',
+        marginTop: isMobile ? '10px' : '20px',
+      },
+      typography: {
+        wilsonIndex: isMobile ? '1.2em' : '1.5em',
+        input: isMobile ? '16px' : 'inherit',
+        button: isMobile ? '16px' : 'inherit',
+      },
+      chart: {
+        height: isMobile ? '250px' : '300px',
+        fonts: {
+          title: isMobile ? 14 : 16,
+          axisTitle: isMobile ? 12 : 14,
+          axisTicks: isMobile ? 10 : 12,
+          legend: isMobile ? 11 : 12,
+          tooltipTitle: isMobile ? 12 : 14,
+          tooltipBody: isMobile ? 11 : 12,
+        },
+      },
+      form: {
+        marginBottom: isMobile ? '10px' : '20px',
+        input: {
+          width: isMobile ? 'calc(100% - 20px)' : '200px',
+          maxWidth: isMobile ? '300px' : '200px',
+          padding: isMobile ? '8px' : '5px',
+          marginRight: isMobile ? '0' : '10px',
+        },
+        button: {
+          padding: isMobile ? '8px 15px' : '5px 10px',
+          width: isMobile ? 'calc(100% - 20px)' : 'auto',
+          maxWidth: isMobile ? '300px' : 'none',
+        },
+        layout: {
+          display: isMobile ? 'flex' : 'block',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? '10px' : '0',
+          alignItems: isMobile ? 'center' : 'flex-start',
+        },
+      },
+    };
+  }
+
+  function createWilsonGraph(indices, container, athleteInfo) {
+    const responsive = getResponsiveConfig();
     const canvas = document.createElement('canvas');
     canvas.style.width = '100%';
-    canvas.style.height = isMobile ? '250px' : '300px';
+    canvas.style.height = responsive.chart.height;
     container.appendChild(canvas);
 
     const ctx = canvas.getContext('2d');
@@ -151,12 +202,12 @@
               display: true,
               text: 'Wilson Index',
               font: {
-                size: isMobile ? 12 : 14,
+                size: responsive.chart.fonts.axisTitle,
               },
             },
             ticks: {
               font: {
-                size: isMobile ? 10 : 12,
+                size: responsive.chart.fonts.axisTicks,
               },
             },
             suggestedMax: Math.ceil(Math.max(...indices.map((i) => i.wilsonIndex)) * 1.1), // Add 10% padding
@@ -166,12 +217,12 @@
               display: true,
               text: 'parkruns',
               font: {
-                size: isMobile ? 12 : 14,
+                size: responsive.chart.fonts.axisTitle,
               },
             },
             ticks: {
               font: {
-                size: isMobile ? 10 : 12,
+                size: responsive.chart.fonts.axisTicks,
               },
             },
             min: 0,
@@ -183,13 +234,13 @@
             display: true,
             text: 'Wilson Index Progress',
             font: {
-              size: isMobile ? 14 : 16,
+              size: responsive.chart.fonts.title,
             },
           },
           legend: {
             labels: {
               font: {
-                size: isMobile ? 11 : 12,
+                size: responsive.chart.fonts.legend,
               },
             },
           },
@@ -201,10 +252,10 @@
               },
             },
             titleFont: {
-              size: isMobile ? 12 : 14,
+              size: responsive.chart.fonts.tooltipTitle,
             },
             bodyFont: {
-              size: isMobile ? 11 : 12,
+              size: responsive.chart.fonts.tooltipBody,
             },
           },
         },
@@ -285,41 +336,39 @@
   }
 
   function createComparisonUI(container, onCompare) {
-    const isMobile = window.innerWidth < 768;
+    const responsive = getResponsiveConfig();
     const form = document.createElement('form');
-    form.style.marginBottom = isMobile ? '10px' : '20px';
+    form.style.marginBottom = responsive.form.marginBottom;
     form.style.textAlign = 'center';
-    if (isMobile) {
-      form.style.display = 'flex';
-      form.style.flexDirection = 'column';
-      form.style.gap = '10px';
-      form.style.alignItems = 'center';
-    }
+    form.style.display = responsive.form.layout.display;
+    form.style.flexDirection = responsive.form.layout.flexDirection;
+    form.style.gap = responsive.form.layout.gap;
+    form.style.alignItems = responsive.form.layout.alignItems;
 
     const input = document.createElement('input');
-    input.style.width = isMobile ? 'calc(100% - 20px)' : '200px';
-    input.style.maxWidth = isMobile ? '300px' : '200px';
+    input.style.width = responsive.form.input.width;
+    input.style.maxWidth = responsive.form.input.maxWidth;
     input.type = 'text';
     input.placeholder = "Enter friend's athlete ID (e.g. A507)";
-    input.style.padding = isMobile ? '8px' : '5px';
-    input.style.marginRight = isMobile ? '0' : '10px';
+    input.style.padding = responsive.form.input.padding;
+    input.style.marginRight = responsive.form.input.marginRight;
     input.style.borderRadius = '3px';
     input.style.border = '1px solid #ffa300';
     input.style.backgroundColor = '#2b223d';
     input.style.color = '#ffa300';
-    input.style.fontSize = isMobile ? '16px' : 'inherit';
+    input.style.fontSize = responsive.typography.input;
 
     const button = document.createElement('button');
     button.textContent = 'Compare';
-    button.style.padding = isMobile ? '8px 15px' : '5px 10px';
-    button.style.width = isMobile ? 'calc(100% - 20px)' : 'auto';
-    button.style.maxWidth = isMobile ? '300px' : 'none';
+    button.style.padding = responsive.form.button.padding;
+    button.style.width = responsive.form.button.width;
+    button.style.maxWidth = responsive.form.button.maxWidth;
     button.style.backgroundColor = '#ffa300';
     button.style.color = '#2b223d';
     button.style.border = 'none';
     button.style.borderRadius = '3px';
     button.style.cursor = 'pointer';
-    button.style.fontSize = isMobile ? '16px' : 'inherit';
+    button.style.fontSize = responsive.typography.button;
     button.style.fontWeight = 'bold';
 
     form.appendChild(input);
@@ -421,20 +470,20 @@
     const wilsonIndices = calculateWilsonIndexOverTime(eventDetails);
 
     if (h2Element) {
-      const isMobile = window.innerWidth < 768;
+      const responsive = getResponsiveConfig();
       const container = document.createElement('div');
       container.id = 'w-index-display';
-      container.style.marginTop = isMobile ? '10px' : '20px';
+      container.style.marginTop = responsive.container.marginTop;
       container.style.backgroundColor = '#2b223d';
-      container.style.padding = isMobile ? '10px' : '20px';
+      container.style.padding = responsive.container.padding;
       container.style.borderRadius = '5px';
 
       const wilsonElement = document.createElement('div');
       wilsonElement.textContent = `Wilson index: ${wilsonIndex}`;
-      wilsonElement.style.fontSize = isMobile ? '1.2em' : '1.5em';
+      wilsonElement.style.fontSize = responsive.typography.wilsonIndex;
       wilsonElement.style.color = '#ffa300';
       wilsonElement.style.fontWeight = 'bold';
-      wilsonElement.style.marginBottom = isMobile ? '10px' : '20px';
+      wilsonElement.style.marginBottom = responsive.spacing.small;
       wilsonElement.style.textAlign = 'center';
       container.appendChild(wilsonElement);
 
