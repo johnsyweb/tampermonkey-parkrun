@@ -29,6 +29,7 @@
 // @match        *://www.parkrun.sg/parkrunner/*/all/
 // @match        *://www.parkrun.us/parkrunner/*/all/
 // @namespace    http://tampermonkey.net/
+// @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
@@ -49,6 +50,9 @@
       container: {
         padding: '10px',
         marginTop: '10px',
+        width: '100%',
+        maxWidth: '800px',
+        aspectRatio: 'auto',
       },
       typography: {
         pIndex: '1.2em',
@@ -57,6 +61,11 @@
       listItem: {
         marginBottom: '5px',
         textAlign: 'left',
+      },
+      button: {
+        padding: '6px 12px',
+        fontSize: '0.9em',
+        marginTop: '10px',
       },
     };
 
@@ -69,6 +78,9 @@
       container: {
         padding: '20px',
         marginTop: '20px',
+        width: 'auto',
+        maxWidth: 'none',
+        aspectRatio: '1',
       },
       typography: {
         pIndex: '1.5em',
@@ -77,6 +89,11 @@
       listItem: {
         marginBottom: '8px',
         textAlign: 'center',
+      },
+      button: {
+        padding: '8px 15px',
+        fontSize: '1em',
+        marginTop: '15px',
       },
     };
 
@@ -121,10 +138,11 @@
       pIndexElement.style.flexDirection = 'column';
       pIndexElement.style.alignItems = 'center';
       pIndexElement.style.justifyContent = 'center';
-      pIndexElement.style.width = '100%';
-      pIndexElement.style.maxWidth = '800px';
+      pIndexElement.style.width = responsive.container.width;
+      pIndexElement.style.maxWidth = responsive.container.maxWidth;
       pIndexElement.style.marginLeft = 'auto';
       pIndexElement.style.marginRight = 'auto';
+      pIndexElement.style.aspectRatio = responsive.container.aspectRatio;
       pIndexElement.setAttribute('id', 'p-index-display');
 
       const eventList = document.createElement('ul');
@@ -144,8 +162,78 @@
       });
       pIndexElement.appendChild(eventList);
 
+      // Add download button
+      addDownloadButton(pIndexElement);
+
       h2Element.parentNode.insertBefore(pIndexElement, h2Element.nextSibling);
+
+      // Make container square on desktop after content is rendered
+      if (!responsive.isMobile) {
+        setTimeout(() => {
+          const rect = pIndexElement.getBoundingClientRect();
+          const maxDimension = Math.max(rect.width, rect.height);
+          pIndexElement.style.width = maxDimension + 'px';
+          pIndexElement.style.height = maxDimension + 'px';
+        }, 0);
+      }
     }
+  }
+
+  function addDownloadButton(container) {
+    const responsive = getResponsiveConfig();
+    const btnContainer = document.createElement('div');
+    btnContainer.style.marginTop = responsive.button.marginTop;
+    btnContainer.id = 'p-index-download-btn-container';
+
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = '💾 Save as Image';
+    downloadBtn.style.padding = responsive.button.padding;
+    downloadBtn.style.backgroundColor = '#ffa300';
+    downloadBtn.style.color = '#2b223d';
+    downloadBtn.style.border = 'none';
+    downloadBtn.style.borderRadius = '4px';
+    downloadBtn.style.cursor = 'pointer';
+    downloadBtn.style.fontWeight = 'bold';
+    downloadBtn.style.fontSize = responsive.button.fontSize;
+
+    // Add hover effect
+    downloadBtn.addEventListener('mouseover', function () {
+      this.style.backgroundColor = '#e59200';
+    });
+
+    downloadBtn.addEventListener('mouseout', function () {
+      this.style.backgroundColor = '#ffa300';
+    });
+
+    // Download handler
+    downloadBtn.addEventListener('click', function () {
+      // Hide the download button temporarily for the screenshot
+      downloadBtn.style.display = 'none';
+
+      // Use html2canvas to capture the container
+      // eslint-disable-next-line no-undef
+      html2canvas(container, {
+        backgroundColor: '#2b223d',
+        scale: 2, // Higher resolution
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+      }).then((canvas) => {
+        // Show the button again
+        downloadBtn.style.display = 'block';
+
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().split('T')[0];
+        const pageUrl = window.location.pathname.split('/');
+        const parkrunnerId = pageUrl[2] || 'parkrunner';
+        link.download = `p-index-${parkrunnerId}-${timestamp}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    });
+
+    btnContainer.appendChild(downloadBtn);
+    container.appendChild(btnContainer);
   }
 
   function extractEventDetails(table) {
