@@ -45,6 +45,11 @@
   function getResponsiveConfig() {
     const mobileConfig = {
       isMobile: true,
+      spacing: {
+        small: '8px',
+        medium: '10px',
+        large: '10px',
+      },
       container: {
         padding: '10px',
         marginTop: '10px',
@@ -56,8 +61,10 @@
       },
       grid: {
         gapSize: '5px',
+        marginTop: '10px',
         cellPadding: '5px',
         letterFontSize: '1.2em',
+        letterMarginBottom: '2px',
         eventFontSize: '0.7em',
         dateFontSize: '0.65em',
       },
@@ -66,10 +73,18 @@
         fontSize: '0.9em',
         marginTop: '10px',
       },
+      heading: {
+        marginBottom: '10px',
+      },
     };
 
     const desktopConfig = {
       isMobile: false,
+      spacing: {
+        small: '10px',
+        medium: '15px',
+        large: '20px',
+      },
       container: {
         padding: '20px',
         marginTop: '20px',
@@ -81,8 +96,10 @@
       },
       grid: {
         gapSize: '10px',
+        marginTop: '20px',
         cellPadding: '10px',
         letterFontSize: '1.5em',
+        letterMarginBottom: '5px',
         eventFontSize: '0.8em',
         dateFontSize: '0.7em',
       },
@@ -90,6 +107,9 @@
         padding: '8px 15px',
         fontSize: '1em',
         marginTop: '15px',
+      },
+      heading: {
+        marginBottom: '15px',
       },
     };
 
@@ -156,14 +176,14 @@
 
     const heading = document.createElement('h3');
     heading.textContent = 'Alphabet Challenge';
-    heading.style.marginBottom = responsive.isMobile ? '10px' : '15px';
+    heading.style.marginBottom = responsive.heading.marginBottom;
     heading.style.color = '#FFA300';
     heading.style.fontSize = responsive.typography.heading;
     container.appendChild(heading);
 
     const stats = document.createElement('div');
     stats.innerHTML =
-      `<div style="font-size: ${responsive.typography.stats}; margin-bottom: ${responsive.isMobile ? '8px' : '10px'};">` +
+      `<div style="font-size: ${responsive.typography.stats}; margin-bottom: ${responsive.spacing.small};">` +
       '<strong>' +
       data.completedCount +
       ' of 25</strong> letters completed' +
@@ -180,7 +200,7 @@
     grid.style.display = 'grid';
     grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
     grid.style.gap = responsive.grid.gapSize;
-    grid.style.marginTop = responsive.isMobile ? '10px' : '20px';
+    grid.style.marginTop = responsive.grid.marginTop;
 
     ALPHABET.forEach((letter) => {
       const cell = document.createElement('div');
@@ -202,7 +222,7 @@
       const letterText = document.createElement('div');
       letterText.textContent = letter;
       letterText.style.fontSize = responsive.grid.letterFontSize;
-      letterText.style.marginBottom = responsive.isMobile ? '2px' : '5px';
+      letterText.style.marginBottom = responsive.grid.letterMarginBottom;
       cell.appendChild(letterText);
 
       if (data.completedLetters[letter]) {
