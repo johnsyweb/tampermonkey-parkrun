@@ -38,6 +38,52 @@
 
 (function () {
   'use strict';
+
+  function getResponsiveConfig() {
+    const mobileConfig = {
+      isMobile: true,
+      spacing: {
+        small: '10px',
+        medium: '15px',
+      },
+      container: {
+        padding: '10px',
+        marginTop: '10px',
+      },
+      typography: {
+        pIndex: '1.2em',
+        listItem: '0.9em',
+      },
+      listItem: {
+        marginBottom: '5px',
+        textAlign: 'left',
+      },
+    };
+
+    const desktopConfig = {
+      isMobile: false,
+      spacing: {
+        small: '20px',
+        medium: '20px',
+      },
+      container: {
+        padding: '20px',
+        marginTop: '20px',
+      },
+      typography: {
+        pIndex: '1.5em',
+        listItem: '1em',
+      },
+      listItem: {
+        marginBottom: '8px',
+        textAlign: 'center',
+      },
+    };
+
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? mobileConfig : desktopConfig;
+  }
+
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       calculatePIndex,
@@ -59,43 +105,46 @@
   }
 
   function displayPIndex(pIndex, contributingEvents) {
+    const responsive = getResponsiveConfig();
     const h2Element = document.querySelector('h2');
     if (h2Element) {
       const pIndexElement = document.createElement('div');
       pIndexElement.textContent = 'p-index: ' + pIndex;
-      pIndexElement.style.fontSize = '1.5em';
+      pIndexElement.style.fontSize = responsive.typography.pIndex;
       pIndexElement.style.fontWeight = 'bold';
-      pIndexElement.style.marginTop = '10px';
+      pIndexElement.style.marginTop = responsive.container.marginTop;
       pIndexElement.style.backgroundColor = '#2b223d';
       pIndexElement.style.color = '#ffa300';
-      pIndexElement.style.padding = '10px';
+      pIndexElement.style.padding = responsive.container.padding;
       pIndexElement.style.borderRadius = '5px';
       pIndexElement.style.display = 'flex';
       pIndexElement.style.flexDirection = 'column';
       pIndexElement.style.alignItems = 'center';
       pIndexElement.style.justifyContent = 'center';
+      pIndexElement.style.width = '100%';
+      pIndexElement.style.maxWidth = '800px';
+      pIndexElement.style.marginLeft = 'auto';
+      pIndexElement.style.marginRight = 'auto';
       pIndexElement.setAttribute('id', 'p-index-display');
 
       const eventList = document.createElement('ul');
       eventList.style.listStyleType = 'none';
       eventList.style.padding = '0';
+      eventList.style.marginTop = responsive.spacing.small;
+      eventList.style.width = '100%';
       contributingEvents.forEach((event) => {
         const listItem = document.createElement('li');
         listItem.textContent = event;
         listItem.style.fontWeight = 'normal';
-        listItem.style.fontSize = '1em';
+        listItem.style.fontSize = responsive.typography.listItem;
+        listItem.style.marginBottom = responsive.listItem.marginBottom;
+        listItem.style.textAlign = responsive.listItem.textAlign;
+        listItem.style.wordBreak = 'break-word';
         eventList.appendChild(listItem);
       });
       pIndexElement.appendChild(eventList);
 
       h2Element.parentNode.insertBefore(pIndexElement, h2Element.nextSibling);
-
-      setTimeout(() => {
-        const rect = pIndexElement.getBoundingClientRect();
-        const maxDimension = Math.max(rect.width, rect.height);
-        pIndexElement.style.width = maxDimension + 'px';
-        pIndexElement.style.height = maxDimension + 'px';
-      }, 0);
     }
   }
 
