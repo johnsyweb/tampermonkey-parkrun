@@ -45,7 +45,6 @@
     clockBorderColor: '#FFA300',
     clockFaceColor: '#333',
     completedColor: '#FFA300',
-    pendingColor: '#53BA9D',
     textColor: '#e0e0e0',
     subtleTextColor: '#cccccc',
   };
@@ -152,7 +151,7 @@
     container.style.width = '100%';
     container.style.maxWidth = '800px';
     container.style.margin = '20px auto';
-    container.style.padding = '20px';
+    container.style.padding = window.innerWidth < 768 ? '10px' : '20px';
     container.style.backgroundColor = STYLES.backgroundColor;
     container.style.borderRadius = '8px';
     container.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
@@ -162,6 +161,7 @@
     heading.textContent = title;
     heading.style.marginBottom = '15px';
     heading.style.color = STYLES.clockBorderColor;
+    heading.style.fontSize = window.innerWidth < 768 ? '1.1em' : '1.3em';
     container.appendChild(heading);
 
     return container;
@@ -170,29 +170,38 @@
   function createBingoClock(data) {
     const container = createClockContainer('Stopwatch Bingo Challenge');
 
+    // Calculate responsive clock size (smaller on mobile)
+    const isMobile = window.innerWidth < 768;
+
     // Add stats
     const statsContainer = document.createElement('div');
-    statsContainer.style.marginBottom = '20px';
+    statsContainer.style.marginBottom = isMobile ? '10px' : '20px';
     statsContainer.style.color = STYLES.textColor;
 
-    let statsText = `<div style="font-size: 1.2em; margin-bottom: 10px;"><strong>${data.collectedCount} of 60</strong> seconds collected</div>`;
-    statsText += `<div>After ${data.totalParkruns} parkruns</div>`;
+    const statsFontSize = isMobile ? '1em' : '1.2em';
+    const completionFontSize = isMobile ? '0.95em' : '1.1em';
+    let statsText = `<div style="font-size: ${statsFontSize}; margin-bottom: 10px;"><strong>${data.collectedCount} of 60</strong> seconds collected</div>`;
+    statsText += `<div style="font-size: ${isMobile ? '0.9em' : '1em'};">After ${data.totalParkruns} parkruns</div>`;
 
     if (data.dateOfCompletion) {
-      statsText += `<div style="margin-top: 10px; font-size: 1.1em;">🏆 Bingo completed on ${data.dateOfCompletion} (${data.firstCompleteEvent})</div>`;
+      statsText += `<div style="margin-top: 10px; font-size: ${completionFontSize};">🏆 Bingo completed on ${data.dateOfCompletion} (${data.firstCompleteEvent})</div>`;
     }
 
     statsContainer.innerHTML = statsText;
     container.appendChild(statsContainer);
 
+    // Calculate responsive clock size (smaller on mobile)
+    const baseSize = isMobile ? Math.min(320, window.innerWidth - 40) : 500;
+    const scale = baseSize / 500; // Scale factor for all dimensions
+
     // Create clock face
     const clockContainer = document.createElement('div');
     clockContainer.style.position = 'relative';
-    clockContainer.style.width = '500px';
-    clockContainer.style.height = '500px';
+    clockContainer.style.width = `${baseSize}px`;
+    clockContainer.style.height = `${baseSize}px`;
     clockContainer.style.margin = '0 auto';
     clockContainer.style.borderRadius = '50%';
-    clockContainer.style.border = `10px solid ${STYLES.clockBorderColor}`;
+    clockContainer.style.border = `${Math.round(10 * scale)}px solid ${STYLES.clockBorderColor}`;
     clockContainer.style.backgroundColor = STYLES.clockFaceColor;
     clockContainer.style.boxSizing = 'content-box';
 
@@ -206,7 +215,9 @@
     // Add the second segments first (so they're at the bottom layer)
     for (let i = 0; i < 60; i++) {
       const hasSecond = i in data.seconds;
-      const occurrences = hasSecond && data.timeData[i] ? data.timeData[i].length : 0;
+      if (!hasSecond) continue; // Only render segments for collected seconds
+
+      const occurrences = data.timeData[i] ? data.timeData[i].length : 0;
 
       // Calculate angles for this segment (0 seconds at top, moving clockwise)
       const startAngle = (((i - 0.4) / 60) * 360 - 90) * (Math.PI / 180);
@@ -221,11 +232,11 @@
       segment.style.height = '100%';
       segment.style.pointerEvents = 'none'; // Make it non-blocking for clicks
 
-      // Base radii
-      const maxRadius = 220; // Leave space for indices
-      const innerHoleRadius = 50; // Matches the visual centre (100px diameter)
-      const centerX = 250;
-      const centerY = 250;
+      // Base radii (scaled for responsive sizing)
+      const maxRadius = 220 * scale; // Leave space for indices
+      const innerHoleRadius = 50 * scale; // Matches the visual centre (100px diameter)
+      const centerX = baseSize / 2;
+      const centerY = baseSize / 2;
 
       // Create SVG element for the segment
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -240,11 +251,10 @@
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
       // Calculate the points for the path as a ring sector clearing the centre
-      // Vary the outer radius for collected seconds proportional to the distance from innerHoleRadius to maxRadius
+      // Vary the outer radius proportional to the number of occurrences
       const ringSpan = maxRadius - innerHoleRadius;
-      const outerRadius = hasSecond
-        ? innerHoleRadius + Math.max(0, Math.round((occurrences / maxOccurrences) * ringSpan))
-        : maxRadius;
+      const outerRadius =
+        innerHoleRadius + Math.max(0, Math.round((occurrences / maxOccurrences) * ringSpan));
 
       const innerStartX = centerX + innerHoleRadius * Math.cos(startAngle);
       const innerStartY = centerY + innerHoleRadius * Math.sin(startAngle);
@@ -266,33 +276,22 @@
       ].join(' ');
 
       path.setAttribute('d', pathData);
+      path.setAttribute('fill', STYLES.completedColor);
+      path.setAttribute('opacity', '1');
 
-      // Use a single colour for collected segments; vary length only
-      if (hasSecond) {
-        path.setAttribute('fill', STYLES.completedColor);
-        path.setAttribute('opacity', '1');
-
-        // Update title to include frequency information
-        const secondData = data.seconds[i];
-        path.setAttribute(
-          'title',
-          `${secondData.time} - ${secondData.date} ${secondData.event} (${occurrences} occurrences)`
-        );
-      } else {
-        path.setAttribute('fill', STYLES.pendingColor);
-        path.setAttribute('opacity', '0.4');
-        path.setAttribute('title', `Missing: ${i.toString().padStart(2, '0')} seconds`);
-      }
+      // Update title to show tooltip on hover
+      path.setAttribute(
+        'title',
+        `${i.toString().padStart(2, '0')} Seconds - ${occurrences} ${occurrences === 1 ? 'Time' : 'Times'}`
+      );
 
       // Add click handler directly to the path for interaction
-      if (hasSecond) {
-        path.style.cursor = 'pointer';
-        path.style.pointerEvents = 'auto'; // Make path clickable
+      path.style.cursor = 'pointer';
+      path.style.pointerEvents = 'auto'; // Make path clickable
 
-        path.addEventListener('click', () => {
-          showSecondDetails(i, data.timeData[i]);
-        });
-      }
+      path.addEventListener('click', () => {
+        showSecondDetails(i, data.timeData[i]);
+      });
 
       svg.appendChild(path);
       segment.appendChild(svg);
@@ -316,11 +315,11 @@
       const radians = angle * (Math.PI / 180);
 
       // Calculate position (outer edge of the clock)
-      const indexOuterRadius = 245; // Just inside the border
-      const indexInnerRadius = i % 15 === 0 ? 210 : 225; // Longer marks for 0, 15, 30, 45
+      const indexOuterRadius = 245 * scale; // Just inside the border
+      const indexInnerRadius = (i % 15 === 0 ? 210 : 225) * scale; // Longer marks for 0, 15, 30, 45
 
-      const centerX = 250;
-      const centerY = 250;
+      const centerX = baseSize / 2;
+      const centerY = baseSize / 2;
 
       // Create line for index mark
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -329,11 +328,11 @@
       line.setAttribute('x2', centerX + indexOuterRadius * Math.cos(radians));
       line.setAttribute('y2', centerY + indexOuterRadius * Math.sin(radians));
       line.setAttribute('stroke', STYLES.textColor);
-      line.setAttribute('stroke-width', i % 15 === 0 ? 3 : 2);
+      line.setAttribute('stroke-width', (i % 15 === 0 ? 3 : 2) * scale);
       indexSvg.appendChild(line);
 
       // Add numerical label for all 5-second intervals
-      const textRadius = i % 15 === 0 ? indexInnerRadius - 25 : indexInnerRadius - 20;
+      const textRadius = indexInnerRadius - (i % 15 === 0 ? 25 : 20) * scale;
       const textX = centerX + textRadius * Math.cos(radians);
       const textY = centerY + textRadius * Math.sin(radians);
 
@@ -341,7 +340,7 @@
       text.setAttribute('x', textX);
       text.setAttribute('y', textY);
       text.setAttribute('fill', STYLES.textColor);
-      text.setAttribute('font-size', i % 15 === 0 ? '16px' : '14px');
+      text.setAttribute('font-size', `${(i % 15 === 0 ? 16 : 14) * scale}px`);
       text.setAttribute('font-weight', 'bold');
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('dominant-baseline', 'middle');
@@ -356,8 +355,8 @@
     clockCenter.style.top = '50%';
     clockCenter.style.left = '50%';
     clockCenter.style.transform = 'translate(-50%, -50%)';
-    clockCenter.style.width = '100px';
-    clockCenter.style.height = '100px';
+    clockCenter.style.width = `${100 * scale}px`;
+    clockCenter.style.height = `${100 * scale}px`;
     clockCenter.style.borderRadius = '50%';
     clockCenter.style.backgroundColor = STYLES.clockBorderColor;
     clockCenter.style.display = 'flex';
@@ -365,7 +364,7 @@
     clockCenter.style.alignItems = 'center';
     clockCenter.style.color = STYLES.backgroundColor;
     clockCenter.style.fontWeight = 'bold';
-    clockCenter.style.fontSize = '20px'; // Larger font for better readability
+    clockCenter.style.fontSize = `${20 * scale}px`; // Larger font for better readability
     clockCenter.style.zIndex = '3'; // Ensure it's on top
     clockCenter.textContent = `${Math.round((data.collectedCount / 60) * 100)}%`;
     clockContainer.appendChild(clockCenter);
@@ -376,30 +375,33 @@
 
     // Add explanation
     const explanation = document.createElement('div');
-    explanation.style.marginTop = '20px';
+    explanation.style.marginTop = isMobile ? '10px' : '20px';
     explanation.style.color = STYLES.subtleTextColor;
-    explanation.style.fontSize = '0.9em';
+    explanation.style.fontSize = isMobile ? '0.8em' : '0.9em';
+    explanation.style.padding = isMobile ? '0 5px' : '0';
     explanation.innerHTML =
-      "Stopwatch Bingo: collect finish times with every second from 00-59.<br>Orange segments show seconds you've collected, green segments are still needed.<br>Click on any segment to see details.";
+      "Stopwatch Bingo: collect finish times with every second from 00-59.<br>Orange segments show seconds you've collected. Segment length indicates frequency.<br>Click on any segment to see details.";
     container.appendChild(explanation);
 
     return container;
   }
 
   function addDownloadButton(container) {
+    const isMobile = window.innerWidth < 768;
     const btnContainer = document.createElement('div');
-    btnContainer.style.marginTop = '15px';
+    btnContainer.style.marginTop = isMobile ? '10px' : '15px';
     btnContainer.id = 'bingo-download-btn-container';
 
     const downloadBtn = document.createElement('button');
     downloadBtn.textContent = '💾 Save as Image';
-    downloadBtn.style.padding = '8px 15px';
+    downloadBtn.style.padding = isMobile ? '6px 12px' : '8px 15px';
     downloadBtn.style.backgroundColor = STYLES.clockBorderColor;
     downloadBtn.style.color = STYLES.backgroundColor;
     downloadBtn.style.border = 'none';
     downloadBtn.style.borderRadius = '4px';
     downloadBtn.style.cursor = 'pointer';
     downloadBtn.style.fontWeight = 'bold';
+    downloadBtn.style.fontSize = isMobile ? '0.9em' : '1em';
 
     // Add hover effect
     downloadBtn.addEventListener('mouseover', function () {
