@@ -42,6 +42,61 @@
 
   const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter((letter) => letter !== 'X');
 
+  function getResponsiveConfig() {
+    const mobileConfig = {
+      isMobile: true,
+      container: {
+        padding: '10px',
+        marginTop: '10px',
+      },
+      typography: {
+        heading: '1.1em',
+        stats: '1em',
+        statsSubtext: '0.9em',
+      },
+      grid: {
+        gapSize: '5px',
+        cellPadding: '5px',
+        letterFontSize: '1.2em',
+        eventFontSize: '0.7em',
+        dateFontSize: '0.65em',
+      },
+      button: {
+        padding: '6px 12px',
+        fontSize: '0.9em',
+        marginTop: '10px',
+      },
+    };
+
+    const desktopConfig = {
+      isMobile: false,
+      container: {
+        padding: '20px',
+        marginTop: '20px',
+      },
+      typography: {
+        heading: '1.3em',
+        stats: '1.2em',
+        statsSubtext: '1em',
+      },
+      grid: {
+        gapSize: '10px',
+        cellPadding: '10px',
+        letterFontSize: '1.5em',
+        eventFontSize: '0.8em',
+        dateFontSize: '0.7em',
+      },
+      button: {
+        padding: '8px 15px',
+        fontSize: '1em',
+        marginTop: '15px',
+      },
+    };
+
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? mobileConfig : desktopConfig;
+  }
+
   function findResultsTable() {
     const tables = document.querySelectorAll('#results');
     return tables[tables.length - 1];
@@ -86,12 +141,13 @@
   }
 
   function createAlphabetContainer(data) {
+    const responsive = getResponsiveConfig();
     const container = document.createElement('div');
     container.className = 'parkrun-alphabet-container';
     container.style.width = '100%';
     container.style.maxWidth = '800px';
-    container.style.margin = '20px auto';
-    container.style.padding = '20px';
+    container.style.margin = `${responsive.container.marginTop} auto`;
+    container.style.padding = responsive.container.padding;
     container.style.backgroundColor = '#2b223d';
     container.style.borderRadius = '8px';
     container.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
@@ -100,30 +156,31 @@
 
     const heading = document.createElement('h3');
     heading.textContent = 'Alphabet Challenge';
-    heading.style.marginBottom = '15px';
+    heading.style.marginBottom = responsive.isMobile ? '10px' : '15px';
     heading.style.color = '#FFA300';
+    heading.style.fontSize = responsive.typography.heading;
     container.appendChild(heading);
 
     const stats = document.createElement('div');
     stats.innerHTML =
-      '<div style="font-size: 1.2em; margin-bottom: 10px;">' +
+      `<div style="font-size: ${responsive.typography.stats}; margin-bottom: ${responsive.isMobile ? '8px' : '10px'};">` +
       '<strong>' +
       data.completedCount +
       ' of 25</strong> letters completed' +
       '</div>' +
-      '<div>After ' +
+      `<div style="font-size: ${responsive.typography.statsSubtext};">After ` +
       data.totalEvents +
       ' parkruns</div>' +
       (data.dateOfCompletion
-        ? '<div>🎉 Challenge completed on: ' + data.dateOfCompletion + '</div>'
+        ? `<div style="font-size: ${responsive.typography.statsSubtext};">🎉 Challenge completed on: ${data.dateOfCompletion}</div>`
         : '');
     container.appendChild(stats);
 
     const grid = document.createElement('div');
     grid.style.display = 'grid';
     grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
-    grid.style.gap = '10px';
-    grid.style.marginTop = '20px';
+    grid.style.gap = responsive.grid.gapSize;
+    grid.style.marginTop = responsive.isMobile ? '10px' : '20px';
 
     ALPHABET.forEach((letter) => {
       const cell = document.createElement('div');
@@ -137,27 +194,85 @@
       cell.style.flexDirection = 'column';
       cell.style.alignItems = 'flex-start'; // Align text to the top-left
       cell.style.justifyContent = 'flex-start';
-      cell.style.padding = '10px';
+      cell.style.padding = responsive.grid.cellPadding;
       cell.style.fontWeight = 'bold';
       cell.style.fontSize = '1em';
+      cell.style.cursor = data.completedLetters[letter] ? 'pointer' : 'default';
 
       const letterText = document.createElement('div');
       letterText.textContent = letter;
-      letterText.style.fontSize = '1.5em';
-      letterText.style.marginBottom = '5px';
+      letterText.style.fontSize = responsive.grid.letterFontSize;
+      letterText.style.marginBottom = responsive.isMobile ? '2px' : '5px';
       cell.appendChild(letterText);
 
       if (data.completedLetters[letter]) {
         const eventDetails = document.createElement('div');
         eventDetails.innerHTML =
-          '<div style="font-size: 0.8em; text-align: left;">' +
+          `<div style="font-size: ${responsive.grid.eventFontSize}; text-align: left;">` +
           data.completedLetters[letter].eventName +
           '<br>' +
-          '<span style="font-size: 0.7em;">(' +
+          `<span style="font-size: ${responsive.grid.dateFontSize};">(` +
           data.completedLetters[letter].date +
           ')</span>' +
           '</div>';
+        // Hide event details on mobile to prevent text overflow
+        if (responsive.isMobile) {
+          eventDetails.style.display = 'none';
+        }
         cell.appendChild(eventDetails);
+
+        // Add click handler for popup
+        cell.addEventListener('click', () => {
+          const popupResponsive = getResponsiveConfig();
+          const overlay = document.createElement('div');
+          overlay.style.position = 'fixed';
+          overlay.style.top = '0';
+          overlay.style.left = '0';
+          overlay.style.width = '100%';
+          overlay.style.height = '100%';
+          overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+          overlay.style.zIndex = '999';
+          overlay.addEventListener('click', () => {
+            document.body.removeChild(overlay);
+          });
+
+          const popup = document.createElement('div');
+          popup.style.position = 'fixed';
+          popup.style.top = '50%';
+          popup.style.left = '50%';
+          popup.style.transform = 'translate(-50%, -50%)';
+          popup.style.backgroundColor = '#2b223d';
+          popup.style.color = '#fff';
+          const popupPadding = popupResponsive.isMobile ? '15px' : '20px';
+          popup.style.padding = popupPadding;
+          popup.style.borderRadius = '8px';
+          popup.style.boxShadow = '0 2px 4px rgba(0,0,0,0.5)';
+          popup.style.zIndex = '1000';
+          popup.style.maxWidth = popupResponsive.isMobile ? '95%' : '90%';
+          popup.style.maxHeight = popupResponsive.isMobile ? '85%' : '80%';
+          popup.style.overflowY = 'auto';
+          popup.style.fontSize = popupResponsive.isMobile ? '0.9em' : '1em';
+
+          const popupHeading = document.createElement('h4');
+          popupHeading.textContent = `Letter ${letter}`;
+          popupHeading.style.marginBottom = '10px';
+          popupHeading.style.color = '#FFA300';
+          popup.appendChild(popupHeading);
+
+          const entry = document.createElement('div');
+          entry.style.marginBottom = '10px';
+          entry.innerHTML =
+            '<strong>' +
+            data.completedLetters[letter].eventName +
+            '</strong><br>' +
+            '<span style="font-size: 0.9em;">' +
+            data.completedLetters[letter].date +
+            '</span>';
+          popup.appendChild(entry);
+
+          overlay.appendChild(popup);
+          document.body.appendChild(overlay);
+        });
       }
 
       grid.appendChild(cell);
@@ -172,19 +287,21 @@
   }
 
   function addDownloadButton(container) {
+    const responsive = getResponsiveConfig();
     const btnContainer = document.createElement('div');
-    btnContainer.style.marginTop = '15px';
+    btnContainer.style.marginTop = responsive.button.marginTop;
     btnContainer.id = 'alphabet-download-btn-container';
 
     const downloadBtn = document.createElement('button');
     downloadBtn.textContent = '💾 Save as Image';
-    downloadBtn.style.padding = '8px 15px';
+    downloadBtn.style.padding = responsive.button.padding;
     downloadBtn.style.backgroundColor = '#FFA300';
     downloadBtn.style.color = '#2b223d';
     downloadBtn.style.border = 'none';
     downloadBtn.style.borderRadius = '4px';
     downloadBtn.style.cursor = 'pointer';
     downloadBtn.style.fontWeight = 'bold';
+    downloadBtn.style.fontSize = responsive.button.fontSize;
 
     // Add hover effect
     downloadBtn.addEventListener('mouseover', function () {
