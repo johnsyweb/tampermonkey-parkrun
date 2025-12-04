@@ -1,98 +1,4 @@
-<!-- Enhanced SEO and OpenGraph meta tags -->
-<meta
-  name="description"
-  content="{{ page.description | default: 'A collection of Tampermonkey userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges for parkrun participants.' }}"
-/>
-<meta
-  name="keywords"
-  content="parkrun, tampermonkey, userscript, parkrun statistics, parkrun analysis, parkrun challenges, parkrun visualisations, parkrun charts, parkrun bingo, parkrun alphabet challenge, parkrun compass, parkrun data analysis"
-/>
-
-<!-- OpenGraph / Facebook -->
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content="parkrun Userscripts" />
-<meta
-  property="og:title"
-  content="{{ page.title | default: 'parkrun Userscripts - Enhance your parkrun experience' }}"
-/>
-<meta
-  property="og:description"
-  content="{{ page.description | default: 'A collection of Tampermonkey userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges.' }}"
-/>
-<meta property="og:url" content="{{ site.url }}{{ page.url }}" />
-<meta
-  property="og:image"
-  content="{{ site.url }}{{ site.baseurl }}/images/alphabet-challenge.png"
-/>
-<meta
-  property="og:image:alt"
-  content="parkrun Alphabet Challenge - Track your progress visiting parkruns starting with each letter of the alphabet"
-/>
-<!-- Fallback icon for smaller social media contexts -->
-<meta
-  property="og:image"
-  content="{{ site.url }}{{ site.baseurl }}/icons/social-icon-192x192.svg"
-/>
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:site" content="@johnsyweb" />
-<meta
-  name="twitter:title"
-  content="{{ page.title | default: 'parkrun Userscripts - Enhance your parkrun experience' }}"
-/>
-<meta
-  name="twitter:description"
-  content="{{ page.description | default: 'A collection of Tampermonkey userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges.' }}"
-/>
-<meta
-  name="twitter:image"
-  content="{{ site.url }}{{ site.baseurl }}/images/alphabet-challenge.png"
-/>
-<meta
-  name="twitter:image:alt"
-  content="parkrun Alphabet Challenge - Track your progress visiting parkruns starting with each letter of the alphabet"
-/>
-
-<!-- Bluesky (uses same meta tags as Twitter/OpenGraph) -->
-<meta name="bluesky:card" content="summary_large_image" />
-<meta
-  name="bluesky:title"
-  content="{{ page.title | default: 'parkrun Userscripts - Enhance your parkrun experience' }}"
-/>
-<meta
-  name="bluesky:description"
-  content="{{ page.description | default: 'A collection of Tampermonkey userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges.' }}"
-/>
-<meta
-  name="bluesky:image"
-  content="{{ site.url }}{{ site.baseurl }}/images/alphabet-challenge.png"
-/>
-
-<!-- Additional SEO -->
-<meta name="robots" content="index, follow" />
-<meta name="author" content="Pete Johns" />
-<meta name="theme-color" content="#2b233d" />
-
-<!-- Messaging Platform Optimizations -->
-<!-- iMessage: Ensure images are at least 900px wide and high-res -->
-<meta property="og:image:width" content="1100" />
-<meta property="og:image:height" content="1337" />
-<meta property="og:image:type" content="image/png" />
-
-<!-- Signal/WhatsApp: Ensure images are publicly accessible -->
-<meta
-  property="og:image:secure_url"
-  content="{{ site.url }}{{ site.baseurl }}/images/alphabet-challenge.png"
-/>
-
-<!-- Additional messaging platform support -->
-<meta name="format-detection" content="telephone=no" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-
-<!-- Structured Data -->
+<!-- Structured Data for parkrun Userscripts -->
 <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -102,7 +8,7 @@
     "url": "{{ site.url }}",
     "applicationCategory": "BrowserExtension",
     "operatingSystem": ["Windows", "macOS", "Linux", "Android", "iOS"],
-    "browserRequirements": "Requires Tampermonkey or compatible userscript manager. Works with Firefox, Chrome, Safari, Edge, and userscript managers.",
+    "browserRequirements": "Requires a userscript manager such as Userscripts, Tampermonkey, or Violentmonkey. Works with Firefox, Chrome, Safari, Edge, Orion, and other compatible browsers.",
     "offers": {
       "@type": "Offer",
       "price": "0",

@@ -7,7 +7,7 @@ keywords: parkrun, userscript, userscripts, tampermonkey, parkrun statistics, pa
 
 ## What
 
-A collection of userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges. These scripts work with parkrun event pages, parkrunner profile pages, and results pages, and can be used with any userscript manager including [Userscripts](https://github.com/quoid/userscripts), [Tampermonkey](https://www.tampermonkey.net/), or any compatible browser extension.
+A collection of userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges. These scripts work with parkrun event pages, parkrunner profile pages, and results pages, and can be used with any userscript manager including [Userscripts](https://github.com/quoid/userscripts), [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), or any compatible browser extension.
 
 ## Why
 
@@ -25,6 +25,7 @@ Each script can be installed directly via any userscript manager:
 1. Install a userscript manager for your browser:
    - [Userscripts](https://github.com/quoid/userscripts) (for Safari, macOS/iOS)
    - [Tampermonkey](https://www.tampermonkey.net/) (for Chrome, Firefox, Edge, Opera)
+   - [Violentmonkey](https://violentmonkey.github.io/) (for Orion on macOS)
    - Or any compatible userscript manager
 2. Click on any of the script links below
 3. Click "Install" when prompted
