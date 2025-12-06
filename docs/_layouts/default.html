@@ -152,8 +152,15 @@
     />
 
     <link href="{{ site.url }}/assets/css/style.css" rel="stylesheet" />
-    <link href="{{ site.url }}/assets/css/colors-light.css" rel="stylesheet" />
-    <link href="{{ site.url }}/assets/css/colors-dark.css" rel="stylesheet" />
+    <link
+      href="{{ site.url }}/assets/css/colors-dark.css"
+      rel="alternate stylesheet"
+      title="Dark"
+    />
+    <link href="{{ site.url }}/assets/css/colors-light.css" rel="stylesheet" title="Light" />
+    <link href="{{ site.baseurl }}/style.css" rel="stylesheet" />
+
+    {% include icons.html %}
 
     <link rel="Start" href="{{ site.url }}/" title="Back to the start" />
     <link rel="Help" href="{{ site.url }}/about/" title="What is the point of this website?" />

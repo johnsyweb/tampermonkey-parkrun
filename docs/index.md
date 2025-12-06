@@ -36,11 +36,12 @@ I wrote these scripts while participating in and volunteering at parkrun, to mak
 
 <div class="scripts-grid">
 {% for script in scripts %}
-<div class="script-item">
+{% assign script_id = script.filename | replace: '.user.js', '' %}
+<div class="script-item" id="{{ script_id }}">
 <h3>{{ script.name }}</h3>
 <p>{{ script.description }}</p>
 <img src="{{ script.screenshot }}" alt="{{ script.name }} Screenshot">
-<a href="{{ script.install_url }}">Install</a>
+<a href="{{ script.install_url }}">Install {{ script.name }}</a>
 </div>
 {% endfor %}
 </div>
