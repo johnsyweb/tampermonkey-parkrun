@@ -1,13 +1,14 @@
 ---
 layout: default
 title: parkrun Userscripts - Enhance your parkrun experience
+og_image: /tampermonkey-parkrun/images/alphabet-challenge.png
 description: A collection of userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges for parkrun participants.
 keywords: parkrun, userscript, userscripts, tampermonkey, parkrun statistics, parkrun analysis, parkrun challenges, parkrun visualisations, parkrun charts, parkrun bingo, parkrun alphabet challenge, parkrun compass, parkrun data analysis
 ---
 
 ## What
 
-A collection of userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges. These scripts work with parkrun event pages, parkrunner profile pages, and results pages, and can be used with any userscript manager including [Userscripts](https://github.com/quoid/userscripts), [Tampermonkey](https://www.tampermonkey.net/), [Violentmonkey](https://violentmonkey.github.io/), or any compatible browser extension.
+A collection of userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges. These scripts work with parkrun event pages, parkrunner profile pages, and results pages, and can be used with any userscript manager including [Userscripts][userscripts], [Tampermonkey][tampermonkey], [Violentmonkey][violentmonkey], or any compatible browser extension.
 
 ## Why
 
@@ -20,15 +21,14 @@ I wrote these scripts while participating in and volunteering at parkrun, to mak
 
 ## Installation
 
-Each script can be installed directly via any userscript manager:
+1. **Install a userscript manager for your browser:**
+   - **Desktop:** [Userscripts][userscripts] (Safari), [Tampermonkey][tampermonkey] (Chrome, Firefox, Edge, Opera), or [Violentmonkey][violentmonkey] ([Orion][orion])
+   - **iOS:** [Userscripts][userscripts] (Safari) or [Violentmonkey][violentmonkey] ([Orion][orion])
+   - **Android:** Install [Kiwi Browser][kiwi-browser], then install [Tampermonkey][tampermonkey-chrome] or [Violentmonkey][violentmonkey-chrome] from the Chrome Web Store
 
-1. Install a userscript manager for your browser:
-   - [Userscripts](https://github.com/quoid/userscripts) (for Safari, macOS/iOS)
-   - [Tampermonkey](https://www.tampermonkey.net/) (for Chrome, Firefox, Edge, Opera)
-   - [Violentmonkey](https://violentmonkey.github.io/) (for Orion on macOS)
-   - Or any compatible userscript manager
-2. Click on any of the script links below
-3. Click "Install" when prompted
+2. **Click on any of the script links below**
+
+3. **Click "Install" when prompted**
 
 ## Available Scripts
 
@@ -44,3 +44,11 @@ Each script can be installed directly via any userscript manager:
 </div>
 {% endfor %}
 </div>
+
+[userscripts]: https://github.com/quoid/userscripts
+[tampermonkey]: https://www.tampermonkey.net/
+[violentmonkey]: https://violentmonkey.github.io/
+[orion]: https://orionbrowser.com
+[kiwi-browser]: https://play.google.com/store/apps/details?id=com.kiwibrowser.browser
+[tampermonkey-chrome]: https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo
+[violentmonkey-chrome]: https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag

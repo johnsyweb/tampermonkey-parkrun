@@ -1,10 +1,12 @@
 ---
-name: johnsy.com
+name: parkrun Userscripts
 title: parkrun Userscripts
-description: A collection of userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges
+description: Enhance your parkrun experience with additional statistics, visualisations, and unofficial challenges.
 description_html: |
-  parkrun Userscripts: Enhance your parkrun experience with additional
-  statistics, visualisations, and unofficial challenges.
+  Enhance your parkrun experience with additional statistics, visualisations, and
+  unofficial challenges.
+og_image: /tampermonkey-parkrun/images/alphabet-challenge.png
+application_name: parkrun Userscripts
 baseurl: /tampermonkey-parkrun
 url: https://johnsy.com
 
