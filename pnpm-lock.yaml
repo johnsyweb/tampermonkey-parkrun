@@ -54,8 +54,8 @@ importers:
         specifier: ^3.7.4
         version: 3.7.4
       puppeteer:
-        specifier: ^24.32.1
-        version: 24.32.1(typescript@5.9.3)
+        specifier: ^24.33.0
+        version: 24.33.0(typescript@5.9.3)
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@24.10.1)(typescript@5.9.3)
@@ -1002,8 +1002,8 @@ packages:
   '@types/node@24.10.1':
     resolution: {integrity: sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==}
 
-  '@types/node@24.10.2':
-    resolution: {integrity: sha512-WOhQTZ4G8xZ1tjJTvKOpyEVSGgOTvJAfDK3FNFgELyaTpzhdgHVHeqW8V+UJvzF5BT+/B54T/1S2K6gd9c7bbA==}
+  '@types/node@24.10.4':
+    resolution: {integrity: sha512-vnDVpYPMzs4wunl27jHrfmwojOGKya0xyM3sH+UE5iv5uPS6vX7UIoh6m+vQc5LGBq52HBKPIn/zcSZVzeDEZg==}
 
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
@@ -2285,12 +2285,12 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
-  puppeteer-core@24.32.1:
-    resolution: {integrity: sha512-GdWTOgy3RqaW6Etgx93ydlVJ4FBJ6TmhMksG5W7v4uawKAzLHNj33k4kBQ1SFZ9NvoXNjhdQuIQ+uik2kWnarA==}
+  puppeteer-core@24.33.0:
+    resolution: {integrity: sha512-tPTxVg+Qdj/8av4cy6szv3GlhxeOoNhiiMZ955fjxQyvPQE/6DjCa6ZyF/x0WJrlgBZtaLSP8TQgJb7FdLDXXA==}
     engines: {node: '>=18'}
 
-  puppeteer@24.32.1:
-    resolution: {integrity: sha512-wa8vGswFjH1iCyG6bGGydIYssEBluXixbMibK4x2x6/lIAuR87gF+c+Jjzom2Wiw/dDOtuki89VBurRWrgYaUA==}
+  puppeteer@24.33.0:
+    resolution: {integrity: sha512-nl3wsAztq5F8zybn4Tk41OCnYIzFIzGC6AN0WcF2KCUnWenajvRRPgBmS6LvNUV2HEeIzT2zRZHH0TgVxLDKew==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -3673,7 +3673,7 @@ snapshots:
       '@jest/fake-timers': 30.0.4
       '@jest/types': 30.0.1
       '@types/jsdom': 21.1.7
-      '@types/node': 24.10.2
+      '@types/node': 24.10.4
       jest-mock: 30.0.2
       jest-util: 30.0.2
       jsdom: 26.1.0
@@ -3682,7 +3682,7 @@ snapshots:
     dependencies:
       '@jest/fake-timers': 30.0.4
       '@jest/types': 30.0.1
-      '@types/node': 24.10.2
+      '@types/node': 24.10.4
       jest-mock: 30.0.2
 
   '@jest/environment@30.2.0':
@@ -3707,7 +3707,7 @@ snapshots:
     dependencies:
       '@jest/types': 30.0.1
       '@sinonjs/fake-timers': 13.0.5
-      '@types/node': 24.10.2
+      '@types/node': 24.10.4
       jest-message-util: 30.0.2
       jest-mock: 30.0.2
       jest-util: 30.0.2
@@ -3826,7 +3826,7 @@ snapshots:
       '@jest/schemas': 30.0.1
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 24.10.2
+      '@types/node': 24.10.4
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -3951,7 +3951,7 @@ snapshots:
 
   '@types/jsdom@21.1.7':
     dependencies:
-      '@types/node': 24.10.2
+      '@types/node': 24.10.4
       '@types/tough-cookie': 4.0.5
       parse5: 7.3.0
 
@@ -3961,7 +3961,7 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
-  '@types/node@24.10.2':
+  '@types/node@24.10.4':
     dependencies:
       undici-types: 7.16.0
 
@@ -3981,7 +3981,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 24.10.2
+      '@types/node': 24.10.4
     optional: true
 
   '@ungap/structured-clone@1.3.0': {}
@@ -4860,7 +4860,7 @@ snapshots:
       '@jest/environment': 30.0.4
       '@jest/environment-jsdom-abstract': 30.0.4(jsdom@26.1.0)
       '@types/jsdom': 21.1.7
-      '@types/node': 24.10.2
+      '@types/node': 24.10.4
       jsdom: 26.1.0
     transitivePeerDependencies:
       - bufferutil
@@ -4935,7 +4935,7 @@ snapshots:
   jest-mock@30.0.2:
     dependencies:
       '@jest/types': 30.0.1
-      '@types/node': 24.10.2
+      '@types/node': 24.10.4
       jest-util: 30.0.2
 
   jest-mock@30.2.0:
@@ -5051,7 +5051,7 @@ snapshots:
   jest-util@30.0.2:
     dependencies:
       '@jest/types': 30.0.1
-      '@types/node': 24.10.2
+      '@types/node': 24.10.4
       chalk: 4.1.2
       ci-info: 4.3.1
       graceful-fs: 4.2.11
@@ -5430,7 +5430,7 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  puppeteer-core@24.32.1:
+  puppeteer-core@24.33.0:
     dependencies:
       '@puppeteer/browsers': 2.11.0
       chromium-bidi: 11.0.0(devtools-protocol@0.0.1534754)
@@ -5447,13 +5447,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  puppeteer@24.32.1(typescript@5.9.3):
+  puppeteer@24.33.0(typescript@5.9.3):
     dependencies:
       '@puppeteer/browsers': 2.11.0
       chromium-bidi: 11.0.0(devtools-protocol@0.0.1534754)
       cosmiconfig: 9.0.0(typescript@5.9.3)
       devtools-protocol: 0.0.1534754
-      puppeteer-core: 24.32.1
+      puppeteer-core: 24.33.0
       typed-query-selector: 2.12.0
     transitivePeerDependencies:
       - bare-abort-controller
