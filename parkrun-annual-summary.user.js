@@ -35,7 +35,7 @@
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-annual-summary.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
 // @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
-// @version      0.2.3
+// @version      0.2.4
 // ==/UserScript==
 
 (function () {
