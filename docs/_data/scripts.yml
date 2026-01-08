@@ -28,6 +28,12 @@
   install_url: https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-charts.user.js
   filename: parkrun-charts.user.js
 
+- name: parkrun Annual Summary
+  description: 'Adds annual participation summaries with totals, averages, min/max, year-over-year growth, charts, and multi-event comparisons for event history pages.'
+  screenshot: /tampermonkey-parkrun/images/parkrun-annual-summary.png
+  install_url: https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-annual-summary.user.js
+  filename: parkrun-annual-summary.user.js
+
 - name: parkrun Walker Analysis
   description: 'Highlight and summarize walkers (>=10:00/km) and compare with faster participants on parkrun results pages.'
   screenshot: /tampermonkey-parkrun/images/parkrun-walker-analysis.png

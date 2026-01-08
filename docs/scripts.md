@@ -48,6 +48,16 @@
 
 [Install parkrun-charts.user.js](https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-charts.user.js)
 
+### Annual Summary
+
+> Adds annual participation summaries to event history pages: totals, averages, min/max for finishers and volunteers, year-over-year growth, interactive charts, download option, and multi-event comparisons with nearby parkruns.
+
+![Annual Summary Screenshot](../images/parkrun-annual-summary.png)
+
+**Demo page**: [https://www.parkrun.com.au/maribyrnong/results/eventhistory/](https://www.parkrun.com.au/maribyrnong/results/eventhistory/)
+
+[Install parkrun-annual-summary.user.js](https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-annual-summary.user.js)
+
 ### Walker Analysis
 
 > Highlight and summarise walkers (>=50:00) and compare with faster participants on parkrun results pages. Includes analysis by gender, parkrun experience, volunteer status, and age group.

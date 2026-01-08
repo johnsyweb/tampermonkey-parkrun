@@ -55,6 +55,14 @@ const screenshotConfigs: ScreenshotConfig[] = [
     viewport: { width: 1200, height: 800 },
   },
   {
+    name: 'parkrun-annual-summary',
+    url: 'https://www.parkrun.com.au/maribyrnong/results/eventhistory/',
+    script: 'parkrun-annual-summary.user.js',
+    waitForSelector: '.parkrun-annual-summary',
+    waitForTimeout: 9000,
+    viewport: { width: 1200, height: 1400 },
+  },
+  {
     name: 'parkrun-walker-analysis',
     url: 'https://www.parkrun.co.za/pigglywiggly/results/latestresults/',
     script: 'parkrun-walker-analysis.user.js',
