@@ -50,7 +50,7 @@
   "jest": {
     "testEnvironment": "jest-fixed-jsdom",
     "transformIgnorePatterns": [
-      "node_modules/(?!(.pnpm|parse5|whatwg-url|tr46|webidl-conversions|jsdom)/)"
+      "node_modules/(?!(.pnpm|parse5|whatwg-url|tr46|webidl-conversions|jsdom|@exodus|html-encoding-sniffer)/)"
     ],
     "transform": {
       "^.+\\.(js|mjs)$": "babel-jest"
