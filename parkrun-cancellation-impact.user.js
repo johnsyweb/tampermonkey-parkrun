@@ -1101,6 +1101,8 @@
           return result.displayName || result.eventName;
         case 'distance':
           return parseFloat(result.distance);
+        case 'eventNumber':
+          return result.eventOnDate ? parseInt(result.eventOnDate.eventNumber, 10) : -1;
         case 'baseline':
           return result.baseline.avgFinishers;
         case 'onDate':
@@ -1195,6 +1197,12 @@
         info: 'Distance from cancelled event in kilometers.',
       },
       {
+        label: 'Event #',
+        key: 'eventNumber',
+        align: 'right',
+        info: `Event number on ${dateStr}. Lower numbers indicate newer parkruns.`,
+      },
+      {
         label: 'Baseline (Avg)',
         key: 'baseline',
         align: 'right',
@@ -1265,6 +1273,18 @@
         distanceCell.style.color = STYLES.subtleTextColor;
         distanceCell.textContent = `${result.distance}km`;
         row.appendChild(distanceCell);
+
+        const eventNumberCell = document.createElement('td');
+        eventNumberCell.style.padding = '10px';
+        eventNumberCell.style.textAlign = 'right';
+        if (result.eventOnDate && result.eventOnDate.eventNumber) {
+          eventNumberCell.textContent = result.eventOnDate.eventNumber;
+          eventNumberCell.style.color = STYLES.textColor;
+        } else {
+          eventNumberCell.textContent = '—';
+          eventNumberCell.style.color = STYLES.subtleTextColor;
+        }
+        row.appendChild(eventNumberCell);
 
         const baselineCell = document.createElement('td');
         baselineCell.style.padding = '10px';
