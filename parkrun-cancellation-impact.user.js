@@ -2175,7 +2175,9 @@
           link.download = filename;
           link.click();
           setTimeout(() => URL.revokeObjectURL(url), 1000);
-          alert('Sharing is not supported in this browser, so the HTML report was downloaded instead.');
+          alert(
+            'Sharing is not supported in this browser, so the HTML report was downloaded instead.'
+          );
         }
       } catch (error) {
         console.error('Share failed:', error);
