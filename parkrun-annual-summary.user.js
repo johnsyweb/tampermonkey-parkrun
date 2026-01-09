@@ -34,7 +34,6 @@
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-annual-summary.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
 // @version      0.2.5
 // ==/UserScript==
 
@@ -203,6 +202,68 @@
         };
       })
       .sort((a, b) => a.distance - b.distance);
+  }
+
+  async function buildHtmlReport(mainContainer, meta) {
+    const clone = mainContainer.cloneNode(true);
+
+    const originalCanvases = mainContainer.querySelectorAll('canvas');
+    const clonedCanvases = clone.querySelectorAll('canvas');
+
+    originalCanvases.forEach((canvas, idx) => {
+      try {
+        const dataUrl = canvas.toDataURL('image/png');
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.alt = 'Chart snapshot';
+        img.style.maxWidth = '100%';
+        img.style.display = 'block';
+        img.style.backgroundColor = '#2b223d';
+
+        if (clonedCanvases[idx]) {
+          clonedCanvases[idx].replaceWith(img);
+        }
+      } catch (error) {
+        console.error('Failed to serialize chart canvas:', error);
+      }
+    });
+
+    const stylesheet = `
+      :root { color-scheme: dark; }
+      body { margin: 0; padding: 20px; background: ${STYLES.backgroundColor}; color: ${STYLES.textColor}; font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; line-height: 1.5; }
+      a { color: ${STYLES.lineColor}; }
+      h1, h2, h3, h4 { color: ${STYLES.barColor}; margin: 0 0 10px 0; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border: 1px solid ${STYLES.gridColor}; padding: 10px; text-align: left; }
+      th { background: #2b223d; color: ${STYLES.barColor}; }
+      tr:nth-child(even) td { background: #241c35; }
+      tr:nth-child(odd) td { background: #1f182e; }
+      .parkrun-annual-summary { background: ${STYLES.backgroundColor}; padding: 16px; border-radius: 6px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); }
+      .chart-img { max-width: 100%; display: block; }
+      .meta { margin-bottom: 16px; color: ${STYLES.subtleTextColor}; font-size: 13px; }
+      .meta strong { color: ${STYLES.textColor}; }
+    `;
+
+    const header = `
+      <header>
+        <h1>parkrun Annual Summary</h1>
+        <div class="meta">
+          <div><strong>Event:</strong> ${meta.eventShortName}</div>
+          <div><strong>Generated:</strong> ${meta.generatedAt}</div>
+        </div>
+      </header>
+    `;
+
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>parkrun Annual Summary - ${meta.eventShortName}</title><style>${stylesheet}</style></head><body>${header}${clone.outerHTML}</body></html>`;
+  }
+
+  async function generateReportBlob(mainContainer, meta) {
+    const html = await buildHtmlReport(mainContainer, meta);
+    const filename = `parkrun-annual-summary-${meta.eventShortName}-${meta.generatedAtISO}.html`;
+    return {
+      blob: new Blob([html], { type: 'text/html' }),
+      filename,
+    };
   }
 
   async function fetchEventHistory(eventName, domain) {
@@ -909,50 +970,122 @@
 
     comparisonSection.appendChild(chartsGrid);
 
-    // Download entire report button
+    // Export/share full report buttons
     const downloadContainer = document.createElement('div');
     downloadContainer.style.display = 'flex';
     downloadContainer.style.justifyContent = 'center';
     downloadContainer.style.marginTop = '20px';
+    downloadContainer.style.gap = '10px';
+    downloadContainer.style.flexWrap = 'wrap';
 
-    const downloadBtn = document.createElement('button');
-    downloadBtn.textContent = '💾 Download Full Report';
-    downloadBtn.style.padding = '8px 16px';
-    downloadBtn.style.backgroundColor = STYLES.lineColor;
-    downloadBtn.style.color = '#2b223d';
-    downloadBtn.style.border = 'none';
-    downloadBtn.style.borderRadius = '4px';
-    downloadBtn.style.cursor = 'pointer';
-    downloadBtn.style.fontWeight = 'bold';
-    downloadBtn.style.fontSize = '14px';
+    const exportHtmlBtn = document.createElement('button');
+    exportHtmlBtn.textContent = '📄 Export HTML';
+    exportHtmlBtn.style.padding = '8px 16px';
+    exportHtmlBtn.style.backgroundColor = STYLES.barColor;
+    exportHtmlBtn.style.color = '#1c1b2a';
+    exportHtmlBtn.style.border = 'none';
+    exportHtmlBtn.style.borderRadius = '4px';
+    exportHtmlBtn.style.cursor = 'pointer';
+    exportHtmlBtn.style.fontWeight = 'bold';
+    exportHtmlBtn.style.fontSize = '14px';
 
-    downloadBtn.addEventListener('click', () => {
-      const mainContainer = document.querySelector('.parkrun-annual-summary');
-      if (!mainContainer) return;
+    const shareBtn = document.createElement('button');
+    shareBtn.textContent = '📤 Share Report';
+    shareBtn.style.padding = '8px 16px';
+    shareBtn.style.backgroundColor = STYLES.lineColor;
+    shareBtn.style.color = '#2b223d';
+    shareBtn.style.border = 'none';
+    shareBtn.style.borderRadius = '4px';
+    shareBtn.style.cursor = 'pointer';
+    shareBtn.style.fontWeight = 'bold';
+    shareBtn.style.fontSize = '14px';
 
-      // Hide comparison controls during download
-      const controls = mainContainer.querySelector('.parkrun-comparison-selector-controls');
-      const originalDisplay = controls?.style.display;
-      if (controls) controls.style.display = 'none';
+    const getReportMeta = () => {
+      const eventInfo = getCurrentEventInfo();
+      const currentParkrun = state.allParkruns?.find(
+        (p) => p.properties.eventname === eventInfo.eventName
+      );
+      const eventShortName = currentParkrun?.properties?.EventShortName || eventInfo.eventName;
+      const generatedAt = new Date();
+      const generatedAtISO = generatedAt.toISOString().split('T')[0];
 
-      downloadBtn.style.display = 'none';
-      // eslint-disable-next-line no-undef
-      html2canvas(mainContainer, {
-        backgroundColor: STYLES.backgroundColor,
-        scale: 2,
-      }).then((canvas) => {
-        downloadBtn.style.display = 'block';
-        if (controls) controls.style.display = originalDisplay || '';
+      return { eventShortName, generatedAt: generatedAt.toLocaleString(), generatedAtISO };
+    };
 
+    exportHtmlBtn.addEventListener('click', async () => {
+      const originalLabel = exportHtmlBtn.textContent;
+      const originalDisplay = exportHtmlBtn.style.display;
+      exportHtmlBtn.textContent = 'Exporting...';
+      exportHtmlBtn.disabled = true;
+      exportHtmlBtn.style.display = 'none';
+
+      try {
+        const mainContainer = document.querySelector('.parkrun-annual-summary');
+        if (!mainContainer) throw new Error('Report container not found');
+
+        const meta = getReportMeta();
+        const { blob, filename } = await generateReportBlob(mainContainer, meta);
+
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        const timestamp = new Date().toISOString().split('T')[0];
-        link.download = `parkrun-comparison-report-${timestamp}.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.href = url;
+        link.download = filename;
         link.click();
-      });
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        console.log('Annual summary HTML export complete');
+      } catch (error) {
+        console.error('Annual summary export failed:', error);
+        alert('Error exporting HTML: ' + error.message);
+      } finally {
+        exportHtmlBtn.disabled = false;
+        exportHtmlBtn.textContent = originalLabel;
+        exportHtmlBtn.style.display = originalDisplay;
+      }
     });
 
-    downloadContainer.appendChild(downloadBtn);
+    shareBtn.addEventListener('click', async () => {
+      const originalLabel = shareBtn.textContent;
+      const originalDisplay = shareBtn.style.display;
+      shareBtn.textContent = 'Sharing...';
+      shareBtn.disabled = true;
+      shareBtn.style.display = 'none';
+
+      try {
+        const mainContainer = document.querySelector('.parkrun-annual-summary');
+        if (!mainContainer) throw new Error('Report container not found');
+
+        const meta = getReportMeta();
+        const { blob, filename } = await generateReportBlob(mainContainer, meta);
+        const file = new File([blob], filename, { type: 'text/html' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: `parkrun Annual Summary - ${meta.eventShortName}`,
+            text: 'Annual participation summary report',
+            files: [file],
+          });
+          console.log('Annual summary shared via Web Share API');
+        } else {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          alert('Sharing is not supported in this browser, so the HTML report was downloaded instead.');
+        }
+      } catch (error) {
+        console.error('Annual summary share failed:', error);
+        alert('Error sharing report: ' + error.message);
+      } finally {
+        shareBtn.disabled = false;
+        shareBtn.textContent = originalLabel;
+        shareBtn.style.display = originalDisplay;
+      }
+    });
+
+    downloadContainer.appendChild(exportHtmlBtn);
+    downloadContainer.appendChild(shareBtn);
     comparisonSection.appendChild(downloadContainer);
 
     // Render charts if Chart.js is available

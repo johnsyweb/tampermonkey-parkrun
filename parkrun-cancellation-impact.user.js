@@ -34,7 +34,6 @@
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @require      https://html2canvas.hertzen.com/dist/html2canvas.min.js
 // @version      0.1.1
 // ==/UserScript==
 
@@ -1147,6 +1146,69 @@
     return sorted;
   }
 
+  async function buildHtmlReport(resultsSection, meta) {
+    const clone = resultsSection.cloneNode(true);
+
+    const originalCanvases = resultsSection.querySelectorAll('canvas');
+    const clonedCanvases = clone.querySelectorAll('canvas');
+
+    originalCanvases.forEach((canvas, idx) => {
+      try {
+        const dataUrl = canvas.toDataURL('image/png');
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.alt = 'Chart snapshot';
+        img.style.maxWidth = '100%';
+        img.style.display = 'block';
+        img.style.backgroundColor = '#2b223d';
+
+        if (clonedCanvases[idx]) {
+          clonedCanvases[idx].replaceWith(img);
+        }
+      } catch (error) {
+        console.error('Failed to serialize chart canvas:', error);
+      }
+    });
+
+    const stylesheet = `
+      :root { color-scheme: dark; }
+      body { margin: 0; padding: 20px; background: ${STYLES.backgroundColor}; color: ${STYLES.textColor}; font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; line-height: 1.5; }
+      a { color: ${STYLES.lineColor}; }
+      h1, h2, h3, h4 { color: ${STYLES.barColor}; margin: 0 0 10px 0; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border: 1px solid ${STYLES.gridColor}; padding: 10px; text-align: left; }
+      th { background: #2b223d; color: ${STYLES.barColor}; }
+      tr:nth-child(even) td { background: #241c35; }
+      tr:nth-child(odd) td { background: #1f182e; }
+      .parkrun-cancellation-results { background: ${STYLES.backgroundColor}; padding: 16px; border-radius: 6px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); }
+      .chart-img { max-width: 100%; display: block; }
+      .meta { margin-bottom: 16px; color: ${STYLES.subtleTextColor}; font-size: 13px; }
+      .meta strong { color: ${STYLES.textColor}; }
+    `;
+
+    const header = `
+      <header>
+        <h1>parkrun Cancellation Impact</h1>
+        <div class="meta">
+          <div><strong>Event:</strong> ${meta.eventShortName}</div>
+          <div><strong>Cancelled date:</strong> ${meta.cancellationDateStr}</div>
+          <div><strong>Generated:</strong> ${meta.generatedAt}</div>
+        </div>
+      </header>
+    `;
+
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>parkrun Cancellation Impact - ${meta.eventShortName} - ${meta.cancellationDateStr}</title><style>${stylesheet}</style></head><body>${header}${clone.outerHTML}</body></html>`;
+  }
+
+  async function generateReportBlob(resultsSection, meta) {
+    const html = await buildHtmlReport(resultsSection, meta);
+    const filename = `parkrun-cancellation-impact-${meta.eventShortName}-${meta.cancellationDateStr}.html`;
+    return {
+      blob: new Blob([html], { type: 'text/html' }),
+      filename,
+    };
+  }
+
   function buildSeasonalTrend(historyData, targetDate) {
     const windowBefore = getSeasonalWindow(targetDate, SEASONAL_WEEKS);
     windowBefore.end = new Date(targetDate);
@@ -2014,49 +2076,119 @@
     downloadContainer.style.display = 'flex';
     downloadContainer.style.justifyContent = 'center';
     downloadContainer.style.marginTop = '20px';
+    downloadContainer.style.gap = '10px';
+    downloadContainer.style.flexWrap = 'wrap';
 
-    const downloadBtn = document.createElement('button');
-    downloadBtn.textContent = '💾 Download Report';
-    downloadBtn.style.padding = '8px 16px';
-    downloadBtn.style.backgroundColor = STYLES.lineColor;
-    downloadBtn.style.color = '#2b223d';
-    downloadBtn.style.border = 'none';
-    downloadBtn.style.borderRadius = '4px';
-    downloadBtn.style.cursor = 'pointer';
-    downloadBtn.style.fontWeight = 'bold';
-    downloadBtn.style.fontSize = '14px';
+    const exportHtmlBtn = document.createElement('button');
+    exportHtmlBtn.textContent = '📄 Export HTML';
+    exportHtmlBtn.style.padding = '8px 16px';
+    exportHtmlBtn.style.backgroundColor = STYLES.barColor;
+    exportHtmlBtn.style.color = '#1c1b2a';
+    exportHtmlBtn.style.border = 'none';
+    exportHtmlBtn.style.borderRadius = '4px';
+    exportHtmlBtn.style.cursor = 'pointer';
+    exportHtmlBtn.style.fontWeight = 'bold';
+    exportHtmlBtn.style.fontSize = '14px';
 
-    downloadBtn.addEventListener('click', () => {
-      downloadBtn.style.display = 'none';
-      // eslint-disable-next-line no-undef
-      html2canvas(resultsSection, {
-        backgroundColor: STYLES.backgroundColor,
-        scale: 2,
-      }).then((canvas) => {
-        downloadBtn.style.display = 'block';
+    const getReportMeta = () => {
+      const eventInfo = getCurrentEventInfo();
+      const currentParkrun = state.allParkruns.find(
+        (p) => p.properties.eventname === eventInfo.eventName
+      );
+      const eventShortName = currentParkrun?.properties?.EventShortName || eventInfo.eventName;
+      const cancellationDateStr = currentDate.toISOString().split('T')[0];
 
+      return { eventShortName, cancellationDateStr };
+    };
+
+    exportHtmlBtn.addEventListener('click', async () => {
+      const originalLabel = exportHtmlBtn.textContent;
+      const originalDisplay = exportHtmlBtn.style.display;
+      exportHtmlBtn.textContent = 'Exporting...';
+      exportHtmlBtn.disabled = true;
+      exportHtmlBtn.style.display = 'none';
+
+      try {
+        const { eventShortName, cancellationDateStr } = getReportMeta();
+        const { blob, filename } = await generateReportBlob(resultsSection, {
+          eventShortName,
+          cancellationDateStr,
+          generatedAt: new Date().toLocaleString(),
+        });
+
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-
-        // Get event short name from state
-        const eventInfo = getCurrentEventInfo();
-        const currentParkrun = state.allParkruns.find(
-          (p) => p.properties.eventname === eventInfo.eventName
-        );
-        const eventShortName = currentParkrun?.properties?.EventShortName || eventInfo.eventName;
-
-        // Format date for filename (YYYY-MM-DD)
-        const cancellationDateStr = currentDate.toISOString().split('T')[0];
-
-        // Create descriptive filename
-        const filename = `parkrun-cancellation-impact-${eventShortName}-${cancellationDateStr}.png`;
-
+        link.href = url;
         link.download = filename;
-        link.href = canvas.toDataURL('image/png');
         link.click();
-      });
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        console.log('HTML export complete');
+      } catch (error) {
+        console.error('HTML export failed:', error);
+        alert('Error exporting HTML: ' + error.message);
+      } finally {
+        exportHtmlBtn.disabled = false;
+        exportHtmlBtn.textContent = originalLabel;
+        exportHtmlBtn.style.display = originalDisplay;
+      }
     });
 
-    downloadContainer.appendChild(downloadBtn);
+    const shareBtn = document.createElement('button');
+    shareBtn.textContent = '📤 Share Report';
+    shareBtn.style.padding = '8px 16px';
+    shareBtn.style.backgroundColor = STYLES.lineColor;
+    shareBtn.style.color = '#2b223d';
+    shareBtn.style.border = 'none';
+    shareBtn.style.borderRadius = '4px';
+    shareBtn.style.cursor = 'pointer';
+    shareBtn.style.fontWeight = 'bold';
+    shareBtn.style.fontSize = '14px';
+
+    shareBtn.addEventListener('click', async () => {
+      const originalLabel = shareBtn.textContent;
+      const originalDisplay = shareBtn.style.display;
+      shareBtn.textContent = 'Sharing...';
+      shareBtn.disabled = true;
+      shareBtn.style.display = 'none';
+
+      try {
+        const { eventShortName, cancellationDateStr } = getReportMeta();
+        const { blob, filename } = await generateReportBlob(resultsSection, {
+          eventShortName,
+          cancellationDateStr,
+          generatedAt: new Date().toLocaleString(),
+        });
+
+        const file = new File([blob], filename, { type: 'text/html' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: `parkrun Cancellation Impact - ${eventShortName}`,
+            text: `Cancellation date: ${cancellationDateStr}`,
+            files: [file],
+          });
+          console.log('Report shared via Web Share API');
+        } else {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          alert('Sharing is not supported in this browser, so the HTML report was downloaded instead.');
+        }
+      } catch (error) {
+        console.error('Share failed:', error);
+        alert('Error sharing report: ' + error.message);
+      } finally {
+        shareBtn.disabled = false;
+        shareBtn.textContent = originalLabel;
+        shareBtn.style.display = originalDisplay;
+      }
+    });
+
+    downloadContainer.appendChild(exportHtmlBtn);
+    downloadContainer.appendChild(shareBtn);
     resultsSection.appendChild(downloadContainer);
 
     resultsContainer.appendChild(resultsSection);
