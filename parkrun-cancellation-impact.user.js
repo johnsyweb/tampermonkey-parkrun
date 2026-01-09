@@ -949,7 +949,7 @@
     navInfo.innerHTML = `
       <strong>${cancellationDates.length} Cancellation Date${cancellationDates.length !== 1 ? 's' : ''} Available</strong>
       <div style="color: ${STYLES.subtleTextColor}; font-size: 12px; margin-top: 4px;">
-        Use dropdown, arrow keys, or buttons to navigate
+        Use dropdown or buttons to navigate • Keyboard: <kbd style="background: #3a3250; padding: 2px 6px; border-radius: 3px; font-family: monospace; border: 1px solid ${STYLES.gridColor};">←</kbd> <kbd style="background: #3a3250; padding: 2px 6px; border-radius: 3px; font-family: monospace; border: 1px solid ${STYLES.gridColor};">→</kbd>
       </div>
     `;
     navSection.appendChild(navInfo);
@@ -971,7 +971,18 @@
     prevBtn.style.cursor = prevEnabled ? 'pointer' : 'not-allowed';
     prevBtn.style.fontWeight = 'bold';
     prevBtn.style.fontSize = '14px';
+    prevBtn.style.transition = 'all 0.2s ease';
     prevBtn.disabled = !prevEnabled;
+    if (prevEnabled) {
+      prevBtn.addEventListener('mouseenter', () => {
+        prevBtn.style.transform = 'translateY(-1px)';
+        prevBtn.style.boxShadow = '0 2px 4px rgba(34, 211, 238, 0.3)';
+      });
+      prevBtn.addEventListener('mouseleave', () => {
+        prevBtn.style.transform = 'translateY(0)';
+        prevBtn.style.boxShadow = 'none';
+      });
+    }
 
     const dateDropdown = document.createElement('select');
     dateDropdown.style.padding = '6px 8px';
@@ -1010,7 +1021,18 @@
     nextBtn.style.cursor = nextEnabled ? 'pointer' : 'not-allowed';
     nextBtn.style.fontWeight = 'bold';
     nextBtn.style.fontSize = '14px';
+    nextBtn.style.transition = 'all 0.2s ease';
     nextBtn.disabled = !nextEnabled;
+    if (nextEnabled) {
+      nextBtn.addEventListener('mouseenter', () => {
+        nextBtn.style.transform = 'translateY(-1px)';
+        nextBtn.style.boxShadow = '0 2px 4px rgba(34, 211, 238, 0.3)';
+      });
+      nextBtn.addEventListener('mouseleave', () => {
+        nextBtn.style.transform = 'translateY(0)';
+        nextBtn.style.boxShadow = 'none';
+      });
+    }
 
     navControlsWrapper.appendChild(prevBtn);
     navControlsWrapper.appendChild(dateDropdown);
@@ -1180,6 +1202,10 @@
     table.style.color = STYLES.textColor;
 
     const thead = document.createElement('thead');
+    thead.style.position = 'sticky';
+    thead.style.top = '0';
+    thead.style.backgroundColor = '#2b223d';
+    thead.style.zIndex = '10';
     const headerRow = document.createElement('tr');
     headerRow.style.borderBottom = `2px solid ${STYLES.gridColor}`;
 
@@ -1246,6 +1272,23 @@
       sortedResults.forEach((result) => {
         const row = document.createElement('tr');
         row.style.borderBottom = `1px solid ${STYLES.gridColor}`;
+        row.style.transition = 'background-color 0.15s ease';
+
+        // Special styling for No Event rows
+        const hasEvent = result.eventOnDate !== null;
+        if (!hasEvent) {
+          row.style.opacity = '0.6';
+        }
+
+        // Add hover effect
+        row.addEventListener('mouseenter', () => {
+          row.style.backgroundColor = hasEvent
+            ? 'rgba(34, 211, 238, 0.08)'
+            : 'rgba(243, 244, 246, 0.03)';
+        });
+        row.addEventListener('mouseleave', () => {
+          row.style.backgroundColor = 'transparent';
+        });
 
         // parkrun name with link
         const nameCell = document.createElement('td');
@@ -1369,6 +1412,14 @@
       th.style.cursor = 'pointer';
       th.style.userSelect = 'none';
       th.style.position = 'relative';
+      th.style.transition = 'background-color 0.15s ease';
+
+      th.addEventListener('mouseenter', () => {
+        th.style.backgroundColor = 'rgba(34, 211, 238, 0.1)';
+      });
+      th.addEventListener('mouseleave', () => {
+        th.style.backgroundColor = 'transparent';
+      });
 
       const headerText = document.createElement('span');
       headerText.textContent = header.label;
@@ -1386,10 +1437,17 @@
       // Info icon with tooltip
       const infoIcon = document.createElement('span');
       infoIcon.textContent = ' ℹ';
-      infoIcon.style.fontSize = '11px';
-      infoIcon.style.opacity = '0.5';
+      infoIcon.style.fontSize = '12px';
+      infoIcon.style.opacity = '0.6';
       infoIcon.style.cursor = 'help';
+      infoIcon.style.transition = 'opacity 0.2s ease';
       infoIcon.title = header.info;
+      infoIcon.addEventListener('mouseenter', () => {
+        infoIcon.style.opacity = '1';
+      });
+      infoIcon.addEventListener('mouseleave', () => {
+        infoIcon.style.opacity = '0.6';
+      });
       th.appendChild(infoIcon);
 
       th.addEventListener('click', () => {
