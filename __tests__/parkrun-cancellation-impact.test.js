@@ -49,10 +49,12 @@ describe('parkrun-cancellation-impact', () => {
     return gaps[gaps.length - 1];
   }
 
-  // Intentionally unused for this test file - defined to mirror script structure
-  // eslint-disable-next-line no-unused-vars
+  function parseDateUTC(dateStr) {
+    return new Date(`${dateStr}T00:00:00Z`);
+  }
+
   function detectAllEventGaps(historyData) {
-    const dates = historyData.rawDates.map((d) => new Date(d));
+    const dates = historyData.rawDates.map((d) => parseDateUTC(d));
 
     if (dates.length < 2) {
       return [];
@@ -79,16 +81,24 @@ describe('parkrun-cancellation-impact', () => {
     return gaps;
   }
 
-  // Intentionally unused for this test file - defined to mirror script structure
-  // eslint-disable-next-line no-unused-vars
   function getCancellationSaturdays(gapStartDate, gapEndDate) {
     const saturdays = [];
-    let current = new Date(gapStartDate);
-    current.setDate(current.getDate() + 7); // Start from first Saturday after gap start
+
+    const startStr = gapStartDate.toISOString().split('T')[0];
+    const startDate = parseDateUTC(startStr);
+    const startDayOfWeek = startDate.getUTCDay();
+
+    let daysUntilSaturday = (6 - startDayOfWeek) % 7;
+    if (daysUntilSaturday === 0) {
+      daysUntilSaturday = 7;
+    }
+
+    const current = new Date(startDate);
+    current.setUTCDate(current.getUTCDate() + daysUntilSaturday);
 
     while (current < gapEndDate) {
       saturdays.push(new Date(current));
-      current.setDate(current.getDate() + 7);
+      current.setUTCDate(current.getUTCDate() + 7);
     }
 
     return saturdays;
@@ -399,6 +409,104 @@ describe('parkrun-cancellation-impact', () => {
       expect(gap.daysDiff).toBeCloseTo(21, 0);
       expect(gap.gapStartDate.toISOString().split('T')[0]).toBe('2025-03-08');
       expect(gap.gapEndDate.toISOString().split('T')[0]).toBe('2025-03-29');
+    });
+  });
+
+  describe('UTC Date Handling & Saturday Calculations', () => {
+    test('correctly identifies all gaps in Coburg October 2022 history', () => {
+      const coburgHistory = {
+        rawDates: ['2022-10-01', '2022-10-22', '2022-11-05'],
+        dates: ['1 Oct 2022', '22 Oct 2022', '5 Nov 2022'],
+        eventNumbers: [325, 326, 327],
+        finishers: [142, 114, 162],
+        volunteers: [12, 18, 16],
+      };
+
+      const gaps = detectAllEventGaps(coburgHistory);
+
+      expect(gaps.length).toBe(2);
+      expect(gaps[0].gapStartDate.toISOString().split('T')[0]).toBe('2022-10-01');
+      expect(gaps[0].gapEndDate.toISOString().split('T')[0]).toBe('2022-10-22');
+      expect(gaps[0].daysDiff).toBeCloseTo(21, 0);
+
+      expect(gaps[1].gapStartDate.toISOString().split('T')[0]).toBe('2022-10-22');
+      expect(gaps[1].gapEndDate.toISOString().split('T')[0]).toBe('2022-11-05');
+      expect(gaps[1].daysDiff).toBeCloseTo(14, 0);
+    });
+
+    test('correctly calculates Saturdays for 1 Oct to 22 Oct gap (should be 8 Oct and 15 Oct)', () => {
+      const gapStart = parseDateUTC('2022-10-01');
+      const gapEnd = parseDateUTC('2022-10-22');
+
+      const saturdays = getCancellationSaturdays(gapStart, gapEnd);
+
+      expect(saturdays.length).toBe(2);
+      expect(saturdays[0].toISOString().split('T')[0]).toBe('2022-10-08');
+      expect(saturdays[1].toISOString().split('T')[0]).toBe('2022-10-15');
+    });
+
+    test('correctly calculates Saturdays for 22 Oct to 5 Nov gap (should be 29 Oct)', () => {
+      const gapStart = parseDateUTC('2022-10-22');
+      const gapEnd = parseDateUTC('2022-11-05');
+
+      const saturdays = getCancellationSaturdays(gapStart, gapEnd);
+
+      expect(saturdays.length).toBe(1);
+      expect(saturdays[0].toISOString().split('T')[0]).toBe('2022-10-29');
+    });
+
+    test('verifies all calculated Saturdays are actually Saturdays', () => {
+      const gapStart = parseDateUTC('2022-10-01');
+      const gapEnd = parseDateUTC('2022-11-05');
+
+      const saturdays = getCancellationSaturdays(gapStart, gapEnd);
+
+      expect(saturdays.length).toBe(4);
+      saturdays.forEach((date) => {
+        const dayOfWeek = date.getUTCDay();
+        expect(dayOfWeek).toBe(6);
+      });
+    });
+
+    test('gap with no Saturdays (end date same week)', () => {
+      const saturdays = getCancellationSaturdays(
+        parseDateUTC('2025-01-08'),
+        parseDateUTC('2025-01-15')
+      );
+      expect(saturdays.length).toBe(1);
+      expect(saturdays[0].toISOString().split('T')[0]).toBe('2025-01-11');
+    });
+
+    test('gap with exactly 15 days', () => {
+      const saturdays = getCancellationSaturdays(
+        parseDateUTC('2025-01-08'),
+        parseDateUTC('2025-01-23')
+      );
+      expect(saturdays.length).toBe(2);
+      expect(saturdays[0].toISOString().split('T')[0]).toBe('2025-01-11');
+      expect(saturdays[1].toISOString().split('T')[0]).toBe('2025-01-18');
+    });
+
+    test('gap spanning multiple weeks', () => {
+      const saturdays = getCancellationSaturdays(
+        parseDateUTC('2025-01-01'),
+        parseDateUTC('2025-02-01')
+      );
+      expect(saturdays.length).toBe(4);
+      expect(saturdays[0].toISOString().split('T')[0]).toBe('2025-01-04');
+      expect(saturdays[1].toISOString().split('T')[0]).toBe('2025-01-11');
+      expect(saturdays[2].toISOString().split('T')[0]).toBe('2025-01-18');
+      expect(saturdays[3].toISOString().split('T')[0]).toBe('2025-01-25');
+    });
+
+    test('gap starting on Saturday (normal case)', () => {
+      const saturdays = getCancellationSaturdays(
+        parseDateUTC('2025-01-04'),
+        parseDateUTC('2025-01-25')
+      );
+      expect(saturdays.length).toBe(2);
+      expect(saturdays[0].toISOString().split('T')[0]).toBe('2025-01-11');
+      expect(saturdays[1].toISOString().split('T')[0]).toBe('2025-01-18');
     });
   });
 });
