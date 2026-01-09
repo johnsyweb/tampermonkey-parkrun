@@ -2036,8 +2036,21 @@
         downloadBtn.style.display = 'block';
 
         const link = document.createElement('a');
-        const timestamp = new Date().toISOString().split('T')[0];
-        link.download = `parkrun-cancellation-impact-${timestamp}.png`;
+
+        // Get event short name from state
+        const eventInfo = getCurrentEventInfo();
+        const currentParkrun = state.allParkruns.find(
+          (p) => p.properties.eventname === eventInfo.eventName
+        );
+        const eventShortName = currentParkrun?.properties?.EventShortName || eventInfo.eventName;
+
+        // Format date for filename (YYYY-MM-DD)
+        const cancellationDateStr = currentDate.toISOString().split('T')[0];
+
+        // Create descriptive filename
+        const filename = `parkrun-cancellation-impact-${eventShortName}-${cancellationDateStr}.png`;
+
+        link.download = filename;
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
