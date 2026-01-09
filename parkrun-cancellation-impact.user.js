@@ -892,10 +892,7 @@
     );
     const startBtn = document.querySelector('.start-analysis-btn');
     if (startBtn) {
-      startBtn.textContent = 'Analysis complete';
-      startBtn.disabled = true;
-      startBtn.style.opacity = '1';
-      startBtn.style.cursor = 'default';
+      startBtn.style.display = 'none';
     }
     progressUI.stop.textContent = 'Close';
     progressUI.stop.style.backgroundColor = STYLES.successColor;
