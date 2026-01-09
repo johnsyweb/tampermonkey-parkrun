@@ -63,6 +63,14 @@ const screenshotConfigs: ScreenshotConfig[] = [
     viewport: { width: 1200, height: 1400 },
   },
   {
+    name: 'parkrun-cancellation-impact',
+    url: 'https://www.parkrun.com.au/aurora/results/eventhistory/',
+    script: 'parkrun-cancellation-impact.user.js',
+    waitForSelector: '.parkrun-cancellation-impact',
+    waitForTimeout: 25000,
+    viewport: { width: 1400, height: 2000 },
+  },
+  {
     name: 'parkrun-walker-analysis',
     url: 'https://www.parkrun.co.za/pigglywiggly/results/latestresults/',
     script: 'parkrun-walker-analysis.user.js',
@@ -263,6 +271,13 @@ async function generateScreenshots(scriptName?: string): Promise<void> {
           // Trigger change event for any listeners
           const changeEvent = new Event('change', { bubbles: true });
           sortSelect.dispatchEvent(changeEvent);
+        }
+
+        // Click "Start Analysis" button if it exists (for cancellation-impact script)
+        const startAnalysisBtn = document.querySelector('.start-analysis-btn') as HTMLButtonElement;
+        if (startAnalysisBtn && !startAnalysisBtn.disabled) {
+          console.log('Clicking Start Analysis button...');
+          startAnalysisBtn.click();
         }
       });
 
