@@ -34,7 +34,7 @@
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @version      0.1.2
+// @version      0.1.3
 // ==/UserScript==
 
 (function () {
