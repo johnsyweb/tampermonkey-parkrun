@@ -5,7 +5,7 @@ module.exports = {
       {
         modules: 'commonjs',
         targets: {
-          node: 'current',
+          ie: '11',
         },
       },
     ],
