@@ -1,7 +1,6 @@
 /**
- * @jest-environment node
+ * (uses default test environment from package.json)
  */
-
 const {
   calculateWilsonIndex,
   calculateWilsonIndexOverTime,
@@ -10,18 +9,12 @@ const {
 } = require('../src/w-index.user');
 const fs = require('fs');
 const path = require('path');
-let JSDOM;
-try {
-  ({ JSDOM } = require('jsdom'));
-} catch (err) {
-  // If jsdom fails to load under this Jest environment, we'll skip DOM-dependent tests.
-  // Log a warning so CI output shows the reason.
-  // eslint-disable-next-line no-console
-  console.warn(
-    'jsdom not available in this test environment; DOM tests will be skipped. Error:',
-    err && err.message
-  );
-}
+
+// Use the Jest-provided DOM when available. Prefer `DOMParser` if present,
+// otherwise fall back to creating a container element and setting `innerHTML`.
+const hasDomEnvironment =
+  typeof DOMParser !== 'undefined' ||
+  (typeof document !== 'undefined' && typeof document.createElement === 'function');
 
 describe('Wilson Index Calculations', () => {
   test('wilson index should be 0 for no events', () => {
@@ -78,13 +71,21 @@ describe('Wilson Index Calculations', () => {
 });
 
 describe('extractEventDetails', () => {
-  const maybeRunDomTest = typeof JSDOM !== 'undefined';
+  const maybeRunDomTest = hasDomEnvironment;
 
   (maybeRunDomTest ? test : test.skip)('should extract event numbers from table', () => {
     const html = fs.readFileSync(path.join(__dirname, '../test-data/1001388.html'), 'utf8');
-    const dom = new JSDOM(html);
-    const document = dom.window.document;
-    const table = findResultsTable(document);
+    let doc;
+    if (typeof DOMParser !== 'undefined') {
+      const parser = new DOMParser();
+      doc = parser.parseFromString(html, 'text/html');
+    } else {
+      const container = document.createElement('div');
+      container.innerHTML = html;
+      doc = container;
+    }
+
+    const table = findResultsTable(doc);
     const result = extractEventDetails(table);
 
     expect(result.slice(0, 3)).toEqual([
