@@ -34,10 +34,10 @@
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @version      0.1.1
+// @version      0.1.4
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-14T02:06:18.316Z
+// Built: 2026-01-14T04:30:23.032Z
 
 function _typeof(o) {
   '@babel/helpers - typeof';
