@@ -1,5 +1,5 @@
 jest.spyOn(console, 'log').mockImplementation(() => {});
-const { getCountryCodeFromUrl } = require('../visited-countries.user.js');
+const { getCountryCodeFromUrl } = require('../src/visited-countries.user.js');
 
 describe('visited-countries', () => {
   describe('getCountryCodeFromUrl', () => {

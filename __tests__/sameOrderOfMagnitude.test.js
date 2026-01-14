@@ -1,4 +1,4 @@
-const { sameOrderOfMagnitude } = require('../parkrun-charts.user');
+const { sameOrderOfMagnitude } = require('../src/parkrun-charts.user');
 
 describe('sameOrderOfMagnitude', () => {
   test('returns true for numbers in the same order of magnitude', () => {

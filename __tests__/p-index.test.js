@@ -1,4 +1,4 @@
-const { calculatePIndex } = require('../p-index.user');
+const { calculatePIndex } = require('../src/p-index.user');
 
 describe('calculatePIndex', () => {
   test('calculates p-index for sample event details', () => {

@@ -1,7 +1,7 @@
 // __tests__/parkrun-walker-analysis.test.js
 
-const { assignUnknownFinishTimes } = require('../parkrun-walker-analysis.user');
-const { computeWalkerThreshold } = require('../parkrun-walker-analysis.user');
+const { assignUnknownFinishTimes } = require('../src/parkrun-walker-analysis.user');
+const { computeWalkerThreshold } = require('../src/parkrun-walker-analysis.user');
 
 describe('assignUnknownFinishTimes', () => {
   it('should assign estimated times to finishers with missing time', () => {
