@@ -4,7 +4,7 @@
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-annual-summary.user.js
 // @grant        GM_xmlhttpRequest
-// @homepage     https://johnsy.com/tampermonkey-parkrun/
+// @homepage     https://www.johnsy.com/tampermonkey-parkrun/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
 // @license      MIT
 // @match        *://www.parkrun.ca/*/results/eventhistory/*

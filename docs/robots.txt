@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://johnsy.com/tampermonkey-parkrun/sitemap.xml
+Sitemap: https://www.johnsy.com/tampermonkey-parkrun/sitemap.xml
 
