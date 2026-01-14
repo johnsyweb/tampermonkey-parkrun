@@ -16,6 +16,8 @@
     "docs:build": "cd docs && bundle exec jekyll build",
     "docs:install": "cd docs && bundle install",
     "docs:serve": "cd docs && bundle exec jekyll serve",
+    "build:scripts": "node scripts/build-scripts.js",
+    "check:userscripts": "node scripts/check-userscript-metadata.js *.user.js",
     "prepare": "husky"
   },
   "keywords": [
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
+    "@babel/cli": "^7.28.5",
     "@eslint/js": "^9.39.2",
     "@types/node": "^25.0.6",
     "babel-jest": "^30.2.0",
