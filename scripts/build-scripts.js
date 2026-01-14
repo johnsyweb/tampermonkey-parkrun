@@ -21,9 +21,9 @@ if (fs.existsSync(distDir)) {
 
 // Transpile with babel
 try {
-  run('npx babel src --out-dir dist --extensions ".js" --copy-files');
+  run(`npx babel ${srcDir} --out-dir ${distDir} --extensions ".js" --copy-files`);
 } catch (err) {
-  console.error('Babel transpile failed');
+  console.error('Babel transpile failed:', err);
   process.exit(1);
 }
 
