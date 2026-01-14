@@ -39,10 +39,74 @@
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 // Built: 2026-01-14T02:06:18.316Z
 
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-
+function _createForOfIteratorHelper(r, e) {
+  var t = ('undefined' != typeof Symbol && r[Symbol.iterator]) || r['@@iterator'];
+  if (!t) {
+    if (
+      Array.isArray(r) ||
+      (t = _unsupportedIterableToArray(r)) ||
+      (e && r && 'number' == typeof r.length)
+    ) {
+      t && (r = t);
+      var _n = 0,
+        F = function F() {};
+      return {
+        s: F,
+        n: function n() {
+          return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] };
+        },
+        e: function e(r) {
+          throw r;
+        },
+        f: F,
+      };
+    }
+    throw new TypeError(
+      'Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.'
+    );
+  }
+  var o,
+    a = !0,
+    u = !1;
+  return {
+    s: function s() {
+      t = t.call(r);
+    },
+    n: function n() {
+      var r = t.next();
+      return ((a = r.done), r);
+    },
+    e: function e(r) {
+      ((u = !0), (o = r));
+    },
+    f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    },
+  };
+}
+function _unsupportedIterableToArray(r, a) {
+  if (r) {
+    if ('string' == typeof r) return _arrayLikeToArray(r, a);
+    var t = {}.toString.call(r).slice(8, -1);
+    return (
+      'Object' === t && r.constructor && (t = r.constructor.name),
+      'Map' === t || 'Set' === t
+        ? Array.from(r)
+        : 'Arguments' === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t)
+          ? _arrayLikeToArray(r, a)
+          : void 0
+    );
+  }
+}
+function _arrayLikeToArray(r, a) {
+  (null == a || a > r.length) && (a = r.length);
+  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+  return n;
+}
 
 (function () {
   'use strict';
@@ -53,12 +117,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       isMobile: true,
       container: {
         padding: '10px',
-        marginTop: '10px'
+        marginTop: '10px',
       },
       typography: {
         heading: '1.1em',
         stats: '1em',
-        statsSubtext: '0.9em'
+        statsSubtext: '0.9em',
       },
       grid: {
         boxSize: 28,
@@ -67,24 +131,24 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         cellPadding: '1px',
         positionFontSize: '0.9em',
         eventFontSize: '0.65em',
-        dateFontSize: '0.6em'
+        dateFontSize: '0.6em',
       },
       button: {
         padding: '6px 12px',
         fontSize: '0.9em',
-        marginTop: '10px'
-      }
+        marginTop: '10px',
+      },
     };
     var desktopConfig = {
       isMobile: false,
       container: {
         padding: '20px',
-        marginTop: '20px'
+        marginTop: '20px',
       },
       typography: {
         heading: '1.3em',
         stats: '1.2em',
-        statsSubtext: '1em'
+        statsSubtext: '1em',
       },
       grid: {
         boxSize: 100,
@@ -93,13 +157,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         cellPadding: '2px',
         positionFontSize: '1.2em',
         eventFontSize: '0.8em',
-        dateFontSize: '0.7em'
+        dateFontSize: '0.7em',
       },
       button: {
         padding: '8px 15px',
         fontSize: '1em',
-        marginTop: '15px'
-      }
+        marginTop: '15px',
+      },
     };
     var isMobile = window.innerWidth < 768;
     return isMobile ? mobileConfig : desktopConfig;
@@ -115,7 +179,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var _iterator = _createForOfIteratorHelper(rows),
       _step;
     try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
         var row = _step.value;
         var cells = row.querySelectorAll('td');
         if (cells.length < 5) continue; // Ensure the row has enough columns
@@ -131,7 +195,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           completedPositions[lastTwoDigits].push({
             eventName: eventName,
             date: date,
-            position: position
+            position: position,
           });
 
           // Stop processing if all 100 positions are attained
@@ -148,15 +212,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     return {
       completedPositions: completedPositions,
-      remainingPositions: Array.from({
-        length: GRID_SIZE
-      }, function (_, i) {
-        return i;
-      }).filter(function (pos) {
+      remainingPositions: Array.from(
+        {
+          length: GRID_SIZE,
+        },
+        function (_, i) {
+          return i;
+        }
+      ).filter(function (pos) {
         return !completedPositions[pos];
       }),
       completedCount: Object.keys(completedPositions).length,
-      totalEvents: totalEvents
+      totalEvents: totalEvents,
     };
   }
   function createPositionBingoContainer(data) {
@@ -166,7 +233,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     container.className = 'parkrun-position-bingo-container';
     container.style.width = '100%';
     container.style.maxWidth = '1200px';
-    container.style.margin = "".concat(responsive.container.marginTop, " auto");
+    container.style.margin = ''.concat(responsive.container.marginTop, ' auto');
     container.style.padding = responsive.container.padding;
     container.style.backgroundColor = '#2b223d';
     container.style.borderRadius = '8px';
@@ -180,7 +247,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     heading.style.fontSize = responsive.typography.heading;
     container.appendChild(heading);
     var stats = document.createElement('div');
-    stats.innerHTML = "<div style=\"font-size: ".concat(responsive.typography.stats, "; margin-bottom: ").concat(responsive.isMobile ? '8px' : '10px', ";\">") + '<strong>' + data.completedCount + ' of ' + GRID_SIZE + '</strong> positions completed</div>' + "<div style=\"font-size: ".concat(responsive.typography.statsSubtext, ";\">After ") + data.totalEvents + ' parkruns</div>';
+    stats.innerHTML =
+      '<div style="font-size: '
+        .concat(responsive.typography.stats, '; margin-bottom: ')
+        .concat(responsive.isMobile ? '8px' : '10px', ';">') +
+      '<strong>' +
+      data.completedCount +
+      ' of ' +
+      GRID_SIZE +
+      '</strong> positions completed</div>' +
+      '<div style="font-size: '.concat(responsive.typography.statsSubtext, ';">After ') +
+      data.totalEvents +
+      ' parkruns</div>';
     container.appendChild(stats);
     var COLUMNS = 10;
     var ROWS = Math.ceil(GRID_SIZE / COLUMNS);
@@ -188,9 +266,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var GAP_SIZE = responsive.grid.gapSize;
     var grid = document.createElement('div');
     grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = "repeat(".concat(COLUMNS, ", ").concat(BOX_SIZE, "px)");
-    grid.style.gridTemplateRows = "repeat(".concat(ROWS, ", ").concat(BOX_SIZE, "px)");
-    grid.style.gap = "".concat(GAP_SIZE, "px");
+    grid.style.gridTemplateColumns = 'repeat('.concat(COLUMNS, ', ').concat(BOX_SIZE, 'px)');
+    grid.style.gridTemplateRows = 'repeat('.concat(ROWS, ', ').concat(BOX_SIZE, 'px)');
+    grid.style.gap = ''.concat(GAP_SIZE, 'px');
     grid.style.margin = '0 auto';
     grid.style.justifyContent = 'center';
     var _loop = function _loop(i) {
@@ -214,7 +292,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       cell.appendChild(positionText);
       if (data.completedPositions[i]) {
         var eventDetails = document.createElement('div');
-        eventDetails.innerHTML = "<div style=\"font-size: ".concat(responsive.grid.eventFontSize, "; text-align: center;\">") + data.completedPositions[i][0].eventName + '<br>' + "<span style=\"font-size: ".concat(responsive.grid.dateFontSize, ";\">") + data.completedPositions[i][0].date + ' (' + data.completedPositions[i][0].position + ')</span>' + '</div>';
+        eventDetails.innerHTML =
+          '<div style="font-size: '.concat(
+            responsive.grid.eventFontSize,
+            '; text-align: center;">'
+          ) +
+          data.completedPositions[i][0].eventName +
+          '<br>' +
+          '<span style="font-size: '.concat(responsive.grid.dateFontSize, ';">') +
+          data.completedPositions[i][0].date +
+          ' (' +
+          data.completedPositions[i][0].position +
+          ')</span>' +
+          '</div>';
         // Hide event details on mobile to prevent text overflow
         if (responsive.isMobile) {
           eventDetails.style.display = 'none';
@@ -252,7 +342,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           popup.style.overflowY = 'auto';
           popup.style.fontSize = popupResponsive.isMobile ? '0.9em' : '1em';
           var popupHeading = document.createElement('h4');
-          popupHeading.textContent = "Position ".concat(i.toString().padStart(2, '0'));
+          popupHeading.textContent = 'Position '.concat(i.toString().padStart(2, '0'));
           popupHeading.style.marginBottom = '10px';
           popupHeading.style.color = '#FFA300';
           popup.appendChild(popupHeading);
@@ -262,7 +352,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               position = _ref.position;
             var entry = document.createElement('div');
             entry.style.marginBottom = '10px';
-            entry.innerHTML = '<strong>' + eventName + '</strong><br>' + '<span style="font-size: 0.9em;">' + date + ' (' + position + ')</span>';
+            entry.innerHTML =
+              '<strong>' +
+              eventName +
+              '</strong><br>' +
+              '<span style="font-size: 0.9em;">' +
+              date +
+              ' (' +
+              position +
+              ')</span>';
             popup.appendChild(entry);
           });
           overlay.appendChild(popup);
@@ -315,7 +413,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         // Higher resolution
         logging: false,
         allowTaint: true,
-        useCORS: true
+        useCORS: true,
       }).then(function (canvas) {
         // Show the button again
         downloadBtn.style.display = 'block';
@@ -323,7 +421,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         var timestamp = new Date().toISOString().split('T')[0];
         var pageUrl = window.location.pathname.split('/');
         var parkrunnerId = pageUrl[2] || 'parkrunner';
-        link.download = "position-bingo-".concat(parkrunnerId, "-").concat(timestamp, ".png");
+        link.download = 'position-bingo-'.concat(parkrunnerId, '-').concat(timestamp, '.png');
         link.href = canvas.toDataURL('image/png');
         link.click();
       });

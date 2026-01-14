@@ -48,7 +48,7 @@
     clockFaceColor: '#333',
     completedColor: '#FFA300',
     textColor: '#e0e0e0',
-    subtleTextColor: '#cccccc'
+    subtleTextColor: '#cccccc',
   };
   function findResultsTable() {
     var tables = document.querySelectorAll('#results');
@@ -72,7 +72,7 @@
       var eventNumber = cells[2].textContent.trim();
       var time = cells[4].textContent.trim();
       if (!time || !eventNumber || !date || !eventName) return;
-      var event = "".concat(eventName, " # ").concat(eventNumber);
+      var event = ''.concat(eventName, ' # ').concat(eventNumber);
 
       // Parse seconds from time (either MM:SS or HH:MM:SS format)
       var secondValue;
@@ -88,7 +88,7 @@
         secondValue: secondValue,
         date: date,
         event: event,
-        time: time
+        time: time,
       });
     });
 
@@ -107,7 +107,7 @@
         seconds[secondValue] = {
           date: date,
           event: event,
-          time: time
+          time: time,
         };
         collectedCount++;
 
@@ -115,11 +115,13 @@
         if (collectedCount === 60 && !dateOfCompletion) {
           dateOfCompletion = date;
           firstCompleteEvent = event;
-          timeData[secondValue] = [{
-            date: date,
-            event: event,
-            time: time
-          }];
+          timeData[secondValue] = [
+            {
+              date: date,
+              event: event,
+              time: time,
+            },
+          ];
           break;
         }
       }
@@ -131,7 +133,7 @@
       timeData[secondValue].push({
         date: date,
         event: event,
-        time: time
+        time: time,
       });
     }
     return {
@@ -140,7 +142,7 @@
       collectedCount: collectedCount,
       totalParkruns: totalParkruns,
       dateOfCompletion: dateOfCompletion,
-      firstCompleteEvent: firstCompleteEvent
+      firstCompleteEvent: firstCompleteEvent,
     };
   }
   function createClockContainer(title) {
@@ -175,10 +177,17 @@
     statsContainer.style.color = STYLES.textColor;
     var statsFontSize = isMobile ? '1em' : '1.2em';
     var completionFontSize = isMobile ? '0.95em' : '1.1em';
-    var statsText = "<div style=\"font-size: ".concat(statsFontSize, "; margin-bottom: 10px;\"><strong>").concat(data.collectedCount, " of 60</strong> seconds collected</div>");
-    statsText += "<div style=\"font-size: ".concat(isMobile ? '0.9em' : '1em', ";\">After ").concat(data.totalParkruns, " parkruns</div>");
+    var statsText = '<div style="font-size: '
+      .concat(statsFontSize, '; margin-bottom: 10px;"><strong>')
+      .concat(data.collectedCount, ' of 60</strong> seconds collected</div>');
+    statsText += '<div style="font-size: '
+      .concat(isMobile ? '0.9em' : '1em', ';">After ')
+      .concat(data.totalParkruns, ' parkruns</div>');
     if (data.dateOfCompletion) {
-      statsText += "<div style=\"margin-top: 10px; font-size: ".concat(completionFontSize, ";\">\uD83C\uDFC6 Bingo completed on ").concat(data.dateOfCompletion, " (").concat(data.firstCompleteEvent, ")</div>");
+      statsText += '<div style="margin-top: 10px; font-size: '
+        .concat(completionFontSize, ';">\uD83C\uDFC6 Bingo completed on ')
+        .concat(data.dateOfCompletion, ' (')
+        .concat(data.firstCompleteEvent, ')</div>');
     }
     statsContainer.innerHTML = statsText;
     container.appendChild(statsContainer);
@@ -190,11 +199,13 @@
     // Create clock face
     var clockContainer = document.createElement('div');
     clockContainer.style.position = 'relative';
-    clockContainer.style.width = "".concat(baseSize, "px");
-    clockContainer.style.height = "".concat(baseSize, "px");
+    clockContainer.style.width = ''.concat(baseSize, 'px');
+    clockContainer.style.height = ''.concat(baseSize, 'px');
     clockContainer.style.margin = '0 auto';
     clockContainer.style.borderRadius = '50%';
-    clockContainer.style.border = "".concat(Math.round(10 * scale), "px solid ").concat(STYLES.clockBorderColor);
+    clockContainer.style.border = ''
+      .concat(Math.round(10 * scale), 'px solid ')
+      .concat(STYLES.clockBorderColor);
     clockContainer.style.backgroundColor = STYLES.clockFaceColor;
     clockContainer.style.boxSizing = 'content-box';
 
@@ -214,8 +225,8 @@
       var occurrences = data.timeData[_i] ? data.timeData[_i].length : 0;
 
       // Calculate angles for this segment (0 seconds at top, moving clockwise)
-      var startAngle = ((_i - 0.4) / 60 * 360 - 90) * (Math.PI / 180);
-      var endAngle = ((_i + 0.4) / 60 * 360 - 90) * (Math.PI / 180);
+      var startAngle = (((_i - 0.4) / 60) * 360 - 90) * (Math.PI / 180);
+      var endAngle = (((_i + 0.4) / 60) * 360 - 90) * (Math.PI / 180);
 
       // Create a segment using SVG path
       var segment = document.createElement('div');
@@ -247,7 +258,8 @@
       // Calculate the points for the path as a ring sector clearing the centre
       // Vary the outer radius proportional to the number of occurrences
       var ringSpan = maxRadius - innerHoleRadius;
-      var outerRadius = innerHoleRadius + Math.max(0, Math.round(occurrences / maxOccurrences * ringSpan));
+      var outerRadius =
+        innerHoleRadius + Math.max(0, Math.round((occurrences / maxOccurrences) * ringSpan));
       var innerStartX = centerX + innerHoleRadius * Math.cos(startAngle);
       var innerStartY = centerY + innerHoleRadius * Math.sin(startAngle);
       var outerStartX = centerX + outerRadius * Math.cos(startAngle);
@@ -258,13 +270,34 @@
       var innerEndY = centerY + innerHoleRadius * Math.sin(endAngle);
 
       // Path goes from inner arc start to outer arc, around, then back along inner arc to close
-      var pathData = ["M ".concat(innerStartX, ",").concat(innerStartY), "L ".concat(outerStartX, ",").concat(outerStartY), "A ".concat(outerRadius, ",").concat(outerRadius, " 0 0,1 ").concat(outerEndX, ",").concat(outerEndY), "L ".concat(innerEndX, ",").concat(innerEndY), "A ".concat(innerHoleRadius, ",").concat(innerHoleRadius, " 0 0,0 ").concat(innerStartX, ",").concat(innerStartY), 'Z'].join(' ');
+      var pathData = [
+        'M '.concat(innerStartX, ',').concat(innerStartY),
+        'L '.concat(outerStartX, ',').concat(outerStartY),
+        'A '
+          .concat(outerRadius, ',')
+          .concat(outerRadius, ' 0 0,1 ')
+          .concat(outerEndX, ',')
+          .concat(outerEndY),
+        'L '.concat(innerEndX, ',').concat(innerEndY),
+        'A '
+          .concat(innerHoleRadius, ',')
+          .concat(innerHoleRadius, ' 0 0,0 ')
+          .concat(innerStartX, ',')
+          .concat(innerStartY),
+        'Z',
+      ].join(' ');
       path.setAttribute('d', pathData);
       path.setAttribute('fill', STYLES.completedColor);
       path.setAttribute('opacity', '1');
 
       // Update title to show tooltip on hover
-      path.setAttribute('title', "".concat(_i.toString().padStart(2, '0'), " Seconds - ").concat(occurrences, " ").concat(occurrences === 1 ? 'Time' : 'Times'));
+      path.setAttribute(
+        'title',
+        ''
+          .concat(_i.toString().padStart(2, '0'), ' Seconds - ')
+          .concat(occurrences, ' ')
+          .concat(occurrences === 1 ? 'Time' : 'Times')
+      );
 
       // Add click handler directly to the path for interaction
       path.style.cursor = 'pointer';
@@ -294,7 +327,7 @@
     // Create indices at 5-second intervals (0, 5, 10, etc.)
     for (var _i2 = 0; _i2 < 60; _i2 += 5) {
       // Calculate angle for this index
-      var angle = _i2 / 60 * 360 - 90; // -90 to start at top
+      var angle = (_i2 / 60) * 360 - 90; // -90 to start at top
       var radians = angle * (Math.PI / 180);
 
       // Calculate position (outer edge of the clock)
@@ -322,7 +355,7 @@
       text.setAttribute('x', textX);
       text.setAttribute('y', textY);
       text.setAttribute('fill', STYLES.textColor);
-      text.setAttribute('font-size', "".concat((_i2 % 15 === 0 ? 16 : 14) * scale, "px"));
+      text.setAttribute('font-size', ''.concat((_i2 % 15 === 0 ? 16 : 14) * scale, 'px'));
       text.setAttribute('font-weight', 'bold');
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('dominant-baseline', 'middle');
@@ -335,8 +368,8 @@
     clockCenter.style.top = '50%';
     clockCenter.style.left = '50%';
     clockCenter.style.transform = 'translate(-50%, -50%)';
-    clockCenter.style.width = "".concat(100 * scale, "px");
-    clockCenter.style.height = "".concat(100 * scale, "px");
+    clockCenter.style.width = ''.concat(100 * scale, 'px');
+    clockCenter.style.height = ''.concat(100 * scale, 'px');
     clockCenter.style.borderRadius = '50%';
     clockCenter.style.backgroundColor = STYLES.clockBorderColor;
     clockCenter.style.display = 'flex';
@@ -344,9 +377,9 @@
     clockCenter.style.alignItems = 'center';
     clockCenter.style.color = STYLES.backgroundColor;
     clockCenter.style.fontWeight = 'bold';
-    clockCenter.style.fontSize = "".concat(20 * scale, "px"); // Larger font for better readability
+    clockCenter.style.fontSize = ''.concat(20 * scale, 'px'); // Larger font for better readability
     clockCenter.style.zIndex = '3'; // Ensure it's on top
-    clockCenter.textContent = "".concat(Math.round(data.collectedCount / 60 * 100), "%");
+    clockCenter.textContent = ''.concat(Math.round((data.collectedCount / 60) * 100), '%');
     clockContainer.appendChild(clockCenter);
     container.appendChild(clockContainer);
     addDownloadButton(container);
@@ -357,7 +390,8 @@
     explanation.style.color = STYLES.subtleTextColor;
     explanation.style.fontSize = isMobile ? '0.8em' : '0.9em';
     explanation.style.padding = isMobile ? '0 5px' : '0';
-    explanation.innerHTML = "Stopwatch Bingo: collect finish times with every second from 00-59.<br>Orange segments show seconds you've collected. Segment length indicates frequency.<br>Click on any segment to see details.";
+    explanation.innerHTML =
+      "Stopwatch Bingo: collect finish times with every second from 00-59.<br>Orange segments show seconds you've collected. Segment length indicates frequency.<br>Click on any segment to see details.";
     container.appendChild(explanation);
     return container;
   }
@@ -398,7 +432,7 @@
         // Higher resolution
         logging: false,
         allowTaint: true,
-        useCORS: true
+        useCORS: true,
       }).then(function (canvas) {
         // Show the button again
         downloadBtn.style.display = 'block';
@@ -406,7 +440,7 @@
         var timestamp = new Date().toISOString().split('T')[0];
         var pageUrl = window.location.pathname.split('/');
         var parkrunnerId = pageUrl[2] || 'parkrunner';
-        link.download = "stopwatch-bingo-".concat(parkrunnerId, "-").concat(timestamp, ".png");
+        link.download = 'stopwatch-bingo-'.concat(parkrunnerId, '-').concat(timestamp, '.png');
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
@@ -453,7 +487,9 @@
 
     // Add title
     var title = document.createElement('h3');
-    title.textContent = "".concat(second.toString().padStart(2, '0'), " Seconds - ").concat(times.length, " Times");
+    title.textContent = ''
+      .concat(second.toString().padStart(2, '0'), ' Seconds - ')
+      .concat(times.length, ' Times');
     title.style.marginBottom = '15px';
     title.style.color = STYLES.clockBorderColor;
     popup.appendChild(title);
@@ -466,16 +502,20 @@
 
     // Add table header
     var thead = document.createElement('thead');
-    var headers = [{
-      title: 'Date',
-      align: 'left'
-    }, {
-      title: 'Event',
-      align: 'left'
-    }, {
-      title: 'Time',
-      align: 'left'
-    }];
+    var headers = [
+      {
+        title: 'Date',
+        align: 'left',
+      },
+      {
+        title: 'Event',
+        align: 'left',
+      },
+      {
+        title: 'Time',
+        align: 'left',
+      },
+    ];
     var headerRow = document.createElement('tr');
     headers.forEach(function (header) {
       var th = document.createElement('th');
@@ -493,15 +533,24 @@
     times.forEach(function (time, index) {
       var row = document.createElement('tr');
       row.style.backgroundColor = index === 0 ? 'rgba(255, 163, 0, 0.2)' : 'transparent';
-      var cells = [{
-        content: time.date
-      }, {
-        content: time.event
-      }, {
-        content: time.time
-      }].map(function (cell) {
-        return "<td style=\"padding: 8px; border-bottom: 1px solid #444;\">".concat(cell.content, "</td>");
-      }).join('');
+      var cells = [
+        {
+          content: time.date,
+        },
+        {
+          content: time.event,
+        },
+        {
+          content: time.time,
+        },
+      ]
+        .map(function (cell) {
+          return '<td style="padding: 8px; border-bottom: 1px solid #444;">'.concat(
+            cell.content,
+            '</td>'
+          );
+        })
+        .join('');
       row.innerHTML = cells;
       tbody.appendChild(row);
     });
@@ -552,7 +601,7 @@
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       findResultsTable: findResultsTable,
-      extractFinishTimes: extractFinishTimes
+      extractFinishTimes: extractFinishTimes,
     };
   } else {
     initStopwatchBingo();

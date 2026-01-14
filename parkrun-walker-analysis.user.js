@@ -40,24 +40,250 @@
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 // Built: 2026-01-14T02:06:18.316Z
 
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-
+function _typeof(o) {
+  '@babel/helpers - typeof';
+  return (
+    (_typeof =
+      'function' == typeof Symbol && 'symbol' == typeof Symbol.iterator
+        ? function (o) {
+            return typeof o;
+          }
+        : function (o) {
+            return o &&
+              'function' == typeof Symbol &&
+              o.constructor === Symbol &&
+              o !== Symbol.prototype
+              ? 'symbol'
+              : typeof o;
+          }),
+    _typeof(o)
+  );
+}
+function _regenerator() {
+  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e,
+    t,
+    r = 'function' == typeof Symbol ? Symbol : {},
+    n = r.iterator || '@@iterator',
+    o = r.toStringTag || '@@toStringTag';
+  function i(r, n, o, i) {
+    var c = n && n.prototype instanceof Generator ? n : Generator,
+      u = Object.create(c.prototype);
+    return (
+      _regeneratorDefine2(
+        u,
+        '_invoke',
+        (function (r, n, o) {
+          var i,
+            c,
+            u,
+            f = 0,
+            p = o || [],
+            y = !1,
+            G = {
+              p: 0,
+              n: 0,
+              v: e,
+              a: d,
+              f: d.bind(e, 4),
+              d: function d(t, r) {
+                return ((i = t), (c = 0), (u = e), (G.n = r), a);
+              },
+            };
+          function d(r, n) {
+            for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) {
+              var o,
+                i = p[t],
+                d = G.p,
+                l = i[2];
+              r > 3
+                ? (o = l === n) && ((u = i[(c = i[4]) ? 5 : ((c = 3), 3)]), (i[4] = i[5] = e))
+                : i[0] <= d &&
+                  ((o = r < 2 && d < i[1])
+                    ? ((c = 0), (G.v = n), (G.n = i[1]))
+                    : d < l &&
+                      (o = r < 3 || i[0] > n || n > l) &&
+                      ((i[4] = r), (i[5] = n), (G.n = l), (c = 0)));
+            }
+            if (o || r > 1) return a;
+            throw ((y = !0), n);
+          }
+          return function (o, p, l) {
+            if (f > 1) throw TypeError('Generator is already running');
+            for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y; ) {
+              i || (c ? (c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : (G.n = u)) : (G.v = u));
+              try {
+                if (((f = 2), i)) {
+                  if ((c || (o = 'next'), (t = i[o]))) {
+                    if (!(t = t.call(i, u))) throw TypeError('iterator result is not an object');
+                    if (!t.done) return t;
+                    ((u = t.value), c < 2 && (c = 0));
+                  } else
+                    (1 === c && (t = i.return) && t.call(i),
+                      c < 2 &&
+                        ((u = TypeError("The iterator does not provide a '" + o + "' method")),
+                        (c = 1)));
+                  i = e;
+                } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break;
+              } catch (t) {
+                ((i = e), (c = 1), (u = t));
+              } finally {
+                f = 1;
+              }
+            }
+            return { value: t, done: y };
+          };
+        })(r, o, i),
+        !0
+      ),
+      u
+    );
+  }
+  var a = {};
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+  t = Object.getPrototypeOf;
+  var c = [][n]
+      ? t(t([][n]()))
+      : (_regeneratorDefine2((t = {}), n, function () {
+          return this;
+        }),
+        t),
+    u = (GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c));
+  function f(e) {
+    return (
+      Object.setPrototypeOf
+        ? Object.setPrototypeOf(e, GeneratorFunctionPrototype)
+        : ((e.__proto__ = GeneratorFunctionPrototype),
+          _regeneratorDefine2(e, o, 'GeneratorFunction')),
+      (e.prototype = Object.create(u)),
+      e
+    );
+  }
+  return (
+    (GeneratorFunction.prototype = GeneratorFunctionPrototype),
+    _regeneratorDefine2(u, 'constructor', GeneratorFunctionPrototype),
+    _regeneratorDefine2(GeneratorFunctionPrototype, 'constructor', GeneratorFunction),
+    (GeneratorFunction.displayName = 'GeneratorFunction'),
+    _regeneratorDefine2(GeneratorFunctionPrototype, o, 'GeneratorFunction'),
+    _regeneratorDefine2(u),
+    _regeneratorDefine2(u, o, 'Generator'),
+    _regeneratorDefine2(u, n, function () {
+      return this;
+    }),
+    _regeneratorDefine2(u, 'toString', function () {
+      return '[object Generator]';
+    }),
+    (_regenerator = function _regenerator() {
+      return { w: i, m: f };
+    })()
+  );
+}
+function _regeneratorDefine2(e, r, n, t) {
+  var i = Object.defineProperty;
+  try {
+    i({}, '', {});
+  } catch (e) {
+    i = 0;
+  }
+  ((_regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) {
+    function o(r, n) {
+      _regeneratorDefine2(e, r, function (e) {
+        return this._invoke(r, n, e);
+      });
+    }
+    r
+      ? i
+        ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t })
+        : (e[r] = n)
+      : (o('next', 0), o('throw', 1), o('return', 2));
+  }),
+    _regeneratorDefine2(e, r, n, t));
+}
+function asyncGeneratorStep(n, t, e, r, o, a, c) {
+  try {
+    var i = n[a](c),
+      u = i.value;
+  } catch (n) {
+    return void e(n);
+  }
+  i.done ? t(u) : Promise.resolve(u).then(r, o);
+}
+function _asyncToGenerator(n) {
+  return function () {
+    var t = this,
+      e = arguments;
+    return new Promise(function (r, o) {
+      var a = n.apply(t, e);
+      function _next(n) {
+        asyncGeneratorStep(a, r, o, _next, _throw, 'next', n);
+      }
+      function _throw(n) {
+        asyncGeneratorStep(a, r, o, _next, _throw, 'throw', n);
+      }
+      _next(void 0);
+    });
+  };
+}
+function ownKeys(e, r) {
+  var t = Object.keys(e);
+  if (Object.getOwnPropertySymbols) {
+    var o = Object.getOwnPropertySymbols(e);
+    (r &&
+      (o = o.filter(function (r) {
+        return Object.getOwnPropertyDescriptor(e, r).enumerable;
+      })),
+      t.push.apply(t, o));
+  }
+  return t;
+}
+function _objectSpread(e) {
+  for (var r = 1; r < arguments.length; r++) {
+    var t = null != arguments[r] ? arguments[r] : {};
+    r % 2
+      ? ownKeys(Object(t), !0).forEach(function (r) {
+          _defineProperty(e, r, t[r]);
+        })
+      : Object.getOwnPropertyDescriptors
+        ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t))
+        : ownKeys(Object(t)).forEach(function (r) {
+            Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
+          });
+  }
+  return e;
+}
+function _defineProperty(e, r, t) {
+  return (
+    (r = _toPropertyKey(r)) in e
+      ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 })
+      : (e[r] = t),
+    e
+  );
+}
+function _toPropertyKey(t) {
+  var i = _toPrimitive(t, 'string');
+  return 'symbol' == _typeof(i) ? i : i + '';
+}
+function _toPrimitive(t, r) {
+  if ('object' != _typeof(t) || !t) return t;
+  var e = t[Symbol.toPrimitive];
+  if (void 0 !== e) {
+    var i = e.call(t, r || 'default');
+    if ('object' != _typeof(i)) return i;
+    throw new TypeError('@@toPrimitive must return a primitive value.');
+  }
+  return ('string' === r ? String : Number)(t);
+}
 
 var ChartRef = typeof window !== 'undefined' && window.Chart ? window.Chart : undefined;
 function assignUnknownFinishTimes(finishers) {
   function findPreviousKnownTime(finishers, startIndex) {
-    var previousFinisher = finishers.slice(0, startIndex).reverse().find(function (f) {
-      return f.timeStr && f.timeSec > 0;
-    });
+    var previousFinisher = finishers
+      .slice(0, startIndex)
+      .reverse()
+      .find(function (f) {
+        return f.timeStr && f.timeSec > 0;
+      });
     return previousFinisher ? previousFinisher.timeSec : null;
   }
   function findNextKnownTime(finishers, startIndex) {
@@ -73,10 +299,14 @@ function assignUnknownFinishTimes(finishers) {
     var prevTime = findPreviousKnownTime(finishers, index);
     var nextTime = findNextKnownTime(finishers, index);
     var estimatedTime = prevTime || nextTime || 0;
-    return _objectSpread(_objectSpread({}, finisher), {}, {
-      timeSec: estimatedTime,
-      estimatedTime: estimatedTime > 0
-    });
+    return _objectSpread(
+      _objectSpread({}, finisher),
+      {},
+      {
+        timeSec: estimatedTime,
+        estimatedTime: estimatedTime > 0,
+      }
+    );
   });
 }
 function getEventMetadata() {
@@ -100,14 +330,20 @@ function getEventMetadata() {
   return {
     eventName: eventName,
     eventDate: eventDate,
-    eventNumber: eventNumber
+    eventNumber: eventNumber,
   };
 }
 function generateExportFilename(metadata, chartName) {
-  var eventPart = metadata.eventName ? metadata.eventName.replace(/[^a-z0-9]+/gi, '').toLowerCase() : 'event';
+  var eventPart = metadata.eventName
+    ? metadata.eventName.replace(/[^a-z0-9]+/gi, '').toLowerCase()
+    : 'event';
   var datePart = metadata.eventDate ? metadata.eventDate.replace(/\//g, '_') : 'date';
   var numPart = metadata.eventNumber ? metadata.eventNumber : 'num';
-  return "".concat(eventPart, "_").concat(datePart, "_").concat(numPart, "_").concat(chartName, ".png");
+  return ''
+    .concat(eventPart, '_')
+    .concat(datePart, '_')
+    .concat(numPart, '_')
+    .concat(chartName, '.png');
 }
 function computeWalkerThreshold(url) {
   var DEFAULT = 5;
@@ -140,14 +376,14 @@ function parkrunWalkerAnalysisMain() {
       var m = _milestones[_i];
       if (count >= m) {
         return {
-          status: "".concat(prefix, " ").concat(m, " Club"),
-          milestone: m
+          status: ''.concat(prefix, ' ').concat(m, ' Club'),
+          milestone: m,
         };
       }
     }
     return {
       status: null,
-      milestone: 0
+      milestone: 0,
     };
   }
   var finishers = rows.map(function (row, idx) {
@@ -188,7 +424,7 @@ function parkrunWalkerAnalysisMain() {
     }
     var clubMatch = row.innerHTML.match(/milestone-v(\d+)/);
     if (clubMatch) {
-      volunteerStatus = "Volunteer ".concat(clubMatch[1], " Club");
+      volunteerStatus = 'Volunteer '.concat(clubMatch[1], ' Club');
       volunteerMilestone = parseInt(clubMatch[1], 10);
     }
     var ageGrade = '';
@@ -230,7 +466,7 @@ function parkrunWalkerAnalysisMain() {
       ageGrade: ageGrade,
       ageGroup: ageGroup,
       _row: row,
-      _idx: idx
+      _idx: idx,
     };
   });
   var finishersWithEstimatedTimes = assignUnknownFinishTimes(finishers);
@@ -250,7 +486,7 @@ function parkrunWalkerAnalysisMain() {
     return {
       bins: bins,
       minMinute: minMinute,
-      maxMinute: maxMinute
+      maxMinute: maxMinute,
     };
   }
   var milestoneColours = {
@@ -265,21 +501,26 @@ function parkrunWalkerAnalysisMain() {
     'Volunteered multiple times': '#00CEAE',
     'Has Volunteered': '#00CEAE',
     'Yet to Volunteer': '#FFA300',
-    Unknown: '#A1B6B7'
+    Unknown: '#A1B6B7',
   };
-  var breakdowns = [{
-    key: 'parkrunExperience',
-    label: 'parkrun Experience'
-  }, {
-    key: 'volunteerStatus',
-    label: 'Volunteer Experience'
-  }, {
-    key: 'gender',
-    label: 'Gender'
-  }, {
-    key: 'ageGroup',
-    label: 'Age Group'
-  }];
+  var breakdowns = [
+    {
+      key: 'parkrunExperience',
+      label: 'parkrun Experience',
+    },
+    {
+      key: 'volunteerStatus',
+      label: 'Volunteer Experience',
+    },
+    {
+      key: 'gender',
+      label: 'Gender',
+    },
+    {
+      key: 'ageGroup',
+      label: 'Age Group',
+    },
+  ];
   var currentBreakdown = 'parkrunExperience';
   var chartContainerId = 'finishersStackedChart';
   var walkerChartInstance = null;
@@ -298,7 +539,9 @@ function parkrunWalkerAnalysisMain() {
     controlDiv.style.marginRight = 'auto';
   }
   function buildTable(breakdownKey) {
-    var threshold = computeWalkerThreshold(typeof document !== 'undefined' && document.location ? document.location.href : '');
+    var threshold = computeWalkerThreshold(
+      typeof document !== 'undefined' && document.location ? document.location.href : ''
+    );
     var walkers = finishersWithEstimatedTimes.filter(function (f) {
       return f.timeSec >= threshold;
     });
@@ -329,7 +572,18 @@ function parkrunWalkerAnalysisMain() {
       if (allValues.has('Not specified')) valueList.push('Not specified');
       if (allValues.has('Unknown')) valueList.push('Unknown');
     } else if (breakdownKey === 'parkrunExperience') {
-      var experienceOrder = ['First Timer (anywhere)', 'First Timer (to this event)', 'Multiple parkruns', 'parkrun 10 Club', 'parkrun 25 Club', 'parkrun 50 Club', 'parkrun 100 Club', 'parkrun 250 Club', 'parkrun 500 Club', 'parkrun 1000 Club'];
+      var experienceOrder = [
+        'First Timer (anywhere)',
+        'First Timer (to this event)',
+        'Multiple parkruns',
+        'parkrun 10 Club',
+        'parkrun 25 Club',
+        'parkrun 50 Club',
+        'parkrun 100 Club',
+        'parkrun 250 Club',
+        'parkrun 500 Club',
+        'parkrun 1000 Club',
+      ];
       var experienceIndex = function experienceIndex(v) {
         var idx = experienceOrder.indexOf(v);
         if (idx !== -1) return idx;
@@ -347,7 +601,18 @@ function parkrunWalkerAnalysisMain() {
         return experienceIndex(a) - experienceIndex(b);
       });
     } else if (breakdownKey === 'volunteerStatus') {
-      var milestoneOrder = ['Yet to Volunteer', 'Volunteered once', 'Volunteered multiple times', 'Volunteer 10 Club', 'Volunteer 25 Club', 'Volunteer 50 Club', 'Volunteer 100 Club', 'Volunteer 250 Club', 'Volunteer 500 Club', 'Volunteer 1000 Club'];
+      var milestoneOrder = [
+        'Yet to Volunteer',
+        'Volunteered once',
+        'Volunteered multiple times',
+        'Volunteer 10 Club',
+        'Volunteer 25 Club',
+        'Volunteer 50 Club',
+        'Volunteer 100 Club',
+        'Volunteer 250 Club',
+        'Volunteer 500 Club',
+        'Volunteer 1000 Club',
+      ];
       var milestoneIndex = function milestoneIndex(v) {
         var idx = milestoneOrder.indexOf(v);
         if (idx !== -1) return idx;
@@ -364,12 +629,22 @@ function parkrunWalkerAnalysisMain() {
       valueList.sort();
     }
     var totalFinishers = totalWalkers + totalRunners;
-    var walkerPercent = totalFinishers ? (totalWalkers / totalFinishers * 100).toFixed(1) : '0.0';
-    var runnerPercent = totalFinishers ? (totalRunners / totalFinishers * 100).toFixed(1) : '0.0';
-    var html = "<div style=\"text-align:center;margin-bottom:0.5em;font-size:1.08em;\">\n      <strong>Walkers:</strong> ".concat(totalWalkers, " (").concat(walkerPercent, "%) &nbsp; | &nbsp; <strong>Runners:</strong> ").concat(totalRunners, " (").concat(runnerPercent, "%) &nbsp; | &nbsp; <strong>Total finishers:</strong> ").concat(totalFinishers, "\n    </div>");
-    html += "<table class=\"Results-table\" style=\"margin:1em auto;font-size:1.1em;\">\n      <thead><tr><th>".concat(breakdowns.find(function (b) {
-      return b.key === breakdownKey;
-    }).label, "</th><th>Walkers (n)</th><th>Walkers (%)</th><th>Runners (n)</th><th>Runners (%)</th><th>Total (n)</th><th>Total (%)</th></tr></thead><tbody>");
+    var walkerPercent = totalFinishers ? ((totalWalkers / totalFinishers) * 100).toFixed(1) : '0.0';
+    var runnerPercent = totalFinishers ? ((totalRunners / totalFinishers) * 100).toFixed(1) : '0.0';
+    var html =
+      '<div style="text-align:center;margin-bottom:0.5em;font-size:1.08em;">\n      <strong>Walkers:</strong> '
+        .concat(totalWalkers, ' (')
+        .concat(walkerPercent, '%) &nbsp; | &nbsp; <strong>Runners:</strong> ')
+        .concat(totalRunners, ' (')
+        .concat(runnerPercent, '%) &nbsp; | &nbsp; <strong>Total finishers:</strong> ')
+        .concat(totalFinishers, '\n    </div>');
+    html +=
+      '<table class="Results-table" style="margin:1em auto;font-size:1.1em;">\n      <thead><tr><th>'.concat(
+        breakdowns.find(function (b) {
+          return b.key === breakdownKey;
+        }).label,
+        '</th><th>Walkers (n)</th><th>Walkers (%)</th><th>Runners (n)</th><th>Runners (%)</th><th>Total (n)</th><th>Total (%)</th></tr></thead><tbody>'
+      );
     valueList.forEach(function (val) {
       var w = walkers.filter(function (f) {
         return (f[breakdownKey] || 'Unknown') === val;
@@ -378,16 +653,48 @@ function parkrunWalkerAnalysisMain() {
         return (f[breakdownKey] || 'Unknown') === val;
       }).length;
       var t = w + r;
-      html += "<tr><td>".concat(val, "</td><td style=\"text-align:right\">").concat(w, "</td><td style=\"text-align:right\">").concat(totalWalkers ? (w / totalWalkers * 100).toFixed(1) : '0.0', "%</td><td style=\"text-align:right\">").concat(r, "</td><td style=\"text-align:right\">").concat(totalRunners ? (r / totalRunners * 100).toFixed(1) : '0.0', "%</td><td style=\"text-align:right\">").concat(t, "</td><td style=\"text-align:right\">").concat(totalFinishers ? (t / totalFinishers * 100).toFixed(1) : '0.0', "%</td></tr>");
+      html += '<tr><td>'
+        .concat(val, '</td><td style="text-align:right">')
+        .concat(w, '</td><td style="text-align:right">')
+        .concat(
+          totalWalkers ? ((w / totalWalkers) * 100).toFixed(1) : '0.0',
+          '%</td><td style="text-align:right">'
+        )
+        .concat(r, '</td><td style="text-align:right">')
+        .concat(
+          totalRunners ? ((r / totalRunners) * 100).toFixed(1) : '0.0',
+          '%</td><td style="text-align:right">'
+        )
+        .concat(t, '</td><td style="text-align:right">')
+        .concat(totalFinishers ? ((t / totalFinishers) * 100).toFixed(1) : '0.0', '%</td></tr>');
     });
-    html += "<tr style=\"font-weight:bold;\"><td>Total</td><td style=\"text-align:right\">".concat(totalWalkers, "</td><td style=\"text-align:right\">100.0%</td><td style=\"text-align:right\">").concat(totalRunners, "</td><td style=\"text-align:right\">100.0%</td><td style=\"text-align:right\">").concat(totalFinishers, "</td><td style=\"text-align:right\">100.0%</td></tr>");
-    html += "</tbody></table>";
+    html += '<tr style="font-weight:bold;"><td>Total</td><td style="text-align:right">'
+      .concat(
+        totalWalkers,
+        '</td><td style="text-align:right">100.0%</td><td style="text-align:right">'
+      )
+      .concat(
+        totalRunners,
+        '</td><td style="text-align:right">100.0%</td><td style="text-align:right">'
+      )
+      .concat(totalFinishers, '</td><td style="text-align:right">100.0%</td></tr>');
+    html += '</tbody></table>';
     return html;
   }
   function updateBreakdownControls() {
-    controlDiv.innerHTML = 'Breakdown: ' + breakdowns.map(function (b) {
-      return "<button style=\"margin:0 8px;padding:6px 12px;border-radius:4px;border:none;background:".concat(currentBreakdown === b.key ? '#FFA300' : '#00CEAE', ";color:#2b223d;font-weight:bold;cursor:pointer;\" data-key=\"").concat(b.key, "\">").concat(b.label, "</button>");
-    }).join('');
+    controlDiv.innerHTML =
+      'Breakdown: ' +
+      breakdowns
+        .map(function (b) {
+          return '<button style="margin:0 8px;padding:6px 12px;border-radius:4px;border:none;background:'
+            .concat(
+              currentBreakdown === b.key ? '#FFA300' : '#00CEAE',
+              ';color:#2b223d;font-weight:bold;cursor:pointer;" data-key="'
+            )
+            .concat(b.key, '">')
+            .concat(b.label, '</button>');
+        })
+        .join('');
     controlDiv.querySelectorAll('button').forEach(function (btn) {
       btn.onclick = function () {
         setBreakdown(btn.getAttribute('data-key'));
@@ -425,7 +732,10 @@ function parkrunWalkerAnalysisMain() {
     walkerContainer.appendChild(summaryDiv);
     var firstH3 = document.querySelector('h3');
     if (firstH3 && firstH3.parentNode) {
-      if (walkerContainer.parentNode !== firstH3.parentNode || walkerContainer.previousSibling !== firstH3) {
+      if (
+        walkerContainer.parentNode !== firstH3.parentNode ||
+        walkerContainer.previousSibling !== firstH3
+      ) {
         if (firstH3.nextSibling) {
           firstH3.parentNode.insertBefore(walkerContainer, firstH3.nextSibling);
         } else {
@@ -435,9 +745,13 @@ function parkrunWalkerAnalysisMain() {
     } else {
       document.body.appendChild(walkerContainer);
     }
-    renderStackedChart(currentBreakdown, breakdowns.find(function (b) {
-      return b.key === currentBreakdown;
-    }).label, chartContainerId);
+    renderStackedChart(
+      currentBreakdown,
+      breakdowns.find(function (b) {
+        return b.key === currentBreakdown;
+      }).label,
+      chartContainerId
+    );
     insertControlsBelowChart();
   }
   function insertControlsBelowChart() {
@@ -483,7 +797,18 @@ function parkrunWalkerAnalysisMain() {
         return sorted;
       }
       if (breakdownType === 'parkrunExperience') {
-        var experienceOrder = ['First Timer (anywhere)', 'First Timer (to this event)', 'Multiple parkruns', 'parkrun 10 Club', 'parkrun 25 Club', 'parkrun 50 Club', 'parkrun 100 Club', 'parkrun 250 Club', 'parkrun 500 Club', 'parkrun 1000 Club'];
+        var experienceOrder = [
+          'First Timer (anywhere)',
+          'First Timer (to this event)',
+          'Multiple parkruns',
+          'parkrun 10 Club',
+          'parkrun 25 Club',
+          'parkrun 50 Club',
+          'parkrun 100 Club',
+          'parkrun 250 Club',
+          'parkrun 500 Club',
+          'parkrun 1000 Club',
+        ];
         var experienceIndex = function experienceIndex(v) {
           var idx = experienceOrder.indexOf(v);
           if (idx !== -1) return idx;
@@ -502,7 +827,18 @@ function parkrunWalkerAnalysisMain() {
         });
       }
       if (breakdownType === 'volunteerStatus') {
-        var milestoneOrder = ['Yet to Volunteer', 'Volunteered once', 'Volunteered multiple times', 'Volunteer 10 Club', 'Volunteer 25 Club', 'Volunteer 50 Club', 'Volunteer 100 Club', 'Volunteer 250 Club', 'Volunteer 500 Club', 'Volunteer 1000 Club'];
+        var milestoneOrder = [
+          'Yet to Volunteer',
+          'Volunteered once',
+          'Volunteered multiple times',
+          'Volunteer 10 Club',
+          'Volunteer 25 Club',
+          'Volunteer 50 Club',
+          'Volunteer 100 Club',
+          'Volunteer 250 Club',
+          'Volunteer 500 Club',
+          'Volunteer 1000 Club',
+        ];
         var milestoneIndex = function milestoneIndex(v) {
           var idx = milestoneOrder.indexOf(v);
           if (idx !== -1) return idx;
@@ -538,7 +874,7 @@ function parkrunWalkerAnalysisMain() {
           'First Timer (anywhere)': '#FFE049',
           'First Timer (to this event)': '#FFA300',
           'Multiple parkruns': '#00CEAE',
-          Unknown: '#A1B6B7'
+          Unknown: '#A1B6B7',
         };
         return experienceColours[key] || '#cccccc';
       }
@@ -547,7 +883,7 @@ function parkrunWalkerAnalysisMain() {
           Male: '#00CEAE',
           Female: '#E21145',
           'Not specified': '#FFE049',
-          Unknown: '#A1B6B7'
+          Unknown: '#A1B6B7',
         };
         return genderColours[key] || '#FFA300';
       }
@@ -557,13 +893,41 @@ function parkrunWalkerAnalysisMain() {
         var _match2 = key.match(/^(\d+)-/);
         if (_match2) {
           var age = parseInt(_match2[1], 10);
-          var gradient = ['#DA70D6', '#9370DB', '#6495ED', '#4169E1', '#1E90FF', '#00BFFF', '#00CED1', '#20B2AA', '#3CB371', '#32CD32', '#9ACD32', '#FFD700', '#FFA500', '#FF8C00', '#FF6347', '#DC143C', '#DB7093'];
+          var gradient = [
+            '#DA70D6',
+            '#9370DB',
+            '#6495ED',
+            '#4169E1',
+            '#1E90FF',
+            '#00BFFF',
+            '#00CED1',
+            '#20B2AA',
+            '#3CB371',
+            '#32CD32',
+            '#9ACD32',
+            '#FFD700',
+            '#FFA500',
+            '#FF8C00',
+            '#FF6347',
+            '#DC143C',
+            '#DB7093',
+          ];
           var index = Math.floor((age - 10) / 5);
           return gradient[Math.min(index, gradient.length - 1)] || '#cccccc';
         }
         return '#cccccc';
       }
-      return ['#FFA300', '#00CEAE', '#E21145', '#EBE9F0', '#FFE049', '#2C504A', '#6D5698', '#C81D31', '#A1B6B7'][keyList.indexOf(key) % 9];
+      return [
+        '#FFA300',
+        '#00CEAE',
+        '#E21145',
+        '#EBE9F0',
+        '#FFE049',
+        '#2C504A',
+        '#6D5698',
+        '#C81D31',
+        '#A1B6B7',
+      ][keyList.indexOf(key) % 9];
     }
     var datasets = keyList.map(function (key) {
       return {
@@ -572,13 +936,13 @@ function parkrunWalkerAnalysisMain() {
           return bins[m] && bins[m][key] ? bins[m][key] : 0;
         }),
         backgroundColor: getColour(key),
-        stack: 'stack1'
+        stack: 'stack1',
       };
     });
     var labels = minutes.map(function (min) {
       var h = Math.floor(min / 60);
       var m = min % 60;
-      return "".concat(h, ":").concat(m.toString().padStart(2, '0'));
+      return ''.concat(h, ':').concat(m.toString().padStart(2, '0'));
     });
     var chartDiv = document.getElementById(containerId);
     if (!chartDiv) {
@@ -594,7 +958,7 @@ function parkrunWalkerAnalysisMain() {
     chartDiv.style.maxWidth = '900px';
     chartDiv.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
     var heading = document.createElement('h3');
-    heading.textContent = "Finishers per Minute by ".concat(breakdownLabel);
+    heading.textContent = 'Finishers per Minute by '.concat(breakdownLabel);
     heading.style.textAlign = 'center';
     heading.style.marginBottom = '15px';
     heading.style.color = '#FFA300';
@@ -619,51 +983,75 @@ function parkrunWalkerAnalysisMain() {
     saveBtn.addEventListener('mouseout', function () {
       this.style.backgroundColor = '#FFA300';
     });
-    saveBtn.addEventListener('click', /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var metadata, _heading, chartName, filename, chartCanvas, chartWidth, chartHeight, titleHeight, totalWidth, totalHeight, out, ctx, titleText, link;
-      return _regenerator().w(function (_context) {
-        while (1) switch (_context.n) {
-          case 0:
-            try {
-              metadata = getEventMetadata();
-              _heading = chartDiv.querySelector('h3');
-              chartName = _heading ? _heading.textContent.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() : 'chart';
-              filename = generateExportFilename(metadata, chartName); // Add title and background to the chart canvas
-              chartCanvas = canvas;
-              chartWidth = chartCanvas.width;
-              chartHeight = chartCanvas.height;
-              titleHeight = 100;
-              totalWidth = chartWidth;
-              totalHeight = chartHeight + titleHeight;
-              out = document.createElement('canvas');
-              out.width = totalWidth;
-              out.height = totalHeight;
-              ctx = out.getContext('2d'); // Background
-              ctx.fillStyle = '#2b223d';
-              ctx.fillRect(0, 0, totalWidth, totalHeight);
+    saveBtn.addEventListener(
+      'click',
+      /*#__PURE__*/ _asyncToGenerator(
+        /*#__PURE__*/ _regenerator().m(function _callee() {
+          var metadata,
+            _heading,
+            chartName,
+            filename,
+            chartCanvas,
+            chartWidth,
+            chartHeight,
+            titleHeight,
+            totalWidth,
+            totalHeight,
+            out,
+            ctx,
+            titleText,
+            link;
+          return _regenerator().w(function (_context) {
+            while (1)
+              switch (_context.n) {
+                case 0:
+                  try {
+                    metadata = getEventMetadata();
+                    _heading = chartDiv.querySelector('h3');
+                    chartName = _heading
+                      ? _heading.textContent
+                          .replace(/[^a-z0-9]+/gi, '-')
+                          .replace(/^-+|-+$/g, '')
+                          .toLowerCase()
+                      : 'chart';
+                    filename = generateExportFilename(metadata, chartName); // Add title and background to the chart canvas
+                    chartCanvas = canvas;
+                    chartWidth = chartCanvas.width;
+                    chartHeight = chartCanvas.height;
+                    titleHeight = 100;
+                    totalWidth = chartWidth;
+                    totalHeight = chartHeight + titleHeight;
+                    out = document.createElement('canvas');
+                    out.width = totalWidth;
+                    out.height = totalHeight;
+                    ctx = out.getContext('2d'); // Background
+                    ctx.fillStyle = '#2b223d';
+                    ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-              // Title
-              ctx.fillStyle = '#FFA300';
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.font = 'bold 56px Arial';
-              titleText = _heading ? _heading.textContent : 'Finishers per Minute';
-              ctx.fillText(titleText, totalWidth / 2, titleHeight / 2);
+                    // Title
+                    ctx.fillStyle = '#FFA300';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = 'bold 56px Arial';
+                    titleText = _heading ? _heading.textContent : 'Finishers per Minute';
+                    ctx.fillText(titleText, totalWidth / 2, titleHeight / 2);
 
-              // Chart
-              ctx.drawImage(chartCanvas, 0, titleHeight);
-              link = document.createElement('a');
-              link.download = filename;
-              link.href = out.toDataURL('image/png');
-              link.click();
-            } catch (err) {
-              alert('Failed to export image: ' + err);
-            }
-          case 1:
-            return _context.a(2);
-        }
-      }, _callee);
-    })));
+                    // Chart
+                    ctx.drawImage(chartCanvas, 0, titleHeight);
+                    link = document.createElement('a');
+                    link.download = filename;
+                    link.href = out.toDataURL('image/png');
+                    link.click();
+                  } catch (err) {
+                    alert('Failed to export image: ' + err);
+                  }
+                case 1:
+                  return _context.a(2);
+              }
+          }, _callee);
+        })
+      )
+    );
     var controlsFooter = chartDiv.querySelector('.walker-controls-footer');
     if (!controlsFooter) {
       controlsFooter = document.createElement('div');
@@ -685,7 +1073,7 @@ function parkrunWalkerAnalysisMain() {
         type: 'bar',
         data: {
           labels: labels,
-          datasets: datasets
+          datasets: datasets,
         },
         options: {
           responsive: true,
@@ -694,18 +1082,18 @@ function parkrunWalkerAnalysisMain() {
               left: 60,
               right: 60,
               top: 40,
-              bottom: 40
-            }
+              bottom: 40,
+            },
           },
           plugins: {
             legend: {
               labels: {
-                color: '#e0e0e0'
-              }
+                color: '#e0e0e0',
+              },
             },
             title: {
-              display: false
-            }
+              display: false,
+            },
           },
           scales: {
             x: {
@@ -713,14 +1101,14 @@ function parkrunWalkerAnalysisMain() {
               title: {
                 display: true,
                 text: 'Finish Time',
-                color: '#e0e0e0'
+                color: '#e0e0e0',
               },
               ticks: {
-                color: '#cccccc'
+                color: '#cccccc',
               },
               grid: {
-                color: 'rgba(200,200,200,0.2)'
-              }
+                color: 'rgba(200,200,200,0.2)',
+              },
             },
             y: {
               stacked: true,
@@ -728,18 +1116,18 @@ function parkrunWalkerAnalysisMain() {
               title: {
                 display: true,
                 text: 'Number of Finishers',
-                color: '#e0e0e0'
+                color: '#e0e0e0',
               },
               ticks: {
                 color: '#cccccc',
-                precision: 0
+                precision: 0,
               },
               grid: {
-                color: 'rgba(200,200,200,0.2)'
-              }
-            }
-          }
-        }
+                color: 'rgba(200,200,200,0.2)',
+              },
+            },
+          },
+        },
       });
     }, 0);
   }
@@ -753,6 +1141,6 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     assignUnknownFinishTimes: assignUnknownFinishTimes,
     getEventMetadata: getEventMetadata,
     generateExportFilename: generateExportFilename,
-    computeWalkerThreshold: computeWalkerThreshold
+    computeWalkerThreshold: computeWalkerThreshold,
   };
 }

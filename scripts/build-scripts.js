@@ -77,7 +77,7 @@ for (const rel of builtFiles) {
   }
 
   // remove metadata block for bookmarklet body
-  let body = content.replace(/\/\/\s*==UserScript==[\s\S]*?\/\/\s*==\/UserScript==\s*/,'').trim();
+  let body = content.replace(/\/\/\s*==UserScript==[\s\S]*?\/\/\s*==\/UserScript==\s*/, '').trim();
   // remove sourceMappingURL comments
   body = body.replace(/\/\/# sourceMappingURL=.*$/gm, '');
 
@@ -116,7 +116,9 @@ if (fs.existsSync(readmePath)) {
   const endIndex = readme.indexOf(endMarker);
   const generated = [];
   generated.push('## Bookmarklets\n');
-  generated.push('You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:\n');
+  generated.push(
+    'You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:\n'
+  );
   for (const b of bookmarklets) {
     generated.push(`### ${b.name}\n`);
     if (b.description) generated.push(`> ${b.description}\n`);
