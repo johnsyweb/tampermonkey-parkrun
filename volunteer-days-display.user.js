@@ -1,5 +1,3 @@
-// DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-14T01:57:51.205Z
 // ==UserScript==
 // @name         parkrun Volunteer Days Display
 // @description  Displays the number of volunteer days for parkrun finishers on results pages, for celebration purposes (and let's not make assumptions about ratios)
@@ -37,6 +35,8 @@
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days-display.user.js
 // @version      1.0.62
 // ==/UserScript==
+// DO NOT EDIT - generated from src/ by scripts/build-scripts.js
+// Built: 2026-01-14T02:06:18.316Z
 
 (function () {
   'use strict';

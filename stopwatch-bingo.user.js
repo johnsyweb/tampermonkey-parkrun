@@ -1,5 +1,3 @@
-// DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-14T01:57:51.205Z
 // ==UserScript==
 // @name         parkrun Stopwatch Bingo
 // @description  Visualizes your progress on the stopwatch bingo challenge (collecting seconds 00-59)
@@ -38,6 +36,8 @@
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/stopwatch-bingo.user.js
 // @version      1.0.62
 // ==/UserScript==
+// DO NOT EDIT - generated from src/ by scripts/build-scripts.js
+// Built: 2026-01-14T02:06:18.316Z
 
 (function () {
   'use strict';
