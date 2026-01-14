@@ -8,7 +8,9 @@ description_html: |
 og_image: /tampermonkey-parkrun/images/alphabet-challenge.png
 application_name: parkrun Userscripts
 baseurl: /tampermonkey-parkrun
-url: https://johnsy.com
+url: https://www.johnsy.com
+plugins:
+  - jekyll-sitemap
 
 apple_touch_icon_sizes:
   - 57

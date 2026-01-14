@@ -1,3 +1,9 @@
+---
+layout: default
+title: Scripts
+permalink: /scripts/
+---
+
 ### Alphabet Challenge
 
 > Tracks progress on the unofficial parkrun alphabet challenge (A-Z, excluding X) with a 5x5 grid visualisation and download feature.
