@@ -120,7 +120,7 @@ const screenshotConfigs: ScreenshotConfig[] = [
   },
 ];
 
-async function generateScreenshots(scriptName?: string): Promise<void> {
+async function generateScreenshots(scriptName?: string, force = false): Promise<void> {
   let browser: Browser | null = null;
 
   try {
@@ -144,11 +144,45 @@ async function generateScreenshots(scriptName?: string): Promise<void> {
     if (scriptName) {
       console.log(`📸 Generating screenshot for: ${scriptName}`);
     }
+    if (force) {
+      console.log(
+        '⚡ Force mode enabled: screenshots will be regenerated regardless of timestamps'
+      );
+    }
     const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
     if (isCI) {
       console.log('📝 Running in CI mode (headless browser)');
     } else {
       console.log('📝 Note: This script will open a browser window and inject the userscript.');
+    }
+
+    // Before launching a browser, filter out any configs where the screenshot
+    // already exists and is newer than the userscript file, unless `force` is set.
+    const configsAfterSkip = [] as typeof screenshotConfigs;
+    for (const config of configsToProcess) {
+      try {
+        const screenshotPath = path.join(process.cwd(), 'docs', 'images', `${config.name}.png`);
+        const scriptPath = path.join(process.cwd(), config.script);
+        if (!force && fs.existsSync(screenshotPath) && fs.existsSync(scriptPath)) {
+          const shotStat = fs.statSync(screenshotPath);
+          const scriptStat = fs.statSync(scriptPath);
+          if (shotStat.mtimeMs > scriptStat.mtimeMs) {
+            console.log(
+              `⏭️  Skipping ${config.name}: existing screenshot is newer than ${config.script}`
+            );
+            continue;
+          }
+        }
+      } catch (err) {
+        // If anything goes wrong determining mtimes, fall back to generating.
+        console.warn(`⚠️  Could not stat files for ${config.name}, will regenerate:`, String(err));
+      }
+      configsAfterSkip.push(config);
+    }
+
+    if (configsAfterSkip.length === 0) {
+      console.log('✅ No screenshots to generate (all up-to-date).');
+      return;
     }
 
     browser = await puppeteer.launch({
@@ -170,7 +204,7 @@ async function generateScreenshots(scriptName?: string): Promise<void> {
 
     const page = await browser.newPage();
 
-    for (const config of configsToProcess) {
+    for (const config of configsAfterSkip) {
       console.log(`📸 Capturing screenshot: ${config.name}`);
 
       if (config.viewport) {
@@ -357,8 +391,18 @@ async function generateScreenshots(scriptName?: string): Promise<void> {
 }
 
 if (require.main === module) {
-  const scriptName = process.argv[2];
-  generateScreenshots(scriptName).catch((error) => {
+  const argv = process.argv.slice(2);
+  let scriptName: string | undefined;
+  let force = false;
+  for (const a of argv) {
+    if (a === '--force' || a === '-f') {
+      force = true;
+    } else if (!scriptName) {
+      scriptName = a;
+    }
+  }
+
+  generateScreenshots(scriptName, force).catch((error) => {
     console.error('❌ Script failed:', error);
     process.exit(1);
   });
