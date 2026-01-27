@@ -1,4 +1,7 @@
 const fs = require('fs');
+const path = require('path');
+
+const projectRoot = path.resolve(__dirname, '..');
 
 function extractUserscriptMetadata(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
@@ -28,12 +31,12 @@ function extractUserscriptMetadata(filePath) {
   return info;
 }
 
-// Find all .user.js files
-const files = fs.readdirSync('.').filter((f) => f.endsWith('.user.js'));
+// Find all .user.js files in project root
+const files = fs.readdirSync(projectRoot).filter((f) => f.endsWith('.user.js'));
 const scripts = [];
 
 for (const file of files) {
-  const info = extractUserscriptMetadata(file);
+  const info = extractUserscriptMetadata(path.join(projectRoot, file));
   if (info) {
     scripts.push({
       ...info,
@@ -44,4 +47,6 @@ for (const file of files) {
   }
 }
 
-console.log(JSON.stringify(scripts, null, 2));
+const outPath = path.join(projectRoot, 'docs', '_data', 'scripts.json');
+fs.writeFileSync(outPath, JSON.stringify(scripts, null, 2), 'utf8');
+console.log('✅ Generated', outPath);

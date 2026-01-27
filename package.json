@@ -12,10 +12,10 @@
     "create-bookmarklets": "node scripts/create-bookmarklets.js",
     "update-version": "node scripts/update-version.js",
     "screenshots": "ts-node scripts/generate-screenshots.ts",
-    "update-scripts-data": "node scripts/extract-script-info.js > docs/_data/scripts.json && node scripts/generate-scripts-yml.js",
-    "docs:build": "cd docs && bundle exec jekyll build",
+    "update-scripts-data": "node scripts/extract-script-info.js",
+    "docs:build": "node scripts/extract-script-info.js && cd docs && bundle exec jekyll build",
     "docs:install": "cd docs && bundle install",
-    "docs:serve": "cd docs && bundle exec jekyll serve",
+    "docs:serve": "node scripts/extract-script-info.js && cd docs && bundle exec jekyll serve",
     "build:scripts": "node scripts/build-scripts.js",
     "check:userscripts": "node scripts/check-userscript-metadata.js *.user.js",
     "prepare": "husky"

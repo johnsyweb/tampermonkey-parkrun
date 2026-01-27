@@ -1,5 +1,6 @@
 /node_modules/
 .pnpm-store/
+docs/_data/scripts.json
 docs/_site/
 docs/vendor/
 pnpm-workspace.yaml
