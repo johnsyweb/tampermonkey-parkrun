@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  PNPM_STORE_DIR: ${{ github.workspace }}/.pnpm-store
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -15,10 +18,12 @@ jobs:
       - uses: actions/checkout@v6
       - name: Set up mise
         uses: jdx/mise-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/pnpm/store/v3
+          path: .pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
@@ -31,12 +36,12 @@ jobs:
       - name: Run lint
         run: pnpm lint
       - name: Build scripts
-        run: pnpm build || true
+        run: pnpm build:scripts
       - name: Cache build artifacts
         if: github.ref == 'refs/heads/main'
         uses: actions/cache@v4
         with:
-          path: dist/
+          path: dist
           key: ${{ runner.os }}-dist-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-dist-
@@ -45,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: dist
 
   update-bookmarklets:
     if: github.ref == 'refs/heads/main'
@@ -57,10 +62,12 @@ jobs:
       - uses: actions/checkout@v6
       - name: Set up mise
         uses: jdx/mise-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/pnpm/store/v3
+          path: .pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
@@ -69,7 +76,7 @@ jobs:
       - name: Restore build artifacts
         uses: actions/cache@v4
         with:
-          path: dist/
+          path: dist
           key: ${{ runner.os }}-dist-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-dist-
@@ -77,7 +84,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: dist
       - name: Update bookmarklets
         run: pnpm create-bookmarklets
       - name: Commit changes
@@ -97,10 +104,12 @@ jobs:
       - uses: actions/checkout@v6
       - name: Set up mise
         uses: jdx/mise-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/pnpm/store/v3
+          path: .pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
@@ -109,7 +118,7 @@ jobs:
       - name: Restore build artifacts
         uses: actions/cache@v4
         with:
-          path: dist/
+          path: dist
           key: ${{ runner.os }}-dist-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-dist-
@@ -117,7 +126,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: dist
       - name: Update version string
         run: pnpm update-version
       - name: Commit changes
@@ -144,10 +153,12 @@ jobs:
           fetch-depth: 1
       - name: Set up mise
         uses: jdx/mise-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/pnpm/store/v3
+          path: .pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
@@ -156,7 +167,7 @@ jobs:
       - name: Restore build artifacts
         uses: actions/cache@v4
         with:
-          path: dist/
+          path: dist
           key: ${{ runner.os }}-dist-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-dist-
@@ -164,7 +175,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: dist
+      - name: Cache bundle
+        uses: actions/cache@v4
+        with:
+          path: docs/vendor/bundle
+          key: ${{ runner.os }}-bundle-${{ hashFiles('docs/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bundle-
+      - name: Install bundle
+        run: cd docs && bundle config set --local path 'vendor/bundle' && bundle install
       - name: Build docs
         run: pnpm docs:build || true
       - name: Setup Pages

@@ -1,4 +1,6 @@
 /node_modules/
+.pnpm-store/
 docs/_site/
+docs/vendor/
 pnpm-workspace.yaml
 screenshots.log
