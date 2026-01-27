@@ -1,3 +1,5 @@
 pnpm-lock.yaml
 README.md
 test-data/**/*
+dist/
+/*.user.js

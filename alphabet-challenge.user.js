@@ -34,79 +34,15 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/alphabet-challenge.user.js
-// @version      1.0.68
+// @version      1.0.65
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-14T04:30:23.032Z
+// Built: 2026-01-27T21:51:51.530Z
 
-function _createForOfIteratorHelper(r, e) {
-  var t = ('undefined' != typeof Symbol && r[Symbol.iterator]) || r['@@iterator'];
-  if (!t) {
-    if (
-      Array.isArray(r) ||
-      (t = _unsupportedIterableToArray(r)) ||
-      (e && r && 'number' == typeof r.length)
-    ) {
-      t && (r = t);
-      var _n = 0,
-        F = function F() {};
-      return {
-        s: F,
-        n: function n() {
-          return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] };
-        },
-        e: function e(r) {
-          throw r;
-        },
-        f: F,
-      };
-    }
-    throw new TypeError(
-      'Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.'
-    );
-  }
-  var o,
-    a = !0,
-    u = !1;
-  return {
-    s: function s() {
-      t = t.call(r);
-    },
-    n: function n() {
-      var r = t.next();
-      return ((a = r.done), r);
-    },
-    e: function e(r) {
-      ((u = !0), (o = r));
-    },
-    f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    },
-  };
-}
-function _unsupportedIterableToArray(r, a) {
-  if (r) {
-    if ('string' == typeof r) return _arrayLikeToArray(r, a);
-    var t = {}.toString.call(r).slice(8, -1);
-    return (
-      'Object' === t && r.constructor && (t = r.constructor.name),
-      'Map' === t || 'Set' === t
-        ? Array.from(r)
-        : 'Arguments' === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t)
-          ? _arrayLikeToArray(r, a)
-          : void 0
-    );
-  }
-}
-function _arrayLikeToArray(r, a) {
-  (null == a || a > r.length) && (a = r.length);
-  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-  return n;
-}
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
 
 (function () {
   'use strict';
@@ -120,16 +56,16 @@ function _arrayLikeToArray(r, a) {
       spacing: {
         small: '8px',
         medium: '10px',
-        large: '10px',
+        large: '10px'
       },
       container: {
         padding: '10px',
-        marginTop: '10px',
+        marginTop: '10px'
       },
       typography: {
         heading: '1.1em',
         stats: '1em',
-        statsSubtext: '0.9em',
+        statsSubtext: '0.9em'
       },
       grid: {
         gapSize: '5px',
@@ -138,32 +74,32 @@ function _arrayLikeToArray(r, a) {
         letterFontSize: '1.2em',
         letterMarginBottom: '2px',
         eventFontSize: '0.7em',
-        dateFontSize: '0.65em',
+        dateFontSize: '0.65em'
       },
       button: {
         padding: '6px 12px',
         fontSize: '0.9em',
-        marginTop: '10px',
+        marginTop: '10px'
       },
       heading: {
-        marginBottom: '10px',
-      },
+        marginBottom: '10px'
+      }
     };
     var desktopConfig = {
       isMobile: false,
       spacing: {
         small: '10px',
         medium: '15px',
-        large: '20px',
+        large: '20px'
       },
       container: {
         padding: '20px',
-        marginTop: '20px',
+        marginTop: '20px'
       },
       typography: {
         heading: '1.3em',
         stats: '1.2em',
-        statsSubtext: '1em',
+        statsSubtext: '1em'
       },
       grid: {
         gapSize: '10px',
@@ -172,16 +108,16 @@ function _arrayLikeToArray(r, a) {
         letterFontSize: '1.5em',
         letterMarginBottom: '5px',
         eventFontSize: '0.8em',
-        dateFontSize: '0.7em',
+        dateFontSize: '0.7em'
       },
       button: {
         padding: '8px 15px',
         fontSize: '1em',
-        marginTop: '15px',
+        marginTop: '15px'
       },
       heading: {
-        marginBottom: '15px',
-      },
+        marginBottom: '15px'
+      }
     };
     var isMobile = window.innerWidth < 768;
     return isMobile ? mobileConfig : desktopConfig;
@@ -198,7 +134,7 @@ function _arrayLikeToArray(r, a) {
     var _iterator = _createForOfIteratorHelper(rows),
       _step;
     try {
-      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var row = _step.value;
         var cells = row.querySelectorAll('td');
         if (cells.length < 1) continue;
@@ -209,7 +145,7 @@ function _arrayLikeToArray(r, a) {
         if (ALPHABET.includes(firstLetter) && !completedLetters[firstLetter]) {
           completedLetters[firstLetter] = {
             eventName: eventName,
-            date: date,
+            date: date
           };
 
           // Stop processing if all 25 letters are attained
@@ -232,7 +168,7 @@ function _arrayLikeToArray(r, a) {
       }),
       completedCount: completedCount,
       dateOfCompletion: dateOfCompletion,
-      totalEvents: totalEvents,
+      totalEvents: totalEvents
     };
   }
   function createAlphabetContainer(data) {
@@ -241,7 +177,7 @@ function _arrayLikeToArray(r, a) {
     container.className = 'parkrun-alphabet-container';
     container.style.width = '100%';
     container.style.maxWidth = '800px';
-    container.style.margin = ''.concat(responsive.container.marginTop, ' auto');
+    container.style.margin = "".concat(responsive.container.marginTop, " auto");
     container.style.padding = responsive.container.padding;
     container.style.backgroundColor = '#2b223d';
     container.style.borderRadius = '8px';
@@ -255,22 +191,7 @@ function _arrayLikeToArray(r, a) {
     heading.style.fontSize = responsive.typography.heading;
     container.appendChild(heading);
     var stats = document.createElement('div');
-    stats.innerHTML =
-      '<div style="font-size: '
-        .concat(responsive.typography.stats, '; margin-bottom: ')
-        .concat(responsive.spacing.small, ';">') +
-      '<strong>' +
-      data.completedCount +
-      ' of 25</strong> letters completed' +
-      '</div>' +
-      '<div style="font-size: '.concat(responsive.typography.statsSubtext, ';">After ') +
-      data.totalEvents +
-      ' parkruns</div>' +
-      (data.dateOfCompletion
-        ? '<div style="font-size: '
-            .concat(responsive.typography.statsSubtext, ';">\uD83C\uDF89 Challenge completed on: ')
-            .concat(data.dateOfCompletion, '</div>')
-        : '');
+    stats.innerHTML = "<div style=\"font-size: ".concat(responsive.typography.stats, "; margin-bottom: ").concat(responsive.spacing.small, ";\">") + '<strong>' + data.completedCount + ' of 25</strong> letters completed' + '</div>' + "<div style=\"font-size: ".concat(responsive.typography.statsSubtext, ";\">After ") + data.totalEvents + ' parkruns</div>' + (data.dateOfCompletion ? "<div style=\"font-size: ".concat(responsive.typography.statsSubtext, ";\">\uD83C\uDF89 Challenge completed on: ").concat(data.dateOfCompletion, "</div>") : '');
     container.appendChild(stats);
     var grid = document.createElement('div');
     grid.style.display = 'grid';
@@ -300,14 +221,7 @@ function _arrayLikeToArray(r, a) {
       cell.appendChild(letterText);
       if (data.completedLetters[letter]) {
         var eventDetails = document.createElement('div');
-        eventDetails.innerHTML =
-          '<div style="font-size: '.concat(responsive.grid.eventFontSize, '; text-align: left;">') +
-          data.completedLetters[letter].eventName +
-          '<br>' +
-          '<span style="font-size: '.concat(responsive.grid.dateFontSize, ';">(') +
-          data.completedLetters[letter].date +
-          ')</span>' +
-          '</div>';
+        eventDetails.innerHTML = "<div style=\"font-size: ".concat(responsive.grid.eventFontSize, "; text-align: left;\">") + data.completedLetters[letter].eventName + '<br>' + "<span style=\"font-size: ".concat(responsive.grid.dateFontSize, ";\">(") + data.completedLetters[letter].date + ')</span>' + '</div>';
         // Hide event details on mobile to prevent text overflow
         if (responsive.isMobile) {
           eventDetails.style.display = 'none';
@@ -345,19 +259,13 @@ function _arrayLikeToArray(r, a) {
           popup.style.overflowY = 'auto';
           popup.style.fontSize = popupResponsive.isMobile ? '0.9em' : '1em';
           var popupHeading = document.createElement('h4');
-          popupHeading.textContent = 'Letter '.concat(letter);
+          popupHeading.textContent = "Letter ".concat(letter);
           popupHeading.style.marginBottom = '10px';
           popupHeading.style.color = '#FFA300';
           popup.appendChild(popupHeading);
           var entry = document.createElement('div');
           entry.style.marginBottom = '10px';
-          entry.innerHTML =
-            '<strong>' +
-            data.completedLetters[letter].eventName +
-            '</strong><br>' +
-            '<span style="font-size: 0.9em;">' +
-            data.completedLetters[letter].date +
-            '</span>';
+          entry.innerHTML = '<strong>' + data.completedLetters[letter].eventName + '</strong><br>' + '<span style="font-size: 0.9em;">' + data.completedLetters[letter].date + '</span>';
           popup.appendChild(entry);
           overlay.appendChild(popup);
           document.body.appendChild(overlay);
@@ -407,7 +315,7 @@ function _arrayLikeToArray(r, a) {
         // Higher resolution
         logging: false,
         allowTaint: true,
-        useCORS: true,
+        useCORS: true
       }).then(function (canvas) {
         // Show the button again
         downloadBtn.style.display = 'block';
@@ -415,7 +323,7 @@ function _arrayLikeToArray(r, a) {
         var timestamp = new Date().toISOString().split('T')[0];
         var pageUrl = window.location.pathname.split('/');
         var parkrunnerId = pageUrl[2] || 'parkrunner';
-        link.download = 'alphabet-challenge-'.concat(parkrunnerId, '-').concat(timestamp, '.png');
+        link.download = "alphabet-challenge-".concat(parkrunnerId, "-").concat(timestamp, ".png");
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
