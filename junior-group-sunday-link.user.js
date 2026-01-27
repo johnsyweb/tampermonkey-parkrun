@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         parkrun Junior Group Sunday Link
+// @name         junior parkrun Group Sunday Link
 // @description  Adds a link to the consolidated club report for the most recent Sunday on junior parkrun group pages
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/junior-group-sunday-link.user.js
@@ -36,7 +36,7 @@
 // @version      0.1.1
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-27T21:51:51.530Z
+// Built: 2026-01-27T23:51:00.906Z
 
 function findConsolidatedClubLink() {
   var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;

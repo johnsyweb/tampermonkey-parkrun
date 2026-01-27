@@ -32,6 +32,10 @@
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
+// @screenshot-url       https://www.parkrun.com.au/aurora/results/eventhistory/
+// @screenshot-selector  .parkrun-cancellation-impact
+// @screenshot-timeout   25000
+// @screenshot-viewport  1400x2000
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
 // @version      0.1.4

@@ -48,7 +48,12 @@ for (const rel of builtFiles) {
   const metaMatch = content.match(metaRegex);
   let destContent = '';
   if (metaMatch) {
-    const metaBlock = metaMatch[0].trim();
+    let metaBlock = metaMatch[0].trim();
+    // Strip @screenshot-* keys so userscript managers only see standard metadata
+    metaBlock = metaBlock
+      .split('\n')
+      .filter((line) => !/^\s*\/\/\s*@screenshot-/.test(line))
+      .join('\n');
     // Remove the metadata from the body
     const body = content.replace(metaRegex, '').replace(/^\s+/, '');
     destContent = metaBlock + '\n' + bannerLines.join('\n') + '\n\n' + body;

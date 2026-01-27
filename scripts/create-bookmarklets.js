@@ -21,15 +21,15 @@ function extractScriptInfo(filepath) {
     const description = descriptionMatch ? descriptionMatch[1].trim() : '';
     const downloadURL = downloadURLMatch ? downloadURLMatch[1].trim() : '';
 
-    return { name, description, downloadURL, filepath, content };
+    return { name, description, downloadURL, filepath: basename(filepath), content };
   });
 }
 
 function createBookmarklet(filepath) {
-  return extractScriptInfo(filepath).then(({ content }) => {
+  return readFile(filepath, 'utf-8').then((content) => {
     const scriptContent = content.split(USERSCRIPT_DELIMITER)[1];
     const requireMatch = content.match(/@require\s+(.*)/);
-    const externalScripts = requireMatch ? [`await loadScript('${requireMatch[1]}');`] : [];
+    const externalScripts = requireMatch ? [`await loadScript('${requireMatch[1].trim()}');`] : [];
 
     const bookmarkletWrapper = `
                 javascript:(async function(){
@@ -119,7 +119,15 @@ function main() {
         return extractScriptInfo(file).then((scriptInfo) => {
           return createBookmarklet(file).then((bookmarkletCode) => {
             console.log(`Processed: ${file} (${scriptInfo.name})`);
-            return [scriptInfo.name, { code: bookmarkletCode, ...scriptInfo }];
+            return [
+              scriptInfo.name,
+              {
+                code: bookmarkletCode,
+                description: scriptInfo.description,
+                downloadURL: scriptInfo.downloadURL,
+                filepath: scriptInfo.filepath,
+              },
+            ];
           });
         });
       });

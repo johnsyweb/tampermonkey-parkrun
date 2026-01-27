@@ -13,120 +13,51 @@ interface ScreenshotConfig {
   viewport?: { width: number; height: number };
 }
 
-const screenshotConfigs: ScreenshotConfig[] = [
-  {
-    name: 'alphabet-challenge',
-    url: 'https://www.parkrun.org.uk/parkrunner/4100252/all/',
-    script: 'alphabet-challenge.user.js',
-    waitForSelector: '.parkrun-alphabet-container',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'compass-challenge',
-    url: 'https://www.parkrun.org.uk/parkrunner/1829613/all/',
-    script: 'compass-challenge.user.js',
-    waitForSelector: '.parkrun-compass-container',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'junior-group-sunday-link',
-    url: 'https://www.parkrun.com.au/westerfolds-juniors/groups/24238/',
-    script: 'junior-group-sunday-link.user.js',
-    waitForSelector: 'a[href*="/results/consolidatedclub/?"]',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'launch-returnees',
-    url: 'https://www.parkrun.org.uk/coronationpark/results/latestresults/',
-    script: 'launch-returnees.user.js',
-    waitForSelector: '#parkrun-launch-returnees',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'parkrun-annual-summary',
-    url: 'https://www.parkrun.com.au/maribyrnong/results/eventhistory/',
-    script: 'parkrun-annual-summary.user.js',
-    waitForSelector: '.parkrun-annual-summary',
-    waitForTimeout: 9000,
-    viewport: { width: 1200, height: 1400 },
-  },
-  {
-    name: 'parkrun-cancellation-impact',
-    url: 'https://www.parkrun.com.au/aurora/results/eventhistory/',
-    script: 'parkrun-cancellation-impact.user.js',
-    waitForSelector: '.parkrun-cancellation-impact',
-    waitForTimeout: 25000,
-    viewport: { width: 1400, height: 2000 },
-  },
-  {
-    name: 'parkrun-charts',
-    url: 'https://www.parkrun.org.uk/cassiobury/results/eventhistory/',
-    script: 'parkrun-charts.user.js',
-    waitForSelector: '#eventHistoryChart',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'parkrun-walker-analysis',
-    url: 'https://www.parkrun.co.za/pigglywiggly/results/latestresults/',
-    script: 'parkrun-walker-analysis.user.js',
-    waitForSelector: '#walkerAnalysisContainer',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'p-index',
-    url: 'https://www.parkrun.org.uk/parkrunner/1179626/all/',
-    script: 'p-index.user.js',
-    waitForSelector: '#p-index-display',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'position-bingo',
-    url: 'https://www.parkrun.org.uk/parkrunner/1965346/all/',
-    script: 'position-bingo.user.js',
-    waitForSelector: '#positionBingoContainer',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'stopwatch-bingo',
-    url: 'https://www.parkrun.org.uk/parkrunner/4886000/all/',
-    script: 'stopwatch-bingo.user.js',
-    waitForSelector: '#stopwatchBingoContainer',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'visited-countries',
-    url: 'https://www.parkrun.org.uk/parkrunner/1179622/all/',
-    script: 'visited-countries.user.js',
-    waitForSelector: '#countries-visited',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'volunteer-days-display',
-    url: 'https://www.parkrun.org.uk/fountainsabbey/results/latestresults/',
-    script: 'volunteer-days-display.user.js',
-    waitForSelector: '.volunteer-days',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-  {
-    name: 'w-index',
-    url: 'https://www.parkrun.org.uk/parkrunner/507/all/',
-    script: 'w-index.user.js',
-    waitForSelector: '#w-index-display',
-    waitForTimeout: 8000,
-    viewport: { width: 1200, height: 800 },
-  },
-];
+function getMeta(content: string, key: string): string | null {
+  const m = content.match(new RegExp(`@${key}\\s+(.+)`));
+  return m ? m[1].trim() : null;
+}
+
+function loadScreenshotConfigs(): ScreenshotConfig[] {
+  // Read from src/ so we see @screenshot-* keys (they are stripped from the built output)
+  const srcDir = path.resolve(__dirname, '..', 'src');
+  const files = fs.readdirSync(srcDir).filter((f) => f.endsWith('.user.js'));
+  const configs: ScreenshotConfig[] = [];
+
+  for (const file of files) {
+    const filePath = path.join(srcDir, file);
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const metaMatch = content.match(/\/\/ ==UserScript==([\s\S]*?)\/\/ ==\/UserScript==/);
+    if (!metaMatch) continue;
+    const meta = metaMatch[1];
+    const url = getMeta(meta, 'screenshot-url');
+    if (!url) continue;
+
+    const selector = getMeta(meta, 'screenshot-selector') ?? undefined;
+    const timeoutStr = getMeta(meta, 'screenshot-timeout');
+    const timeout = timeoutStr ? parseInt(timeoutStr, 10) : 8000;
+    const viewportStr = getMeta(meta, 'screenshot-viewport');
+    let viewport: { width: number; height: number } | undefined;
+    if (viewportStr) {
+      const [w, h] = viewportStr.split('x').map((n) => parseInt(n, 10));
+      if (!isNaN(w) && !isNaN(h)) viewport = { width: w, height: h };
+    }
+    if (!viewport) viewport = { width: 1200, height: 800 };
+
+    configs.push({
+      name: file.replace('.user.js', ''),
+      script: file,
+      url,
+      waitForSelector: selector,
+      waitForTimeout: timeout,
+      viewport,
+    });
+  }
+
+  return configs;
+}
+
+const screenshotConfigs: ScreenshotConfig[] = loadScreenshotConfigs();
 
 async function generateScreenshots(scriptName?: string, force = false): Promise<void> {
   let browser: Browser | null = null;
