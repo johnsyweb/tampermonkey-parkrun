@@ -34,74 +34,18 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/compass-challenge.user.js
-// @version      1.0.68
+// @version      1.0.65
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-14T04:30:23.032Z
+// Built: 2026-01-27T21:51:51.530Z
 
-function _slicedToArray(r, e) {
-  return (
-    _arrayWithHoles(r) ||
-    _iterableToArrayLimit(r, e) ||
-    _unsupportedIterableToArray(r, e) ||
-    _nonIterableRest()
-  );
-}
-function _nonIterableRest() {
-  throw new TypeError(
-    'Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.'
-  );
-}
-function _unsupportedIterableToArray(r, a) {
-  if (r) {
-    if ('string' == typeof r) return _arrayLikeToArray(r, a);
-    var t = {}.toString.call(r).slice(8, -1);
-    return (
-      'Object' === t && r.constructor && (t = r.constructor.name),
-      'Map' === t || 'Set' === t
-        ? Array.from(r)
-        : 'Arguments' === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t)
-          ? _arrayLikeToArray(r, a)
-          : void 0
-    );
-  }
-}
-function _arrayLikeToArray(r, a) {
-  (null == a || a > r.length) && (a = r.length);
-  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-  return n;
-}
-function _iterableToArrayLimit(r, l) {
-  var t =
-    null == r ? null : ('undefined' != typeof Symbol && r[Symbol.iterator]) || r['@@iterator'];
-  if (null != t) {
-    var e,
-      n,
-      i,
-      u,
-      a = [],
-      f = !0,
-      o = !1;
-    try {
-      if (((i = (t = t.call(r)).next), 0 === l)) {
-        if (Object(t) !== t) return;
-        f = !1;
-      } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
-    } catch (r) {
-      ((o = !0), (n = r));
-    } finally {
-      try {
-        if (!f && null != t.return && ((u = t.return()), Object(u) !== u)) return;
-      } finally {
-        if (o) throw n;
-      }
-    }
-    return a;
-  }
-}
-function _arrayWithHoles(r) {
-  if (Array.isArray(r)) return r;
-}
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 (function () {
   'use strict';
@@ -112,7 +56,7 @@ function _arrayWithHoles(r) {
     completedColor: '#53BA9D',
     pendingColor: '#666',
     textColor: '#e0e0e0',
-    subtleTextColor: '#cccccc',
+    subtleTextColor: '#cccccc'
   };
 
   // Patterns to match compass directions in parkrun names
@@ -120,7 +64,7 @@ function _arrayWithHoles(r) {
     north: /north/i,
     south: /south/i,
     east: /east/i,
-    west: /west/i,
+    west: /west/i
   };
   function getResponsiveConfig() {
     var mobileConfig = {
@@ -129,26 +73,26 @@ function _arrayWithHoles(r) {
         small: '10px',
         medium: '15px',
         statsMarginBottom: '8px',
-        completionMarginTop: '8px',
+        completionMarginTop: '8px'
       },
       container: {
         padding: '10px',
-        marginTop: '10px',
+        marginTop: '10px'
       },
       typography: {
         heading: '1.1em',
         stats: '1em',
         statsSubtext: '0.9em',
-        completion: '0.95em',
+        completion: '0.95em'
       },
       compass: {
-        baseSize: 320,
+        baseSize: 320
       },
       button: {
         padding: '6px 12px',
         fontSize: '0.9em',
-        marginTop: '10px',
-      },
+        marginTop: '10px'
+      }
     };
     var desktopConfig = {
       isMobile: false,
@@ -156,26 +100,26 @@ function _arrayWithHoles(r) {
         small: '20px',
         medium: '20px',
         statsMarginBottom: '10px',
-        completionMarginTop: '10px',
+        completionMarginTop: '10px'
       },
       container: {
         padding: '20px',
-        marginTop: '20px',
+        marginTop: '20px'
       },
       typography: {
         heading: '1.3em',
         stats: '1.2em',
         statsSubtext: '1em',
-        completion: '1.1em',
+        completion: '1.1em'
       },
       compass: {
-        baseSize: 700,
+        baseSize: 700
       },
       button: {
         padding: '8px 15px',
         fontSize: '1em',
-        marginTop: '15px',
-      },
+        marginTop: '15px'
+      }
     };
     var isMobile = window.innerWidth < 768;
     return isMobile ? mobileConfig : desktopConfig;
@@ -189,7 +133,7 @@ function _arrayWithHoles(r) {
       north: null,
       south: null,
       east: null,
-      west: null,
+      west: null
     };
     var completedCount = 0;
     var dateOfCompletion = null;
@@ -209,7 +153,7 @@ function _arrayWithHoles(r) {
         eventName: eventName,
         date: date,
         eventNumber: eventNumber,
-        time: time,
+        time: time
       });
     });
 
@@ -224,11 +168,7 @@ function _arrayWithHoles(r) {
       totalEvents++;
 
       // Check for compass directions in the event name
-      for (
-        var _i = 0, _Object$entries = Object.entries(DIRECTION_PATTERNS);
-        _i < _Object$entries.length;
-        _i++
-      ) {
+      for (var _i = 0, _Object$entries = Object.entries(DIRECTION_PATTERNS); _i < _Object$entries.length; _i++) {
         var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
           direction = _Object$entries$_i[0],
           pattern = _Object$entries$_i[1];
@@ -237,7 +177,7 @@ function _arrayWithHoles(r) {
             eventName: eventName,
             date: date,
             eventNumber: eventNumber,
-            time: time,
+            time: time
           };
           completedCount++;
 
@@ -252,7 +192,7 @@ function _arrayWithHoles(r) {
       directions: directions,
       completedCount: completedCount,
       dateOfCompletion: dateOfCompletion,
-      totalEvents: totalEvents,
+      totalEvents: totalEvents
     };
   }
   function createCompassContainer(title) {
@@ -261,7 +201,7 @@ function _arrayWithHoles(r) {
     container.className = 'parkrun-compass-container';
     container.style.width = '100%';
     container.style.maxWidth = '800px';
-    container.style.margin = ''.concat(responsive.container.marginTop, ' auto');
+    container.style.margin = "".concat(responsive.container.marginTop, " auto");
     container.style.padding = responsive.container.padding;
     container.style.backgroundColor = STYLES.backgroundColor;
     container.style.borderRadius = '8px';
@@ -283,33 +223,23 @@ function _arrayWithHoles(r) {
     var statsContainer = document.createElement('div');
     statsContainer.style.marginBottom = responsive.spacing.small;
     statsContainer.style.color = STYLES.textColor;
-    var statsText = '<div style="font-size: '
-      .concat(responsive.typography.stats, '; margin-bottom: ')
-      .concat(responsive.spacing.statsMarginBottom, ';"><strong>')
-      .concat(data.completedCount, ' of 4</strong> compass directions completed</div>');
-    statsText += '<div style="font-size: '
-      .concat(responsive.typography.statsSubtext, ';">After ')
-      .concat(data.totalEvents, ' parkruns</div>');
+    var statsText = "<div style=\"font-size: ".concat(responsive.typography.stats, "; margin-bottom: ").concat(responsive.spacing.statsMarginBottom, ";\"><strong>").concat(data.completedCount, " of 4</strong> compass directions completed</div>");
+    statsText += "<div style=\"font-size: ".concat(responsive.typography.statsSubtext, ";\">After ").concat(data.totalEvents, " parkruns</div>");
     if (data.dateOfCompletion) {
-      statsText += '<div style="margin-top: '
-        .concat(responsive.spacing.completionMarginTop, '; font-size: ')
-        .concat(responsive.typography.completion, ';">\uD83E\uDDED Challenge completed on ')
-        .concat(data.dateOfCompletion, '</div>');
+      statsText += "<div style=\"margin-top: ".concat(responsive.spacing.completionMarginTop, "; font-size: ").concat(responsive.typography.completion, ";\">\uD83E\uDDED Challenge completed on ").concat(data.dateOfCompletion, "</div>");
     }
     statsContainer.innerHTML = statsText;
     container.appendChild(statsContainer);
 
     // Calculate responsive compass size
     var desktopBaseSize = 700; // Reference size for scaling calculations
-    var baseSize = responsive.isMobile
-      ? Math.min(responsive.compass.baseSize, window.innerWidth - 40)
-      : responsive.compass.baseSize;
+    var baseSize = responsive.isMobile ? Math.min(responsive.compass.baseSize, window.innerWidth - 40) : responsive.compass.baseSize;
 
     // Create compass visual
     var compassContainer = document.createElement('div');
     compassContainer.style.position = 'relative';
-    compassContainer.style.width = ''.concat(baseSize, 'px');
-    compassContainer.style.height = ''.concat(baseSize, 'px');
+    compassContainer.style.width = "".concat(baseSize, "px");
+    compassContainer.style.height = "".concat(baseSize, "px");
     compassContainer.style.margin = '0 auto';
     compassContainer.style.boxSizing = 'content-box';
 
@@ -317,7 +247,7 @@ function _arrayWithHoles(r) {
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '100%');
     svg.setAttribute('height', '100%');
-    svg.setAttribute('viewBox', '0 0 '.concat(desktopBaseSize, ' ').concat(desktopBaseSize));
+    svg.setAttribute('viewBox', "0 0 ".concat(desktopBaseSize, " ").concat(desktopBaseSize));
     svg.style.position = 'absolute';
     svg.style.top = '0';
     svg.style.left = '0';
@@ -339,32 +269,27 @@ function _arrayWithHoles(r) {
     svg.appendChild(compassCircle);
 
     // First add directions and paths - we'll add the center rose later to ensure higher z-index
-    var directions = [
-      {
-        name: 'north',
-        angle: 270,
-        label: 'N',
-        data: data.directions.north,
-      },
-      {
-        name: 'east',
-        angle: 0,
-        label: 'E',
-        data: data.directions.east,
-      },
-      {
-        name: 'south',
-        angle: 90,
-        label: 'S',
-        data: data.directions.south,
-      },
-      {
-        name: 'west',
-        angle: 180,
-        label: 'W',
-        data: data.directions.west,
-      },
-    ];
+    var directions = [{
+      name: 'north',
+      angle: 270,
+      label: 'N',
+      data: data.directions.north
+    }, {
+      name: 'east',
+      angle: 0,
+      label: 'E',
+      data: data.directions.east
+    }, {
+      name: 'south',
+      angle: 90,
+      label: 'S',
+      data: data.directions.south
+    }, {
+      name: 'west',
+      angle: 180,
+      label: 'W',
+      data: data.directions.west
+    }];
 
     // Draw the needle for each direction
     directions.forEach(function (dir) {
@@ -391,15 +316,7 @@ function _arrayWithHoles(r) {
 
       // Create needle path
       var needlePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      var pathData = 'M '
-        .concat(centerX, ' ')
-        .concat(centerY, ' L ')
-        .concat(widthX1, ' ')
-        .concat(widthY1, ' L ')
-        .concat(tipX, ' ')
-        .concat(tipY, ' L ')
-        .concat(widthX2, ' ')
-        .concat(widthY2, ' Z');
+      var pathData = "M ".concat(centerX, " ").concat(centerY, " L ").concat(widthX1, " ").concat(widthY1, " L ").concat(tipX, " ").concat(tipY, " L ").concat(widthX2, " ").concat(widthY2, " Z");
       needlePath.setAttribute('d', pathData);
       needlePath.setAttribute('fill', dir.data ? STYLES.completedColor : STYLES.pendingColor);
       needlePath.setAttribute('stroke', '#000');
@@ -432,10 +349,10 @@ function _arrayWithHoles(r) {
         var displayName = nameMatch ? nameMatch[1] : dir.data.eventName;
 
         // Create combined text (name and date)
-        var combinedText = ''.concat(displayName, ' - ').concat(dir.data.date);
+        var combinedText = "".concat(displayName, " - ").concat(dir.data.date);
 
         // Create curved text path around the outside of the circle
-        var pathId = 'text-path-'.concat(dir.name);
+        var pathId = "text-path-".concat(dir.name);
         var textPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
         // Create curved path for each direction that follows the circle circumference
@@ -444,44 +361,20 @@ function _arrayWithHoles(r) {
         var pathWidth = 170;
         switch (dir.name) {
           case 'north':
-            pathD = 'M '
-              .concat(centerX - pathWidth, ' ')
-              .concat(centerY - adjustedOffset, ' A ')
-              .concat(adjustedOffset, ' ')
-              .concat(adjustedOffset, ' 0 0 1 ')
-              .concat(centerX + pathWidth, ' ')
-              .concat(centerY - adjustedOffset);
+            pathD = "M ".concat(centerX - pathWidth, " ").concat(centerY - adjustedOffset, " A ").concat(adjustedOffset, " ").concat(adjustedOffset, " 0 0 1 ").concat(centerX + pathWidth, " ").concat(centerY - adjustedOffset);
             break;
           case 'east':
-            pathD = 'M '
-              .concat(centerX + adjustedOffset, ' ')
-              .concat(centerY - pathWidth, ' A ')
-              .concat(adjustedOffset, ' ')
-              .concat(adjustedOffset, ' 0 0 1 ')
-              .concat(centerX + adjustedOffset, ' ')
-              .concat(centerY + pathWidth);
+            pathD = "M ".concat(centerX + adjustedOffset, " ").concat(centerY - pathWidth, " A ").concat(adjustedOffset, " ").concat(adjustedOffset, " 0 0 1 ").concat(centerX + adjustedOffset, " ").concat(centerY + pathWidth);
             break;
           case 'south':
             // Arc from left to right across the bottom (text curves anticlockwise)
-            pathD = 'M '
-              .concat(centerX - pathWidth, ' ')
-              .concat(centerY + adjustedOffset, ' A ')
-              .concat(adjustedOffset, ' ')
-              .concat(adjustedOffset, ' 0 0 0 ')
-              .concat(centerX + pathWidth, ' ')
-              .concat(centerY + adjustedOffset);
+            pathD = "M ".concat(centerX - pathWidth, " ").concat(centerY + adjustedOffset, " A ").concat(adjustedOffset, " ").concat(adjustedOffset, " 0 0 0 ").concat(centerX + pathWidth, " ").concat(centerY + adjustedOffset);
             break;
           case 'west':
-            pathD = 'M '
-              .concat(centerX - adjustedOffset, ' ')
-              .concat(centerY + pathWidth, ' A ')
-              .concat(adjustedOffset, ' ')
-              .concat(adjustedOffset, ' 0 0 1 ')
-              .concat(centerX - adjustedOffset, ' ')
-              .concat(centerY - pathWidth);
+            pathD = "M ".concat(centerX - adjustedOffset, " ").concat(centerY + pathWidth, " A ").concat(adjustedOffset, " ").concat(adjustedOffset, " 0 0 1 ").concat(centerX - adjustedOffset, " ").concat(centerY - pathWidth);
             break;
           default:
-            console.warn('Unknown direction: '.concat(dir.name));
+            console.warn("Unknown direction: ".concat(dir.name));
             break;
         }
         textPath.setAttribute('id', pathId);
@@ -497,7 +390,7 @@ function _arrayWithHoles(r) {
 
         // Create the textPath element
         var textPathElement = document.createElementNS('http://www.w3.org/2000/svg', 'textPath');
-        textPathElement.setAttribute('href', '#'.concat(pathId));
+        textPathElement.setAttribute('href', "#".concat(pathId));
         textPathElement.setAttribute('startOffset', '50%');
         textPathElement.setAttribute('text-anchor', 'middle');
         if (dir.name === 'south') {
@@ -548,7 +441,7 @@ function _arrayWithHoles(r) {
     percentageText.setAttribute('fill', STYLES.backgroundColor);
     percentageText.setAttribute('font-size', '24px');
     percentageText.setAttribute('font-weight', 'bold');
-    percentageText.textContent = ''.concat(Math.round((data.completedCount / 4) * 100), '%');
+    percentageText.textContent = "".concat(Math.round(data.completedCount / 4 * 100), "%");
     svg.appendChild(percentageText);
     compassContainer.appendChild(svg);
     container.appendChild(compassContainer);
@@ -594,7 +487,7 @@ function _arrayWithHoles(r) {
         // Higher resolution
         logging: false,
         allowTaint: true,
-        useCORS: true,
+        useCORS: true
       }).then(function (canvas) {
         // Show the button again
         downloadBtn.style.display = 'block';
@@ -602,7 +495,7 @@ function _arrayWithHoles(r) {
         var timestamp = new Date().toISOString().split('T')[0];
         var pageUrl = window.location.pathname.split('/');
         var parkrunnerId = pageUrl[2] || 'parkrunner';
-        link.download = 'compass-challenge-'.concat(parkrunnerId, '-').concat(timestamp, '.png');
+        link.download = "compass-challenge-".concat(parkrunnerId, "-").concat(timestamp, ".png");
         link.href = canvas.toDataURL('image/png');
         link.click();
       });

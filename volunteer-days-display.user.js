@@ -33,10 +33,10 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days-display.user.js
-// @version      1.0.68
+// @version      1.0.65
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-14T04:30:23.032Z
+// Built: 2026-01-27T21:51:51.530Z
 
 (function () {
   'use strict';
@@ -45,28 +45,24 @@
    * Adds volunteer day information to each finisher who has volunteered
    */
   function showVolunteerDays() {
-    document
-      .querySelectorAll('tr[data-vols] > td.Results-table-td.Results-table-td--name > div.detailed')
-      .forEach(function (div) {
-        var volDays = div.closest('tr').getAttribute('data-vols');
-        if (volDays && parseInt(volDays) > 0) {
-          var spacer = document.createElement('span');
-          spacer.classList.add('spacer');
-          spacer.textContent = ' | ';
-          var volSpan = document.createElement('span');
-          volSpan.textContent = ''
-            .concat(volDays, ' volunteer day')
-            .concat(volDays === '1' ? '' : 's');
-          volSpan.classList.add('volunteer-days');
-          var firstElement = div.firstElementChild;
-          if (firstElement) {
-            firstElement.insertAdjacentElement('afterend', spacer);
-            spacer.insertAdjacentElement('afterend', volSpan);
-          } else {
-            div.appendChild(volSpan);
-          }
+    document.querySelectorAll('tr[data-vols] > td.Results-table-td.Results-table-td--name > div.detailed').forEach(function (div) {
+      var volDays = div.closest('tr').getAttribute('data-vols');
+      if (volDays && parseInt(volDays) > 0) {
+        var spacer = document.createElement('span');
+        spacer.classList.add('spacer');
+        spacer.textContent = ' | ';
+        var volSpan = document.createElement('span');
+        volSpan.textContent = "".concat(volDays, " volunteer day").concat(volDays === '1' ? '' : 's');
+        volSpan.classList.add('volunteer-days');
+        var firstElement = div.firstElementChild;
+        if (firstElement) {
+          firstElement.insertAdjacentElement('afterend', spacer);
+          spacer.insertAdjacentElement('afterend', volSpan);
+        } else {
+          div.appendChild(volSpan);
         }
-      });
+      }
+    });
   }
 
   /**
@@ -90,9 +86,7 @@
     if (!firstRow) return;
     var tbody = firstRow.closest('tbody');
     // Try to find an existing sort <select>
-    var sortSelect = document.querySelector(
-      'select[name="sort"], .Results-sort select, select.Results-sort, .Results-controls select'
-    );
+    var sortSelect = document.querySelector('select[name="sort"], .Results-sort select, select.Results-sort, .Results-controls select');
 
     // Sorting function using data-vols
     function sortByVolunteerDays(direction) {
@@ -104,7 +98,7 @@
       var indexed = rows.map(function (row, index) {
         return {
           row: row,
-          index: index,
+          index: index
         };
       });
       indexed.sort(function (a, b) {
@@ -134,19 +128,15 @@
       // Avoid adding duplicate listeners
       if (!sortSelect.dataset.volsSortWired) {
         // Capture phase listener to prevent native handlers when using our custom options
-        sortSelect.addEventListener(
-          'change',
-          function (e) {
-            var value = e.target.value || '';
-            if (value === 'vols-asc' || value === 'vols-desc') {
-              if (e.cancelable) e.preventDefault();
-              if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
-              if (typeof e.stopPropagation === 'function') e.stopPropagation();
-              sortByVolunteerDays(value.endsWith('asc') ? 'asc' : 'desc');
-            }
-          },
-          true
-        );
+        sortSelect.addEventListener('change', function (e) {
+          var value = e.target.value || '';
+          if (value === 'vols-asc' || value === 'vols-desc') {
+            if (e.cancelable) e.preventDefault();
+            if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+            if (typeof e.stopPropagation === 'function') e.stopPropagation();
+            sortByVolunteerDays(value.endsWith('asc') ? 'asc' : 'desc');
+          }
+        }, true);
         // Bubble phase listener (fallback) if capture was bypassed
         sortSelect.addEventListener('change', function (e) {
           var value = e.target.value || '';

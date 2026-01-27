@@ -35,74 +35,18 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-charts.user.js
-// @version      1.0.68
+// @version      1.0.65
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-14T04:30:23.032Z
+// Built: 2026-01-27T21:51:51.530Z
 
-function _slicedToArray(r, e) {
-  return (
-    _arrayWithHoles(r) ||
-    _iterableToArrayLimit(r, e) ||
-    _unsupportedIterableToArray(r, e) ||
-    _nonIterableRest()
-  );
-}
-function _nonIterableRest() {
-  throw new TypeError(
-    'Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.'
-  );
-}
-function _unsupportedIterableToArray(r, a) {
-  if (r) {
-    if ('string' == typeof r) return _arrayLikeToArray(r, a);
-    var t = {}.toString.call(r).slice(8, -1);
-    return (
-      'Object' === t && r.constructor && (t = r.constructor.name),
-      'Map' === t || 'Set' === t
-        ? Array.from(r)
-        : 'Arguments' === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t)
-          ? _arrayLikeToArray(r, a)
-          : void 0
-    );
-  }
-}
-function _arrayLikeToArray(r, a) {
-  (null == a || a > r.length) && (a = r.length);
-  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-  return n;
-}
-function _iterableToArrayLimit(r, l) {
-  var t =
-    null == r ? null : ('undefined' != typeof Symbol && r[Symbol.iterator]) || r['@@iterator'];
-  if (null != t) {
-    var e,
-      n,
-      i,
-      u,
-      a = [],
-      f = !0,
-      o = !1;
-    try {
-      if (((i = (t = t.call(r)).next), 0 === l)) {
-        if (Object(t) !== t) return;
-        f = !1;
-      } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
-    } catch (r) {
-      ((o = !0), (n = r));
-    } finally {
-      try {
-        if (!f && null != t.return && ((u = t.return()), Object(u) !== u)) return;
-      } finally {
-        if (o) throw n;
-      }
-    }
-    return a;
-  }
-}
-function _arrayWithHoles(r) {
-  if (Array.isArray(r)) return r;
-}
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 (function () {
   'use strict';
@@ -113,7 +57,7 @@ function _arrayWithHoles(r) {
     lineColor: '#53BA9D',
     textColor: '#e0e0e0',
     subtleTextColor: '#cccccc',
-    gridColor: 'rgba(200, 200, 200, 0.2)',
+    gridColor: 'rgba(200, 200, 200, 0.2)'
   };
   var DEBUG_WATERMARK = false;
   function createChartContainer(title, id) {
@@ -138,7 +82,7 @@ function _arrayWithHoles(r) {
     container.appendChild(canvas);
     return {
       container: container,
-      canvas: canvas,
+      canvas: canvas
     };
   }
   function insertAfterFirst(selector, element) {
@@ -184,17 +128,15 @@ function _arrayWithHoles(r) {
         scale: 2,
         logging: false,
         allowTaint: true,
-        useCORS: true,
+        useCORS: true
       }).then(function (canvas) {
         downloadBtn.style.display = 'block';
         var link = document.createElement('a');
         var timestamp = new Date().toISOString().split('T')[0];
         var pageUrl = window.location.pathname.split('/');
         var eventName = pageUrl[1];
-        var chartType = container.classList.contains('eventHistoryChart-container')
-          ? 'event-history'
-          : 'finishers';
-        link.download = ''.concat(eventName, '-').concat(chartType, '-').concat(timestamp, '.png');
+        var chartType = container.classList.contains('eventHistoryChart-container') ? 'event-history' : 'finishers';
+        link.download = "".concat(eventName, "-").concat(chartType, "-").concat(timestamp, ".png");
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
@@ -239,7 +181,7 @@ function _arrayWithHoles(r) {
     return {
       timeData: timeData,
       minMinute: minMinute,
-      maxMinute: maxMinute,
+      maxMinute: maxMinute
     };
   }
   function prepareFinisherChartData(_ref) {
@@ -255,11 +197,11 @@ function _arrayWithHoles(r) {
     var labels = minutes.map(function (min) {
       var hours = Math.floor(min / 60);
       var remainingMins = min % 60;
-      return ''.concat(hours, ':').concat(remainingMins.toString().padStart(2, '0'));
+      return "".concat(hours, ":").concat(remainingMins.toString().padStart(2, '0'));
     });
     return {
       labels: labels,
-      data: counts,
+      data: counts
     };
   }
   function addWatermark(canvas) {
@@ -272,7 +214,7 @@ function _arrayWithHoles(r) {
       scriptVersion = GM_info.script.version || scriptVersion;
       scriptUrl = GM_info.script.homepage || '';
     }
-    var watermarkText = ['Generated by '.concat(scriptName, ' v').concat(scriptVersion), scriptUrl];
+    var watermarkText = ["Generated by ".concat(scriptName, " v").concat(scriptVersion), scriptUrl];
     ctx.save();
     ctx.font = DEBUG_WATERMARK ? 'bold 16px Arial' : '10px Arial';
     ctx.fillStyle = DEBUG_WATERMARK ? 'rgba(255, 0, 0, 0.5)' : 'rgba(200, 200, 200, 0.1)';
@@ -293,20 +235,8 @@ function _arrayWithHoles(r) {
   }
   function createFinishersChart() {
     var _document$querySelect, _document$querySelect2;
-    var eventName =
-      (_document$querySelect = document.querySelector('h1')) === null ||
-      _document$querySelect === void 0 ||
-      (_document$querySelect = _document$querySelect.textContent) === null ||
-      _document$querySelect === void 0
-        ? void 0
-        : _document$querySelect.trim();
-    var eventDate =
-      (_document$querySelect2 = document.querySelector('h3')) === null ||
-      _document$querySelect2 === void 0 ||
-      (_document$querySelect2 = _document$querySelect2.textContent) === null ||
-      _document$querySelect2 === void 0
-        ? void 0
-        : _document$querySelect2.trim();
+    var eventName = (_document$querySelect = document.querySelector('h1')) === null || _document$querySelect === void 0 || (_document$querySelect = _document$querySelect.textContent) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.trim();
+    var eventDate = (_document$querySelect2 = document.querySelector('h3')) === null || _document$querySelect2 === void 0 || (_document$querySelect2 = _document$querySelect2.textContent) === null || _document$querySelect2 === void 0 ? void 0 : _document$querySelect2.trim();
     var titlePrefix = [eventName, eventDate].filter(Boolean).join(' | ');
     var title = [titlePrefix, 'Finishers per Minute'].filter(Boolean).join(': ');
     var timeData = extractFinishTimeData();
@@ -330,15 +260,13 @@ function _arrayWithHoles(r) {
       type: 'bar',
       data: {
         labels: chartData.labels,
-        datasets: [
-          {
-            label: 'Number of Finishers',
-            data: chartData.data,
-            backgroundColor: STYLES.barColor,
-            borderColor: STYLES.barColor,
-            borderWidth: 1,
-          },
-        ],
+        datasets: [{
+          label: 'Number of Finishers',
+          data: chartData.data,
+          backgroundColor: STYLES.barColor,
+          borderColor: STYLES.barColor,
+          borderWidth: 1
+        }]
       },
       options: {
         animation: false,
@@ -346,12 +274,12 @@ function _arrayWithHoles(r) {
         plugins: {
           legend: {
             labels: {
-              color: STYLES.textColor,
-            },
+              color: STYLES.textColor
+            }
           },
           title: {
             display: false,
-            color: STYLES.textColor,
+            color: STYLES.textColor
           },
           tooltip: {
             callbacks: {
@@ -363,51 +291,47 @@ function _arrayWithHoles(r) {
                     _label$split2 = _slicedToArray(_label$split, 2),
                     hours = _label$split2[0],
                     mins = _label$split2[1];
-                  return ''
-                    .concat(hours, ' hour')
-                    .concat(hours === '1' ? '' : 's', ' ')
-                    .concat(mins, ' minute')
-                    .concat(mins === '01' ? '' : 's');
+                  return "".concat(hours, " hour").concat(hours === '1' ? '' : 's', " ").concat(mins, " minute").concat(mins === '01' ? '' : 's');
                 } else {
                   var minute = label.replace("'", '');
-                  return ''.concat(minute, ' minute').concat(minute === '1' ? '' : 's');
+                  return "".concat(minute, " minute").concat(minute === '1' ? '' : 's');
                 }
               },
               label: function label(context) {
-                return ''.concat(context.raw, ' finisher').concat(context.raw === 1 ? '' : 's');
-              },
-            },
-          },
+                return "".concat(context.raw, " finisher").concat(context.raw === 1 ? '' : 's');
+              }
+            }
+          }
         },
         scales: {
           x: {
             title: {
               display: true,
               text: 'Finish Time',
-              color: STYLES.textColor,
+              color: STYLES.textColor
             },
             ticks: {
-              color: STYLES.subtleTextColor,
+              color: STYLES.subtleTextColor
             },
             grid: {
-              color: STYLES.gridColor,
-            },
+              color: STYLES.gridColor
+            }
           },
           y: {
             beginAtZero: true,
             title: {
               display: true,
               text: 'Number of Finishers',
-              color: STYLES.textColor,
+              color: STYLES.textColor
             },
             ticks: {
               precision: 0,
-              color: STYLES.subtleTextColor,
+              color: STYLES.subtleTextColor
             },
             grid: {
-              color: STYLES.gridColor,
-            },
-          },
+              color: STYLES.gridColor
+            }
+          }
         },
         onHover: function onHover() {
           setTimeout(function () {
@@ -425,9 +349,9 @@ function _arrayWithHoles(r) {
             setTimeout(function () {
               return addWatermark(canvas);
             }, 0);
-          },
-        },
-      },
+          }
+        }
+      }
     });
     setTimeout(function () {
       return addWatermark(canvas);
@@ -435,51 +359,42 @@ function _arrayWithHoles(r) {
   }
   function extractEventHistoryData() {
     var _document$querySelect3, _document$querySelect4;
-    var title =
-      (_document$querySelect3 =
-        (_document$querySelect4 = document.querySelector('h1')) === null ||
-        _document$querySelect4 === void 0
-          ? void 0
-          : _document$querySelect4.textContent.trim()) !== null && _document$querySelect3 !== void 0
-        ? _document$querySelect3
-        : 'Event History';
+    var title = (_document$querySelect3 = (_document$querySelect4 = document.querySelector('h1')) === null || _document$querySelect4 === void 0 ? void 0 : _document$querySelect4.textContent.trim()) !== null && _document$querySelect3 !== void 0 ? _document$querySelect3 : 'Event History';
     var eventNumbers = [];
     var dates = [];
     var finishers = [];
     var volunteers = [];
     var rows = document.querySelectorAll('tr.Results-table-row');
-    Array.from(rows)
-      .reverse()
-      .forEach(function (row) {
-        var eventNumber = row.getAttribute('data-parkrun');
-        if (eventNumber) {
-          eventNumbers.push(eventNumber);
-        }
-        var date = row.getAttribute('data-date');
-        if (date) {
-          var dateObj = new Date(date);
-          var formattedDate = dateObj.toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          });
-          dates.push(formattedDate);
-        }
-        var finishersCount = row.getAttribute('data-finishers');
-        if (finishersCount) {
-          finishers.push(parseInt(finishersCount, 10));
-        }
-        var volunteersCount = row.getAttribute('data-volunteers');
-        if (volunteersCount) {
-          volunteers.push(parseInt(volunteersCount, 10));
-        }
-      });
+    Array.from(rows).reverse().forEach(function (row) {
+      var eventNumber = row.getAttribute('data-parkrun');
+      if (eventNumber) {
+        eventNumbers.push(eventNumber);
+      }
+      var date = row.getAttribute('data-date');
+      if (date) {
+        var dateObj = new Date(date);
+        var formattedDate = dateObj.toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+        dates.push(formattedDate);
+      }
+      var finishersCount = row.getAttribute('data-finishers');
+      if (finishersCount) {
+        finishers.push(parseInt(finishersCount, 10));
+      }
+      var volunteersCount = row.getAttribute('data-volunteers');
+      if (volunteersCount) {
+        volunteers.push(parseInt(volunteersCount, 10));
+      }
+    });
     return {
       title: title,
       eventNumbers: eventNumbers,
       dates: dates,
       finishers: finishers,
-      volunteers: volunteers,
+      volunteers: volunteers
     };
   }
   function calculateRollingAverage(data, windowSize) {
@@ -523,14 +438,14 @@ function _arrayWithHoles(r) {
         value: minValue,
         eventNumber: eventNumbers[minIndex],
         date: dates[minIndex],
-        index: minIndex,
+        index: minIndex
       },
       max: {
         value: maxValue,
         eventNumber: eventNumbers[maxIndex],
         date: dates[maxIndex],
-        index: maxIndex,
-      },
+        index: maxIndex
+      }
     };
   }
   function sameOrderOfMagnitude(a, b) {
@@ -549,20 +464,9 @@ function _arrayWithHoles(r) {
     }
     var rollingAvgWindowSize = 12;
     var finishersRollingAvg = calculateRollingAverage(historyData.finishers, rollingAvgWindowSize);
-    var volunteersRollingAvg = calculateRollingAverage(
-      historyData.volunteers,
-      rollingAvgWindowSize
-    );
-    var finishersMinMax = findMinMaxPoints(
-      historyData.finishers,
-      historyData.eventNumbers,
-      historyData.dates
-    );
-    var volunteersMinMax = findMinMaxPoints(
-      historyData.volunteers,
-      historyData.eventNumbers,
-      historyData.dates
-    );
+    var volunteersRollingAvg = calculateRollingAverage(historyData.volunteers, rollingAvgWindowSize);
+    var finishersMinMax = findMinMaxPoints(historyData.finishers, historyData.eventNumbers, historyData.dates);
+    var volunteersMinMax = findMinMaxPoints(historyData.volunteers, historyData.eventNumbers, historyData.dates);
     var axisDefs = {
       'y-parkrunners': {
         type: 'linear',
@@ -571,15 +475,15 @@ function _arrayWithHoles(r) {
         title: {
           display: true,
           text: 'parkrunners',
-          color: STYLES.textColor,
+          color: STYLES.textColor
         },
         ticks: {
           precision: 0,
-          color: STYLES.subtleTextColor,
+          color: STYLES.subtleTextColor
         },
         grid: {
-          color: STYLES.gridColor,
-        },
+          color: STYLES.gridColor
+        }
       },
       'y-finishers': {
         type: 'linear',
@@ -588,15 +492,15 @@ function _arrayWithHoles(r) {
         title: {
           display: true,
           text: 'Number of Finishers',
-          color: STYLES.barColor,
+          color: STYLES.barColor
         },
         ticks: {
           precision: 0,
-          color: STYLES.barColor,
+          color: STYLES.barColor
         },
         grid: {
-          color: STYLES.gridColor,
-        },
+          color: STYLES.gridColor
+        }
       },
       'y-volunteers': {
         type: 'linear',
@@ -605,27 +509,23 @@ function _arrayWithHoles(r) {
         title: {
           display: true,
           text: 'Number of Volunteers',
-          color: STYLES.lineColor,
+          color: STYLES.lineColor
         },
         ticks: {
           precision: 0,
-          color: STYLES.lineColor,
+          color: STYLES.lineColor
         },
         grid: {
-          display: false,
-        },
-      },
+          display: false
+        }
+      }
     };
     var finishersMax = finishersMinMax.max.value;
     var volunteersMax = volunteersMinMax.max.value;
     var useSingleYAxis = sameOrderOfMagnitude(finishersMax, volunteersMax);
     var finishersAxisId = useSingleYAxis ? 'y-parkrunners' : 'y-finishers';
     var volunteersAxisId = useSingleYAxis ? 'y-parkrunners' : 'y-volunteers';
-    var _createChartContainer2 = createChartContainer(
-        ''.concat(historyData.title, ': Finishers & Volunteers'),
-        'eventHistoryChart',
-        1000
-      ),
+    var _createChartContainer2 = createChartContainer("".concat(historyData.title, ": Finishers & Volunteers"), 'eventHistoryChart', 1000),
       container = _createChartContainer2.container,
       canvas = _createChartContainer2.canvas;
     canvas.height = 400;
@@ -642,27 +542,13 @@ function _arrayWithHoles(r) {
     statsFooter.style.borderRadius = '4px';
     statsFooter.style.fontSize = '14px';
     statsFooter.style.textAlign = 'center';
-    statsFooter.innerHTML = '\n      <span style="color: '
-      .concat(STYLES.barColor, '">Finishers:</span> Min: ')
-      .concat(finishersMinMax.min.value, ' (')
-      .concat(finishersMinMax.min.date, ', Event #')
-      .concat(finishersMinMax.min.eventNumber, ') |\n      Max: ')
-      .concat(finishersMinMax.max.value, ' (')
-      .concat(finishersMinMax.max.date, ', Event #')
-      .concat(finishersMinMax.max.eventNumber, ')<br>\n      <span style="color: ')
-      .concat(STYLES.lineColor, '">Volunteers:</span> Min: ')
-      .concat(volunteersMinMax.min.value, ' (')
-      .concat(volunteersMinMax.min.date, ', Event #')
-      .concat(volunteersMinMax.min.eventNumber, ') |\n      Max: ')
-      .concat(volunteersMinMax.max.value, ' (')
-      .concat(volunteersMinMax.max.date, ', Event #')
-      .concat(volunteersMinMax.max.eventNumber, ')\n    ');
+    statsFooter.innerHTML = "\n      <span style=\"color: ".concat(STYLES.barColor, "\">Finishers:</span> Min: ").concat(finishersMinMax.min.value, " (").concat(finishersMinMax.min.date, ", Event #").concat(finishersMinMax.min.eventNumber, ") |\n      Max: ").concat(finishersMinMax.max.value, " (").concat(finishersMinMax.max.date, ", Event #").concat(finishersMinMax.max.eventNumber, ")<br>\n      <span style=\"color: ").concat(STYLES.lineColor, "\">Volunteers:</span> Min: ").concat(volunteersMinMax.min.value, " (").concat(volunteersMinMax.min.date, ", Event #").concat(volunteersMinMax.min.eventNumber, ") |\n      Max: ").concat(volunteersMinMax.max.value, " (").concat(volunteersMinMax.max.date, ", Event #").concat(volunteersMinMax.max.eventNumber, ")\n    ");
     container.appendChild(statsFooter);
     var xAxis = {
       title: {
         display: true,
         text: 'Date',
-        color: STYLES.textColor,
+        color: STYLES.textColor
       },
       ticks: {
         color: STYLES.subtleTextColor,
@@ -682,65 +568,60 @@ function _arrayWithHoles(r) {
             return historyData.dates[index];
           }
           return index % showEvery === 0 ? historyData.dates[index] : '';
-        },
+        }
       },
       grid: {
-        color: STYLES.gridColor,
-      },
+        color: STYLES.gridColor
+      }
     };
-    var datasets = [
-      {
-        label: 'Finishers',
-        data: historyData.finishers,
-        backgroundColor: STYLES.barColor,
-        borderColor: STYLES.barColor,
-        borderWidth: 1,
-        yAxisID: finishersAxisId,
-        order: 1,
-      },
-      {
-        label: ''.concat(rollingAvgWindowSize, '-Event Avg (Finishers)'),
-        data: finishersRollingAvg,
-        type: 'line',
-        borderColor: STYLES.barColor,
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        borderDash: [5, 5],
-        pointRadius: 0,
-        fill: false,
-        yAxisID: finishersAxisId,
-        order: 0,
-      },
-      {
-        label: 'Volunteers',
-        data: historyData.volunteers,
-        type: 'line',
-        borderColor: STYLES.lineColor,
-        backgroundColor: 'rgba(83, 186, 157, 0.2)',
-        borderWidth: 1,
-        pointBackgroundColor: STYLES.lineColor,
-        pointRadius: 2,
-        fill: false,
-        tension: 0.2,
-        yAxisID: volunteersAxisId,
-        order: 2,
-      },
-      {
-        label: ''.concat(rollingAvgWindowSize, '-Event Avg (Volunteers)'),
-        data: volunteersRollingAvg,
-        type: 'line',
-        borderColor: STYLES.lineColor,
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        borderDash: [5, 5],
-        pointRadius: 0,
-        fill: false,
-        yAxisID: volunteersAxisId,
-        order: 3,
-      },
-    ];
+    var datasets = [{
+      label: 'Finishers',
+      data: historyData.finishers,
+      backgroundColor: STYLES.barColor,
+      borderColor: STYLES.barColor,
+      borderWidth: 1,
+      yAxisID: finishersAxisId,
+      order: 1
+    }, {
+      label: "".concat(rollingAvgWindowSize, "-Event Avg (Finishers)"),
+      data: finishersRollingAvg,
+      type: 'line',
+      borderColor: STYLES.barColor,
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      borderDash: [5, 5],
+      pointRadius: 0,
+      fill: false,
+      yAxisID: finishersAxisId,
+      order: 0
+    }, {
+      label: 'Volunteers',
+      data: historyData.volunteers,
+      type: 'line',
+      borderColor: STYLES.lineColor,
+      backgroundColor: 'rgba(83, 186, 157, 0.2)',
+      borderWidth: 1,
+      pointBackgroundColor: STYLES.lineColor,
+      pointRadius: 2,
+      fill: false,
+      tension: 0.2,
+      yAxisID: volunteersAxisId,
+      order: 2
+    }, {
+      label: "".concat(rollingAvgWindowSize, "-Event Avg (Volunteers)"),
+      data: volunteersRollingAvg,
+      type: 'line',
+      borderColor: STYLES.lineColor,
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      borderDash: [5, 5],
+      pointRadius: 0,
+      fill: false,
+      yAxisID: volunteersAxisId,
+      order: 3
+    }];
     var scales = {
-      x: xAxis,
+      x: xAxis
     };
     scales[finishersAxisId] = axisDefs[finishersAxisId];
     if (volunteersAxisId !== finishersAxisId) {
@@ -752,7 +633,7 @@ function _arrayWithHoles(r) {
       type: 'bar',
       data: {
         labels: historyData.dates,
-        datasets: datasets,
+        datasets: datasets
       },
       options: {
         animation: false,
@@ -763,8 +644,8 @@ function _arrayWithHoles(r) {
           legend: {
             labels: {
               color: STYLES.textColor,
-              usePointStyle: true,
-            },
+              usePointStyle: true
+            }
           },
           tooltip: {
             mode: 'index',
@@ -773,21 +654,21 @@ function _arrayWithHoles(r) {
                 var index = tooltipItems[0].dataIndex;
                 var eventNumber = historyData.eventNumbers[index];
                 var date = historyData.dates[index];
-                return ''.concat(date, ' (Event #').concat(eventNumber, ')');
+                return "".concat(date, " (Event #").concat(eventNumber, ")");
               },
               label: function label(tooltipItem) {
                 var datasetLabel = tooltipItem.dataset.label || '';
                 if (datasetLabel === 'Finishers') {
-                  return 'Finishers: '.concat(tooltipItem.raw);
+                  return "Finishers: ".concat(tooltipItem.raw);
                 } else if (datasetLabel === 'Volunteers') {
-                  return 'Volunteers: '.concat(tooltipItem.raw);
+                  return "Volunteers: ".concat(tooltipItem.raw);
                 } else if (datasetLabel.includes('Avg')) {
-                  return ''.concat(datasetLabel, ': ').concat(tooltipItem.raw);
+                  return "".concat(datasetLabel, ": ").concat(tooltipItem.raw);
                 }
                 return tooltipItem.formattedValue;
-              },
-            },
-          },
+              }
+            }
+          }
         },
         scales: scales,
         onHover: function onHover() {
@@ -806,9 +687,9 @@ function _arrayWithHoles(r) {
             setTimeout(function () {
               return addWatermark(canvas);
             }, 0);
-          },
-        },
-      },
+          }
+        }
+      }
     });
     setTimeout(function () {
       return addWatermark(canvas);

@@ -34,74 +34,18 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
-// @version      1.0.68
+// @version      1.0.65
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-14T04:30:23.032Z
+// Built: 2026-01-27T21:51:51.530Z
 
-function _slicedToArray(r, e) {
-  return (
-    _arrayWithHoles(r) ||
-    _iterableToArrayLimit(r, e) ||
-    _unsupportedIterableToArray(r, e) ||
-    _nonIterableRest()
-  );
-}
-function _nonIterableRest() {
-  throw new TypeError(
-    'Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.'
-  );
-}
-function _unsupportedIterableToArray(r, a) {
-  if (r) {
-    if ('string' == typeof r) return _arrayLikeToArray(r, a);
-    var t = {}.toString.call(r).slice(8, -1);
-    return (
-      'Object' === t && r.constructor && (t = r.constructor.name),
-      'Map' === t || 'Set' === t
-        ? Array.from(r)
-        : 'Arguments' === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t)
-          ? _arrayLikeToArray(r, a)
-          : void 0
-    );
-  }
-}
-function _arrayLikeToArray(r, a) {
-  (null == a || a > r.length) && (a = r.length);
-  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-  return n;
-}
-function _iterableToArrayLimit(r, l) {
-  var t =
-    null == r ? null : ('undefined' != typeof Symbol && r[Symbol.iterator]) || r['@@iterator'];
-  if (null != t) {
-    var e,
-      n,
-      i,
-      u,
-      a = [],
-      f = !0,
-      o = !1;
-    try {
-      if (((i = (t = t.call(r)).next), 0 === l)) {
-        if (Object(t) !== t) return;
-        f = !1;
-      } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
-    } catch (r) {
-      ((o = !0), (n = r));
-    } finally {
-      try {
-        if (!f && null != t.return && ((u = t.return()), Object(u) !== u)) return;
-      } finally {
-        if (o) throw n;
-      }
-    }
-    return a;
-  }
-}
-function _arrayWithHoles(r) {
-  if (Array.isArray(r)) return r;
-}
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 (function () {
   'use strict';
@@ -111,55 +55,55 @@ function _arrayWithHoles(r) {
       isMobile: true,
       spacing: {
         small: '10px',
-        medium: '15px',
+        medium: '15px'
       },
       container: {
         padding: '10px',
         marginTop: '10px',
         width: '100%',
         maxWidth: '800px',
-        aspectRatio: 'auto',
+        aspectRatio: 'auto'
       },
       typography: {
         pIndex: '1.2em',
-        listItem: '0.9em',
+        listItem: '0.9em'
       },
       listItem: {
         marginBottom: '5px',
-        textAlign: 'left',
+        textAlign: 'left'
       },
       button: {
         padding: '6px 12px',
         fontSize: '0.9em',
-        marginTop: '10px',
-      },
+        marginTop: '10px'
+      }
     };
     var desktopConfig = {
       isMobile: false,
       spacing: {
         small: '20px',
-        medium: '20px',
+        medium: '20px'
       },
       container: {
         padding: '20px',
         marginTop: '20px',
         width: 'auto',
         maxWidth: 'none',
-        aspectRatio: '1',
+        aspectRatio: '1'
       },
       typography: {
         pIndex: '1.5em',
-        listItem: '1em',
+        listItem: '1em'
       },
       listItem: {
         marginBottom: '8px',
-        textAlign: 'center',
+        textAlign: 'center'
       },
       button: {
         padding: '8px 15px',
         fontSize: '1em',
-        marginTop: '15px',
-      },
+        marginTop: '15px'
+      }
     };
     var isMobile = window.innerWidth < 768;
     return isMobile ? mobileConfig : desktopConfig;
@@ -168,7 +112,7 @@ function _arrayWithHoles(r) {
     module.exports = {
       calculatePIndex: calculatePIndex,
       extractEventDetails: extractEventDetails,
-      findResultsTable: findResultsTable,
+      findResultsTable: findResultsTable
     };
   } else {
     main();
@@ -277,7 +221,7 @@ function _arrayWithHoles(r) {
         // Higher resolution
         logging: false,
         allowTaint: true,
-        useCORS: true,
+        useCORS: true
       }).then(function (canvas) {
         // Show the button again
         downloadBtn.style.display = 'block';
@@ -285,7 +229,7 @@ function _arrayWithHoles(r) {
         var timestamp = new Date().toISOString().split('T')[0];
         var pageUrl = window.location.pathname.split('/');
         var parkrunnerId = pageUrl[2] || 'parkrunner';
-        link.download = 'p-index-'.concat(parkrunnerId, '-').concat(timestamp, '.png');
+        link.download = "p-index-".concat(parkrunnerId, "-").concat(timestamp, ".png");
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
@@ -303,7 +247,7 @@ function _arrayWithHoles(r) {
       eventDetails.unshift({
         eventName: eventName,
         date: date,
-        eventNumber: eventNumber,
+        eventNumber: eventNumber
       });
     });
 
@@ -317,7 +261,7 @@ function _arrayWithHoles(r) {
       }
       acc[eventName].push({
         date: date,
-        eventNumber: eventNumber,
+        eventNumber: eventNumber
       });
       return acc;
     }, {});
@@ -342,47 +286,30 @@ function _arrayWithHoles(r) {
     function convertDate(dateStr) {
       return new Date(dateStr.split('/').reverse().join('-'));
     }
-    var contributingEvents = filteredGroupedEvents
-      .map(function (_ref4) {
-        var _ref5 = _slicedToArray(_ref4, 2),
-          eventName = _ref5[0],
-          events = _ref5[1];
-        var first = events[0];
-        var pIndexReached = events[pIndex - 1];
-        return {
-          eventName: eventName,
-          eventCount: events.length,
-          firstDate: first.date,
-          firstEventNumber: first.eventNumber,
-          pIndexDate: pIndexReached.date,
-          pIndexEventNumber: pIndexReached.eventNumber,
-          firstDateForSorting: convertDate(first.date),
-          pIndexDateForSorting: convertDate(pIndexReached.date),
-        };
-      })
-      .sort(function (a, b) {
-        return a.pIndexDateForSorting - b.pIndexDateForSorting;
-      })
-      .slice(0, pIndex)
-      .map(function (event) {
-        return (
-          event.eventName +
-          ' (' +
-          event.eventCount +
-          '): ' +
-          event.firstDate +
-          ' (#' +
-          event.firstEventNumber +
-          ') - ' +
-          event.pIndexDate +
-          ' (#' +
-          event.pIndexEventNumber +
-          ')'
-        );
-      });
+    var contributingEvents = filteredGroupedEvents.map(function (_ref4) {
+      var _ref5 = _slicedToArray(_ref4, 2),
+        eventName = _ref5[0],
+        events = _ref5[1];
+      var first = events[0];
+      var pIndexReached = events[pIndex - 1];
+      return {
+        eventName: eventName,
+        eventCount: events.length,
+        firstDate: first.date,
+        firstEventNumber: first.eventNumber,
+        pIndexDate: pIndexReached.date,
+        pIndexEventNumber: pIndexReached.eventNumber,
+        firstDateForSorting: convertDate(first.date),
+        pIndexDateForSorting: convertDate(pIndexReached.date)
+      };
+    }).sort(function (a, b) {
+      return a.pIndexDateForSorting - b.pIndexDateForSorting;
+    }).slice(0, pIndex).map(function (event) {
+      return event.eventName + ' (' + event.eventCount + '): ' + event.firstDate + ' (#' + event.firstEventNumber + ') - ' + event.pIndexDate + ' (#' + event.pIndexEventNumber + ')';
+    });
     return {
       pIndex: pIndex,
-      contributingEvents: contributingEvents,
+      contributingEvents: contributingEvents
     };
   }
 })();
