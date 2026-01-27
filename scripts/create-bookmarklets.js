@@ -65,6 +65,7 @@ function updateReadme(bookmarklets) {
 You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:
 
 ${Object.entries(bookmarklets)
+  .sort(([a], [b]) => a.localeCompare(b))
   .map(
     ([name, { code, description, downloadURL, filepath }]) => `### ${name}
 ${description ? `\n> ${description}\n` : ''}
