@@ -1,4 +1,0 @@
-[tools]
-ruby = "3.4.7"
-node = "lts"
-pnpm = "latest"
