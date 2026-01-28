@@ -76,7 +76,9 @@ layout: default
   </a>
 </p>
 
-<p><a href="{{ script.install_url }}">Install {{ script.name }}</a></p>
+<p class="script-install-cta">
+  <a href="{{ script.install_url }}" class="script-install-button">Install {{ script.name }}</a>
+</p>
 
 {% assign bookmarklets = site.data.bookmarklets %} {% if bookmarklets and
 bookmarklets[script.filename] %} {% assign bm = bookmarklets[script.filename] %}
@@ -89,7 +91,9 @@ bookmarklets[script.filename] %} {% assign bm = bookmarklets[script.filename] %}
 <h3>Desktop bookmarklet</h3>
 <p>Drag this link to your bookmarks bar:</p>
 <p>
-  <a href="{{ bm.bookmarklet | escape }}">{{ script.name }} bookmarklet</a>
+  <a href="{{ bm.bookmarklet | escape }}" class="script-install-button script-bookmarklet-button">
+    {{ script.name }} bookmarklet
+  </a>
 </p>
 
 <h3>Mobile bookmarklet</h3>
