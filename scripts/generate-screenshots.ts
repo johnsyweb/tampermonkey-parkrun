@@ -99,12 +99,14 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
     }
 
     // Before launching a browser, filter out any configs where the screenshot
-    // already exists and is newer than the userscript file, unless `force` is set.
+    // already exists and is newer than the *source* userscript file in src/,
+    // unless `force` is set. This ensures we only regenerate screenshots when
+    // the actual script source changes, regardless of rebuilds.
     const configsAfterSkip = [] as typeof screenshotConfigs;
     for (const config of configsToProcess) {
       try {
         const screenshotPath = path.join(process.cwd(), 'docs', 'images', `${config.name}.png`);
-        const scriptPath = path.join(process.cwd(), config.script);
+        const scriptPath = path.join(process.cwd(), 'src', config.script);
         if (!force && fs.existsSync(screenshotPath) && fs.existsSync(scriptPath)) {
           const shotStat = fs.statSync(screenshotPath);
           const scriptStat = fs.statSync(scriptPath);
