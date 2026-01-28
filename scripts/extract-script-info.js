@@ -31,7 +31,9 @@ for (const file of files) {
     description: info.description || '',
     filename: file,
     screenshot: `/tampermonkey-parkrun/images/${slug}.png`,
-    install_url: info.downloadURL || `https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/${file}`,
+    install_url:
+      info.downloadURL ||
+      `https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/${file}`,
   });
 }
 
