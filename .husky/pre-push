@@ -14,7 +14,7 @@ if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
 fi
 
 echo "🔍 Running full CI (build, check, test, lint, docs:build)..."
-if ! pnpm ci; then
+if ! pnpm run ci; then
   echo ""
   echo "❌ CI failed. Fix the issues above before pushing."
   exit 1
