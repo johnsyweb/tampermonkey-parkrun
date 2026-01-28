@@ -1,15 +1,28 @@
 #!/bin/bash
 
-# Pre-push hook to generate screenshots if userscripts have been modified
-# This prevents pushing without updating screenshots when userscripts change
+# Pre-push: run full CI (build, check, test, lint, docs:build) then screenshot logic
 
 set -e
 
-# Skip screenshot generation in CI environments
+# Ensure pnpm from mise is on PATH (hooks run with minimal env)
+export PATH="${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims:$PATH"
+
+# Skip in CI (GitHub Actions runs its own pipeline)
 if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
-  echo "⏭️  Skipping screenshot generation in CI environment"
+  echo "⏭️  Skipping pre-push hooks in CI environment"
   exit 0
 fi
+
+echo "🔍 Running full CI (build, check, test, lint, docs:build)..."
+if ! pnpm ci; then
+  echo ""
+  echo "❌ CI failed. Fix the issues above before pushing."
+  exit 1
+fi
+echo "✅ CI passed."
+echo ""
+
+# Generate screenshots if userscripts have been modified
 
 # Get the list of files being pushed
 while read local_ref local_sha remote_ref remote_sha; do

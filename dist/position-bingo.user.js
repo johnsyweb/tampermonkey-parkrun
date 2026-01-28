@@ -36,6 +36,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
+// @screenshot-url       https://www.parkrun.org.uk/parkrunner/1965346/all/
+// @screenshot-selector  #positionBingoContainer
+// @screenshot-timeout   8000
+// @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/position-bingo.user.js
 // @version      1.0.65
 // ==/UserScript==

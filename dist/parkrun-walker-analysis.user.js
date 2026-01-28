@@ -44,6 +44,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
+// @screenshot-url       https://www.parkrun.co.za/pigglywiggly/results/latestresults/
+// @screenshot-selector  #walkerAnalysisContainer
+// @screenshot-timeout   8000
+// @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-walker-analysis.user.js
 // @version      1.0.65
 // ==/UserScript==

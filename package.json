@@ -18,6 +18,7 @@
     "docs:serve": "node scripts/generate-thumbnails.js && node scripts/extract-script-info.js && cd docs && bundle exec jekyll serve",
     "build:scripts": "node scripts/build-scripts.js",
     "check:userscripts": "node scripts/check-userscript-metadata.js *.user.js",
+    "ci": "pnpm run build:scripts && pnpm run check:userscripts && pnpm test && pnpm lint && pnpm docs:build",
     "prepare": "husky"
   },
   "keywords": [

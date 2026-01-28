@@ -13,6 +13,7 @@ function run(cmd) {
 const root = process.cwd();
 const srcDir = path.join(root, 'src');
 const distDir = path.join(root, 'dist');
+const docsDir = path.join(root, 'docs');
 
 // Clean dist
 if (fs.existsSync(distDir)) {
@@ -144,6 +145,28 @@ if (fs.existsSync(readmePath)) {
     fs.writeFileSync(readmePath, readme, 'utf8');
     console.log('Appended bookmarklets to README.md');
   }
+}
+
+// Write bookmarklets JSON for Jekyll data (keyed by built filename)
+if (bookmarklets.length) {
+  const dataDir = path.join(docsDir, '_data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  const bookmarkletsByFile = {};
+  for (const b of bookmarklets) {
+    bookmarkletsByFile[b.file] = {
+      name: b.name,
+      description: b.description,
+      rawUrl: b.rawUrl,
+      bookmarklet: b.bookmarklet,
+    };
+  }
+
+  const bookmarkletsPath = path.join(dataDir, 'bookmarklets.json');
+  fs.writeFileSync(bookmarkletsPath, JSON.stringify(bookmarkletsByFile, null, 2), 'utf8');
+  console.log(`Wrote ${bookmarkletsPath}`);
 }
 
 console.log('Build complete');
