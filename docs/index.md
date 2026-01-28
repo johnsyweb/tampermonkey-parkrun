@@ -4,6 +4,7 @@ title: parkrun Userscripts - Enhance your parkrun experience
 redirect_from:
   - /scripts/
 og_image: /tampermonkey-parkrun/images/alphabet-challenge.png
+lcp_preload: true
 description: A collection of userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges for parkrun participants.
 keywords: parkrun, userscript, userscripts, tampermonkey, parkrun statistics, parkrun analysis, parkrun challenges, parkrun visualisations, parkrun charts, parkrun bingo, parkrun alphabet challenge, parkrun compass, parkrun data analysis
 ---
