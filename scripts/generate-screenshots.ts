@@ -90,7 +90,10 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
     }
     const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
     if (isCI) {
-      console.log('📝 Running in CI mode (headless browser)');
+      console.log(
+        '📝 CI environment detected; skipping screenshot generation to avoid hitting external parkrun sites.'
+      );
+      return;
     } else {
       console.log('📝 Note: This script will open a browser window and inject the userscript.');
     }

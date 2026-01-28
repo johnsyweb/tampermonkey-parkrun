@@ -35,10 +35,7 @@ if (!builtFiles.length) {
   process.exit(0);
 }
 
-const bannerLines = [
-  '// DO NOT EDIT - generated from src/ by scripts/build-scripts.js',
-  '// Built: ' + new Date().toISOString(),
-];
+const bannerLines = ['// DO NOT EDIT - generated from src/ by scripts/build-scripts.js'];
 
 for (const rel of builtFiles) {
   const srcPath = path.join(distDir, rel);
@@ -60,6 +57,16 @@ for (const rel of builtFiles) {
     destContent = metaBlock + '\n' + bannerLines.join('\n') + '\n\n' + body;
   } else {
     destContent = bannerLines.join('\n') + '\n' + content;
+  }
+  // Only rewrite the root .user.js file if the content actually changed.
+  // This keeps mtimes stable when src/ is unchanged, so downstream steps
+  // (like screenshot generation) can reliably detect real changes.
+  if (fs.existsSync(destPath)) {
+    const existing = fs.readFileSync(destPath, 'utf8');
+    if (existing === destContent) {
+      console.log(`Unchanged ${destPath}, skipping write`);
+      continue;
+    }
   }
   fs.writeFileSync(destPath, destContent, 'utf8');
   console.log(`Wrote ${destPath}`);
