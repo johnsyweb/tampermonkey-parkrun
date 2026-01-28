@@ -6,6 +6,21 @@ const path = require('path');
 const execSync = require('child_process').execSync;
 const process = require('process');
 
+// Safety guard: only allow this to run in CI environments.
+// This script mutates version headers across all .user.js files
+// and should not be invoked manually in local development.
+const isCI =
+  process.env.CI === 'true' ||
+  process.env.GITHUB_ACTIONS === 'true' ||
+  process.env.GITHUB_ACTION === 'true';
+
+if (!isCI) {
+  console.error(
+    '❌ scripts/update-version.js is intended to run only in CI (CI/GITHUB_ACTIONS=true).'
+  );
+  process.exit(1);
+}
+
 function getCurrentVersion(fileContent) {
   // Match @version x.y.z
   const versionRegex = /@version\s+(\d+)\.(\d+)\.(\d+)/;
