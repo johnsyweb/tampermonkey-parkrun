@@ -72,7 +72,7 @@ for (const rel of builtFiles) {
   console.log(`Wrote ${destPath}`);
 }
 
-// Generate bookmarklets and update README.md
+// Generate bookmarklets (for Jekyll data and optional README usage)
 const bookmarklets = [];
 for (const rel of builtFiles) {
   const srcPath = path.join(distDir, rel);
@@ -117,41 +117,6 @@ for (const rel of builtFiles) {
   const bookmarklet = 'javascript:' + minified;
   const rawUrl = `https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/${path.basename(rel)}`;
   bookmarklets.push({ file: path.basename(rel), name, description, rawUrl, bookmarklet });
-}
-
-// Update README.md between the Bookmarklets header and END marker
-const readmePath = path.join(root, 'README.md');
-if (fs.existsSync(readmePath)) {
-  let readme = fs.readFileSync(readmePath, 'utf8');
-  const startMarker = '## Bookmarklets';
-  const endMarker = '<!-- END BOOKMARKLETS SECTION -->';
-  const startIndex = readme.indexOf(startMarker);
-  const endIndex = readme.indexOf(endMarker);
-  const generated = [];
-  generated.push('## Bookmarklets\n');
-  generated.push(
-    'You can also use these scripts as bookmarklets by creating bookmarks with the following URLs:\n'
-  );
-  for (const b of bookmarklets) {
-    generated.push(`### ${b.name}\n`);
-    if (b.description) generated.push(`> ${b.description}\n`);
-    generated.push(`[${b.file}](${b.rawUrl})\n\n`);
-    generated.push('```javascript\n' + b.bookmarklet + '\n```\n');
-  }
-  const newSection = generated.join('\n');
-
-  if (endIndex !== -1) {
-    const prefix = startIndex !== -1 ? readme.slice(0, startIndex) : readme.slice(0, endIndex);
-    const suffix = readme.slice(endIndex);
-    const updated = prefix + newSection + '\n' + suffix;
-    fs.writeFileSync(readmePath, updated, 'utf8');
-    console.log('Updated README.md with bookmarklets');
-  } else {
-    // append
-    readme += '\n' + newSection + '\n' + endMarker + '\n';
-    fs.writeFileSync(readmePath, readme, 'utf8');
-    console.log('Appended bookmarklets to README.md');
-  }
 }
 
 // Write bookmarklets JSON for Jekyll data (keyed by built filename)

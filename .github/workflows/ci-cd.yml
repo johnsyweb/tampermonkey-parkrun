@@ -52,53 +52,9 @@ jobs:
           name: dist
           path: dist
 
-  update-bookmarklets:
-    if: github.ref == 'refs/heads/main'
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-      - name: Rebase on latest main
-        run: git fetch origin main && git rebase origin/main
-      - name: Set up mise
-        uses: jdx/mise-action@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: .pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-      - name: Install dependencies
-        run: pnpm install
-      - name: Restore build artifacts
-        uses: actions/cache@v4
-        with:
-          path: dist
-          key: ${{ runner.os }}-dist-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-dist-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
-      - name: Update bookmarklets
-        run: pnpm create-bookmarklets
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: 'docs: update bookmarklets in README'
-          file_pattern: 'README.md'
-          branch: main
-
   update-version:
     if: github.ref == 'refs/heads/main'
-    needs: update-bookmarklets
+    needs: build-and-test
     runs-on: ubuntu-latest
     permissions:
       contents: write

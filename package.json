@@ -10,7 +10,6 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "build:data": "pnpm run docs:assets",
-    "create-bookmarklets": "node scripts/create-bookmarklets.js",
     "update-version": "node scripts/update-version.js",
     "screenshots": "ts-node scripts/generate-screenshots.ts",
     "update-scripts-data": "node scripts/extract-script-info.js",
