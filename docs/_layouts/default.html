@@ -78,6 +78,7 @@
     {% endif %}
     <meta property="og:site_name" content="johnsy.com" />
     <meta property="og:image" content="{{ image_url }}" />
+    <link rel="preload" href="{{ image_url }}" as="image" />
     {% if page.og_image_width %}
     <meta property="og:image:width" content="{{ page.og_image_width }}" />
     {% endif %} {% if page.og_image_height %}
@@ -285,6 +286,6 @@
       </p>
     </footer>
 
-    <script src="{{ site.url }}/assets/js/mobile-menu.js"></script>
+    <script src="{{ site.url }}/assets/js/mobile-menu.min.js" defer></script>
   </body>
 </html>

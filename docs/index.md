@@ -45,7 +45,7 @@ I wrote these scripts while participating in and volunteering at parkrun, to mak
 <a href="{{ site.url }}{{ script.screenshot }}" class="screenshot-link" title="View full-size screenshot" target="_blank" rel="noopener">
 <picture>
   <source type="image/webp" srcset="{{ script.screenshot_webp }}">
-  <img src="{{ script.screenshot }}" alt="{{ script.name }} Screenshot" width="{{ script.screenshot_width }}" height="{{ script.screenshot_height }}">
+  <img src="{{ script.screenshot }}" alt="{{ script.name }} Screenshot" width="{{ script.screenshot_width }}" height="{{ script.screenshot_height }}" style="aspect-ratio: {{ script.screenshot_width }} / {{ script.screenshot_height }};" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}" {% if forloop.first %}fetchpriority="high"{% endif %}>
 </picture>
 </a>
 <a href="{{ script.install_url }}">Install {{ script.name }}</a>
