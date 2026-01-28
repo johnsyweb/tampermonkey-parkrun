@@ -16,6 +16,7 @@ p img {
   width: 800px;
 }
 
+/* Grid dimensions: scripts/docs-layout.js parses columns and gap from here for thumbnail max-width. */
 .scripts-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -46,6 +47,18 @@ p img {
 .script-item > p {
   margin: 0 20px 10px 20px;
   flex-grow: 1;
+}
+
+.script-item .screenshot-link {
+  display: block;
+  max-width: 100%;
+  line-height: 0;
+}
+
+.script-item picture {
+  max-width: 100%;
+  display: block;
+  line-height: 0;
 }
 
 .script-item img {

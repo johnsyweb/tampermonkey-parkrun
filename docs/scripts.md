@@ -8,7 +8,7 @@ permalink: /scripts/
 
 > Tracks progress on the unofficial parkrun alphabet challenge (A-Z, excluding X) with a 5x5 grid visualisation and download feature.
 
-![Alphabet Challenge Screenshot](../images/alphabet-challenge.png)
+<img src="../images/alphabet-challenge.png" alt="Alphabet Challenge Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/parkrunner/4100252/all/](https://www.parkrun.org.uk/parkrunner/4100252/all/)
 
@@ -18,7 +18,7 @@ permalink: /scripts/
 
 > Visualises your progress on the compass challenge (North, South, East, West parkruns)
 
-![Compass Challenge Screenshot](../images/compass-challenge.png)
+<img src="../images/compass-challenge.png" alt="Compass Challenge Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/parkrunner/1829613/all/](https://www.parkrun.org.uk/parkrunner/1829613/all/)
 
@@ -28,7 +28,7 @@ permalink: /scripts/
 
 > Identifies and displays participants who attended both the launch event and the latest event
 
-![Launch Returnees Screenshot](../images/launch-returnees.png)
+<img src="../images/launch-returnees.png" alt="Launch Returnees Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/coronationpark/results/latestresults/](https://www.parkrun.org.uk/coronationpark/results/latestresults/)
 
@@ -38,7 +38,7 @@ permalink: /scripts/
 
 > The parkrun p-index is an unofficial statistic that measures the number of different parkrun events a person has completed a specific number of times.
 
-![p-index Screenshot](../images/p-index.png)
+<img src="../images/p-index.png" alt="p-index Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/parkrunner/1179626/all/](https://www.parkrun.org.uk/parkrunner/1179626/all/)
 
@@ -48,7 +48,7 @@ permalink: /scripts/
 
 > Displays charts on parkrun pages: finishers per minute on results pages and event history on event history pages
 
-![parkrun Charts Screenshot](../images/parkrun-charts.png)
+<img src="../images/parkrun-charts.png" alt="parkrun Charts Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/cassiobury/results/eventhistory/](https://www.parkrun.org.uk/cassiobury/results/eventhistory/)
 
@@ -58,7 +58,7 @@ permalink: /scripts/
 
 > Adds annual participation summaries to event history pages: totals, averages, min/max for finishers and volunteers, year-over-year growth, interactive charts, download option, and multi-event comparisons with nearby parkruns.
 
-![Annual Summary Screenshot](../images/parkrun-annual-summary.png)
+<img src="../images/parkrun-annual-summary.png" alt="Annual Summary Screenshot" width="1200" height="1400">
 
 **Demo page**: [https://www.parkrun.com.au/maribyrnong/results/eventhistory/](https://www.parkrun.com.au/maribyrnong/results/eventhistory/)
 
@@ -68,7 +68,7 @@ permalink: /scripts/
 
 > Highlight and summarise walkers (>=50:00) and compare with faster participants on parkrun results pages. Includes analysis by gender, parkrun experience, volunteer status, and age group.
 
-![Walker Analysis Screenshot](../images/parkrun-walker-analysis.png)
+<img src="../images/parkrun-walker-analysis.png" alt="Walker Analysis Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.co.za/pigglywiggly/results/latestresults/](https://www.parkrun.co.za/pigglywiggly/results/latestresults/)
 
@@ -78,7 +78,7 @@ permalink: /scripts/
 
 > Track the different finishing positions you've achieved across all your parkruns
 
-![Position Bingo Screenshot](../images/position-bingo.png)
+<img src="../images/position-bingo.png" alt="Position Bingo Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/parkrunner/1965346/all/](https://www.parkrun.org.uk/parkrunner/1965346/all/)
 
@@ -88,7 +88,7 @@ permalink: /scripts/
 
 > Track the different finish times you've achieved across all your parkruns
 
-![Stopwatch Bingo Screenshot](../images/stopwatch-bingo.png)
+<img src="../images/stopwatch-bingo.png" alt="Stopwatch Bingo Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/parkrunner/4886000/all](https://www.parkrun.org.uk/parkrunner/4886000/all)
 
@@ -98,7 +98,7 @@ permalink: /scripts/
 
 > Display a map of all the countries where you've completed parkruns
 
-![Visited Countries Screenshot](../images/visited-countries.png)
+<img src="../images/visited-countries.png" alt="Visited Countries Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/parkrunner/1179622/all/](https://www.parkrun.org.uk/parkrunner/1179622/all/)
 
@@ -108,7 +108,7 @@ permalink: /scripts/
 
 > Show which days of the week you've volunteered at parkrun
 
-![Volunteer Days Display Screenshot](../images/volunteer-days-display.png)
+<img src="../images/volunteer-days-display.png" alt="Volunteer Days Display Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/fountainsabbey/results/latestresults/](https://www.parkrun.org.uk/fountainsabbey/results/latestresults/)
 
@@ -118,7 +118,7 @@ permalink: /scripts/
 
 > Calculate and display the Wilson index based on your parkrun history
 
-![Wilson Index Screenshot](../images/w-index.png)
+<img src="../images/w-index.png" alt="Wilson Index Screenshot" width="1200" height="800">
 
 **Demo page**: [https://www.parkrun.org.uk/parkrunner/507/all/](https://www.parkrun.org.uk/parkrunner/507/all/)
 

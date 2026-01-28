@@ -13,9 +13,9 @@
     "update-version": "node scripts/update-version.js",
     "screenshots": "ts-node scripts/generate-screenshots.ts",
     "update-scripts-data": "node scripts/extract-script-info.js",
-    "docs:build": "node scripts/extract-script-info.js && cd docs && bundle exec jekyll build",
+    "docs:build": "node scripts/generate-thumbnails.js && node scripts/extract-script-info.js && cd docs && bundle exec jekyll build",
     "docs:install": "cd docs && bundle install",
-    "docs:serve": "node scripts/extract-script-info.js && cd docs && bundle exec jekyll serve",
+    "docs:serve": "node scripts/generate-thumbnails.js && node scripts/extract-script-info.js && cd docs && bundle exec jekyll serve",
     "build:scripts": "node scripts/build-scripts.js",
     "check:userscripts": "node scripts/check-userscript-metadata.js *.user.js",
     "prepare": "husky"
@@ -47,6 +47,7 @@
     "jsdom": "^27.4.0",
     "prettier": "^3.8.1",
     "puppeteer": "^24.36.1",
+    "sharp": "^0.34.5",
     "ts-node": "^10.9.2",
     "uglify-js": "^3.19.3"
   },

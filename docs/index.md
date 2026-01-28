@@ -40,7 +40,12 @@ I wrote these scripts while participating in and volunteering at parkrun, to mak
 <div class="script-item" id="{{ script_id }}">
 <h3>{{ script.name }}</h3>
 <p>{{ script.description }}</p>
-<img src="{{ script.screenshot }}" alt="{{ script.name }} Screenshot">
+<a href="{{ site.url }}{{ script.screenshot }}" class="screenshot-link" title="View full-size screenshot" target="_blank" rel="noopener">
+<picture>
+  <source type="image/webp" srcset="{{ script.screenshot_webp }}">
+  <img src="{{ script.screenshot }}" alt="{{ script.name }} Screenshot" width="{{ script.screenshot_width }}" height="{{ script.screenshot_height }}">
+</picture>
+</a>
 <a href="{{ script.install_url }}">Install {{ script.name }}</a>
 </div>
 {% endfor %}

@@ -1,7 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+const sharp = require('sharp');
+const { getThumbMaxWidth } = require('./docs-layout.js');
 
 const projectRoot = path.resolve(__dirname, '..');
+const THUMB_MAX_WIDTH = getThumbMaxWidth();
+const DEFAULT_DIMENSIONS = { width: 1200, height: 800 };
 
 function parseUserscriptHeader(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
@@ -19,30 +23,57 @@ function parseUserscriptHeader(filePath) {
   };
 }
 
-const files = fs.readdirSync(projectRoot).filter((f) => f.endsWith('.user.js'));
-const scripts = [];
-
-for (const file of files) {
-  const info = parseUserscriptHeader(path.join(projectRoot, file));
-  if (!info || !info.name) continue;
-  const slug = file.replace('.user.js', '');
-  scripts.push({
-    name: info.name,
-    description: info.description || '',
-    filename: file,
-    screenshot: `/tampermonkey-parkrun/images/${slug}.png`,
-    install_url:
-      info.downloadURL ||
-      `https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/${file}`,
-  });
+async function getImageDimensions(imagePath) {
+  if (!fs.existsSync(imagePath)) return null;
+  try {
+    const { width, height } = await sharp(imagePath).metadata();
+    return width && height ? { width, height } : null;
+  } catch {
+    return null;
+  }
 }
 
-scripts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+async function run() {
+  const files = fs.readdirSync(projectRoot).filter((f) => f.endsWith('.user.js'));
+  const scripts = [];
 
-const outPath = path.join(projectRoot, 'docs', '_data', 'scripts.json');
-const outDir = path.dirname(outPath);
-if (!fs.existsSync(outDir)) {
-  fs.mkdirSync(outDir, { recursive: true });
+  for (const file of files) {
+    const info = parseUserscriptHeader(path.join(projectRoot, file));
+    if (!info || !info.name) continue;
+    const slug = file.replace('.user.js', '');
+    const screenshotPath = path.join(projectRoot, 'docs', 'images', `${slug}.png`);
+    const dims = (await getImageDimensions(screenshotPath)) || DEFAULT_DIMENSIONS;
+    if (!fs.existsSync(screenshotPath)) {
+      console.warn(`⚠️ No screenshot at docs/images/${slug}.png, using default dimensions`);
+    }
+    const tw = Math.min(THUMB_MAX_WIDTH, dims.width);
+    const th = Math.round((dims.height * tw) / dims.width);
+    scripts.push({
+      name: info.name,
+      description: info.description || '',
+      filename: file,
+      screenshot: `/tampermonkey-parkrun/images/${slug}.png`,
+      screenshot_webp: `/tampermonkey-parkrun/images/thumbs/${slug}.webp`,
+      screenshot_width: tw,
+      screenshot_height: th,
+      install_url:
+        info.downloadURL ||
+        `https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/${file}`,
+    });
+  }
+
+  scripts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  const outPath = path.join(projectRoot, 'docs', '_data', 'scripts.json');
+  const outDir = path.dirname(outPath);
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+  }
+  fs.writeFileSync(outPath, JSON.stringify(scripts, null, 2), 'utf8');
+  console.log('✅ Generated', outPath);
 }
-fs.writeFileSync(outPath, JSON.stringify(scripts, null, 2), 'utf8');
-console.log('✅ Generated', outPath);
+
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
