@@ -56,7 +56,7 @@
   };
 
   const GAP_THRESHOLD_DAYS = 7;
-  const SEASONAL_WEEKS = 12;
+  const BASELINE_EVENTS = 12;
   const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
   const state = {
@@ -359,14 +359,36 @@
     return gaps;
   }
 
-  function getSeasonalWindow(referenceDate, weeksAround = SEASONAL_WEEKS) {
-    const start = new Date(referenceDate);
-    start.setUTCDate(start.getUTCDate() - weeksAround * 7);
+  function getBaselineEventsBefore(historyData, targetDate, n = BASELINE_EVENTS) {
+    const targetStr = targetDate.toISOString().split('T')[0];
+    const targetUTC = parseDateUTC(targetStr);
 
-    const end = new Date(referenceDate);
-    end.setUTCDate(end.getUTCDate() + weeksAround * 7);
+    const indices = [];
+    for (let i = historyData.rawDates.length - 1; i >= 0; i--) {
+      const eventUTC = parseDateUTC(historyData.rawDates[i]);
+      if (eventUTC < targetUTC) {
+        indices.push(i);
+        if (indices.length >= n) break;
+      }
+    }
+    indices.reverse();
 
-    return { start, end };
+    const filtered = {
+      dates: indices.map((i) => historyData.dates[i]),
+      finishers: indices.map((i) => historyData.finishers[i]),
+      volunteers: indices.map((i) => historyData.volunteers[i]),
+    };
+    const baseline = calculateBaseline(filtered);
+
+    const window =
+      indices.length > 0
+        ? {
+            start: parseDateUTC(historyData.rawDates[indices[0]]),
+            end: parseDateUTC(historyData.rawDates[indices[indices.length - 1]]),
+          }
+        : { start: new Date(targetUTC), end: new Date(targetUTC) };
+
+    return { filtered, window, baseline };
   }
 
   function getCancellationSaturdays(gapStartDate, gapEndDate) {
@@ -508,25 +530,6 @@
       console.error(`Failed to fetch event history for ${eventName}:`, error);
       return null;
     }
-  }
-
-  function filterEventsByDateRange(historyData, startDate, endDate) {
-    const filtered = {
-      dates: [],
-      finishers: [],
-      volunteers: [],
-    };
-
-    historyData.rawDates.forEach((dateStr, index) => {
-      const date = new Date(dateStr);
-      if (date >= startDate && date <= endDate) {
-        filtered.dates.push(historyData.dates[index]);
-        filtered.finishers.push(historyData.finishers[index]);
-        filtered.volunteers.push(historyData.volunteers[index]);
-      }
-    });
-
-    return filtered;
   }
 
   function calculateBaseline(data) {
@@ -837,17 +840,8 @@
       const dateKey = targetDate.toISOString().split('T')[0];
       const results = [];
 
-      const windowBefore = getSeasonalWindow(targetDate, SEASONAL_WEEKS);
-      windowBefore.end = new Date(targetDate);
-      windowBefore.end.setUTCDate(windowBefore.end.getUTCDate() - 1);
-
       nearbyHistories.forEach(({ parkrun, historyData, shortName, distance }) => {
-        const beforeData = filterEventsByDateRange(
-          historyData,
-          windowBefore.start,
-          windowBefore.end
-        );
-        const baseline = calculateBaseline(beforeData);
+        const base = getBaselineEventsBefore(historyData, targetDate);
 
         // Find event on this cancellation date
         const eventOnDate = findEventOnDate(historyData, targetDate);
@@ -857,21 +851,23 @@
           title: historyData.title,
           displayName: shortName,
           distance,
-          baseline,
+          baseline: base.baseline,
           eventOnDate,
-          seasonalTrend: buildSeasonalTrend(historyData, targetDate),
+          seasonalTrend: base,
           change: eventOnDate
             ? {
-                finishersChange: eventOnDate.finishers - baseline.avgFinishers,
-                volunteersChange: eventOnDate.volunteers - baseline.avgVolunteers,
+                finishersChange: eventOnDate.finishers - base.baseline.avgFinishers,
+                volunteersChange: eventOnDate.volunteers - base.baseline.avgVolunteers,
                 finishersPct:
-                  baseline.avgFinishers > 0
-                    ? ((eventOnDate.finishers - baseline.avgFinishers) / baseline.avgFinishers) *
+                  base.baseline.avgFinishers > 0
+                    ? ((eventOnDate.finishers - base.baseline.avgFinishers) /
+                        base.baseline.avgFinishers) *
                       100
                     : 0,
                 volunteersPct:
-                  baseline.avgVolunteers > 0
-                    ? ((eventOnDate.volunteers - baseline.avgVolunteers) / baseline.avgVolunteers) *
+                  base.baseline.avgVolunteers > 0
+                    ? ((eventOnDate.volunteers - base.baseline.avgVolunteers) /
+                        base.baseline.avgVolunteers) *
                       100
                     : 0,
               }
@@ -1249,18 +1245,7 @@
   }
 
   function buildSeasonalTrend(historyData, targetDate) {
-    const windowBefore = getSeasonalWindow(targetDate, SEASONAL_WEEKS);
-    windowBefore.end = new Date(targetDate);
-    windowBefore.end.setUTCDate(windowBefore.end.getUTCDate() - 1);
-
-    const filtered = filterEventsByDateRange(historyData, windowBefore.start, windowBefore.end);
-    const baseline = calculateBaseline(filtered);
-
-    return {
-      window: windowBefore,
-      filtered,
-      baseline,
-    };
+    return getBaselineEventsBefore(historyData, targetDate);
   }
 
   function renderImpactResults(
@@ -1333,7 +1318,7 @@
         label: 'Baseline (Avg)',
         key: 'baseline',
         align: 'right',
-        info: `12-week seasonal average (finishers/volunteers) ending the day before ${dateStr}.`,
+        info: `12-event baseline average (finishers/volunteers) for events before ${dateStr}.`,
       },
       {
         label: 'On Date',
@@ -1617,7 +1602,7 @@
     windowText.style.color = STYLES.textColor;
     windowText.style.fontSize = '13px';
     windowText.style.marginBottom = '6px';
-    windowText.innerHTML = `Window: ${startStr} → ${endStr} (12-week baseline)`;
+    windowText.innerHTML = `Window: ${startStr} → ${endStr} (12-event baseline)`;
     trendSection.appendChild(windowText);
 
     const trendStats = document.createElement('div');
@@ -1947,7 +1932,7 @@
           labels: finishersLabels,
           datasets: [
             {
-              label: 'Baseline (12-week avg)',
+              label: 'Baseline (12-event avg)',
               data: finishersBaseline,
               backgroundColor: STYLES.barColor,
               borderColor: STYLES.barColor,
@@ -2005,7 +1990,7 @@
           labels: finishersLabels,
           datasets: [
             {
-              label: 'Baseline (12-week avg)',
+              label: 'Baseline (12-event avg)',
               data: volunteersBaseline,
               backgroundColor: STYLES.barColor,
               borderColor: STYLES.barColor,
@@ -2092,11 +2077,11 @@
       </p>
       <p style="margin: 4px 0;">
         Average change in finishers: <span style="color: ${avgChangeFinishers < 0 ? STYLES.alertColor : STYLES.successColor}; font-weight: bold;">${avgChangeFinishers > 0 ? '+' : ''}${avgChangeFinishers}</span>
-        <span style="color: ${STYLES.subtleTextColor}; font-size: 11px; margin-left: 8px;" title="Mean difference between actual finishers and 12-week baseline average across events that ran">ℹ</span>
+        <span style="color: ${STYLES.subtleTextColor}; font-size: 11px; margin-left: 8px;" title="Mean difference between actual finishers and 12-event baseline average across events that ran">ℹ</span>
       </p>
       <p style="margin: 4px 0;">
         Average change in volunteers: <span style="color: ${avgChangeVolunteers < 0 ? STYLES.alertColor : STYLES.successColor}; font-weight: bold;">${avgChangeVolunteers > 0 ? '+' : ''}${avgChangeVolunteers}</span>
-        <span style="color: ${STYLES.subtleTextColor}; font-size: 11px; margin-left: 8px;" title="Mean difference between actual volunteers and 12-week baseline average across events that ran">ℹ</span>
+        <span style="color: ${STYLES.subtleTextColor}; font-size: 11px; margin-left: 8px;" title="Mean difference between actual volunteers and 12-event baseline average across events that ran">ℹ</span>
       </p>
       <p style="margin: 4px 0;">
         Estimated total additional finishers: <span style="color: ${totalGain < 0 ? STYLES.alertColor : STYLES.successColor}; font-weight: bold;">${totalGain > 0 ? '+' : ''}${totalGain}</span>

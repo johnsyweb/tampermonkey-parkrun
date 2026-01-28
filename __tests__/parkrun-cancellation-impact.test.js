@@ -1,6 +1,7 @@
 describe('parkrun-cancellation-impact', () => {
   // Constants from the script
   const GAP_THRESHOLD_DAYS = 7;
+  const BASELINE_EVENTS = 12;
 
   // Pure functions extracted for testing
   function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -185,6 +186,38 @@ describe('parkrun-cancellation-impact', () => {
     };
   }
 
+  function getBaselineEventsBefore(historyData, targetDate, n = BASELINE_EVENTS) {
+    const targetStr = targetDate.toISOString().split('T')[0];
+    const targetUTC = parseDateUTC(targetStr);
+
+    const indices = [];
+    for (let i = historyData.rawDates.length - 1; i >= 0; i--) {
+      const eventUTC = parseDateUTC(historyData.rawDates[i]);
+      if (eventUTC < targetUTC) {
+        indices.push(i);
+        if (indices.length >= n) break;
+      }
+    }
+    indices.reverse();
+
+    const filtered = {
+      dates: indices.map((i) => historyData.dates[i]),
+      finishers: indices.map((i) => historyData.finishers[i]),
+      volunteers: indices.map((i) => historyData.volunteers[i]),
+    };
+    const baseline = calculateBaseline(filtered);
+
+    const window =
+      indices.length > 0
+        ? {
+            start: parseDateUTC(historyData.rawDates[indices[0]]),
+            end: parseDateUTC(historyData.rawDates[indices[indices.length - 1]]),
+          }
+        : { start: new Date(targetUTC), end: new Date(targetUTC) };
+
+    return { filtered, window, baseline };
+  }
+
   describe('Gap Detection', () => {
     test('detects a single 21-day gap between two events', () => {
       const historyData = {
@@ -344,6 +377,157 @@ describe('parkrun-cancellation-impact', () => {
       expect(gaps[0].gapStartDate.toISOString().split('T')[0]).toBe('2025-01-18');
       expect(gaps[0].gapEndDate.toISOString().split('T')[0]).toBe('2025-01-30');
       expect(gaps[0].eventsAfter).toBe(0);
+    });
+  });
+
+  describe('12-event baseline (getBaselineEventsBefore)', () => {
+    test('uses last 12 events when more than 12 exist before target', () => {
+      const rawDates = [];
+      const dates = [];
+      const finishers = [];
+      const volunteers = [];
+      for (let w = 0; w < 15; w++) {
+        const d = new Date(Date.UTC(2025, 0, 4 + w * 7));
+        rawDates.push(d.toISOString().split('T')[0]);
+        dates.push(
+          d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        );
+        finishers.push(200 + w * 10);
+        volunteers.push(15 + w);
+      }
+      const historyData = { rawDates, dates, finishers, volunteers };
+      const targetDate = parseDateUTC('2025-04-20'); // after all 15
+
+      const result = getBaselineEventsBefore(historyData, targetDate);
+
+      expect(result.filtered.dates.length).toBe(12);
+      expect(result.baseline.totalEvents).toBe(12);
+      const startRaw = historyData.rawDates[3];
+      const endRaw = historyData.rawDates[14];
+      expect(result.window.start.toISOString().split('T')[0]).toBe(startRaw);
+      expect(result.window.end.toISOString().split('T')[0]).toBe(endRaw);
+    });
+
+    test('uses all available events when fewer than 12 exist before target (cancellation in first 12 weeks)', () => {
+      const historyData = {
+        rawDates: ['2025-01-04', '2025-01-11', '2025-01-18', '2025-01-25'],
+        dates: ['4 Jan 2025', '11 Jan 2025', '18 Jan 2025', '25 Jan 2025'],
+        finishers: [180, 210, 240, 230],
+        volunteers: [12, 14, 16, 15],
+      };
+      const targetDate = parseDateUTC('2025-02-01'); // cancellation on week 5
+
+      const result = getBaselineEventsBefore(historyData, targetDate);
+
+      expect(result.filtered.dates.length).toBe(4);
+      expect(result.baseline.totalEvents).toBe(4);
+      expect(result.baseline.avgFinishers).toBe(215);
+      expect(result.baseline.avgVolunteers).toBe(14);
+      expect(result.window.start.toISOString().split('T')[0]).toBe('2025-01-04');
+      expect(result.window.end.toISOString().split('T')[0]).toBe('2025-01-25');
+    });
+
+    test('uses exactly 12 events when 12 exist before target', () => {
+      const rawDates = [];
+      const dates = [];
+      const finishers = [];
+      const volunteers = [];
+      for (let w = 0; w < 12; w++) {
+        const d = new Date(Date.UTC(2025, 0, 4 + w * 7));
+        rawDates.push(d.toISOString().split('T')[0]);
+        dates.push(
+          d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        );
+        finishers.push(100);
+        volunteers.push(10);
+      }
+      const historyData = { rawDates, dates, finishers, volunteers };
+      const targetDate = parseDateUTC('2025-03-29'); // after 12th event
+
+      const result = getBaselineEventsBefore(historyData, targetDate);
+
+      expect(result.filtered.dates.length).toBe(12);
+      expect(result.baseline.totalEvents).toBe(12);
+      expect(result.window.start.toISOString().split('T')[0]).toBe('2025-01-04');
+      expect(result.window.end.toISOString().split('T')[0]).toBe('2025-03-22');
+    });
+
+    test('returns empty baseline when no events before target', () => {
+      const historyData = {
+        rawDates: ['2025-02-01', '2025-02-08'],
+        dates: ['1 Feb 2025', '8 Feb 2025'],
+        finishers: [100, 110],
+        volunteers: [10, 12],
+      };
+      const targetDate = parseDateUTC('2025-01-15');
+
+      const result = getBaselineEventsBefore(historyData, targetDate);
+
+      expect(result.filtered.dates.length).toBe(0);
+      expect(result.baseline.totalEvents).toBe(0);
+      expect(result.baseline.avgFinishers).toBe(0);
+      expect(result.baseline.avgVolunteers).toBe(0);
+      expect(result.window.start.toISOString().split('T')[0]).toBe('2025-01-15');
+      expect(result.window.end.toISOString().split('T')[0]).toBe('2025-01-15');
+    });
+
+    test('uses one event when only one exists before target (cancel on second weekend)', () => {
+      const historyData = {
+        rawDates: ['2025-01-04', '2025-01-11'],
+        dates: ['4 Jan 2025', '11 Jan 2025'],
+        finishers: [150, 180],
+        volunteers: [12, 14],
+      };
+      const targetDate = parseDateUTC('2025-01-11'); // cancel on week 2, only 4 Jan is before
+
+      const result = getBaselineEventsBefore(historyData, targetDate);
+
+      expect(result.filtered.dates.length).toBe(1);
+      expect(result.baseline.totalEvents).toBe(1);
+      expect(result.baseline.avgFinishers).toBe(150);
+      expect(result.window.start.toISOString().split('T')[0]).toBe('2025-01-04');
+      expect(result.window.end.toISOString().split('T')[0]).toBe('2025-01-04');
+    });
+
+    test('uses both events when only two exist before target (cancel on third weekend)', () => {
+      const historyData = {
+        rawDates: ['2025-01-04', '2025-01-11'],
+        dates: ['4 Jan 2025', '11 Jan 2025'],
+        finishers: [150, 180],
+        volunteers: [12, 14],
+      };
+      const targetDate = parseDateUTC('2025-01-18'); // cancel on week 3
+
+      const result = getBaselineEventsBefore(historyData, targetDate);
+
+      expect(result.filtered.dates.length).toBe(2);
+      expect(result.baseline.totalEvents).toBe(2);
+      expect(result.baseline.avgFinishers).toBe(165);
+      expect(result.window.start.toISOString().split('T')[0]).toBe('2025-01-04');
+      expect(result.window.end.toISOString().split('T')[0]).toBe('2025-01-11');
+    });
+
+    test('respects custom n when provided', () => {
+      const rawDates = [];
+      const dates = [];
+      const finishers = [];
+      const volunteers = [];
+      for (let w = 0; w < 20; w++) {
+        const d = new Date(Date.UTC(2025, 0, 4 + w * 7));
+        rawDates.push(d.toISOString().split('T')[0]);
+        dates.push(
+          d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        );
+        finishers.push(100);
+        volunteers.push(10);
+      }
+      const historyData = { rawDates, dates, finishers, volunteers };
+      const targetDate = parseDateUTC('2025-06-01');
+
+      const result = getBaselineEventsBefore(historyData, targetDate, 5);
+
+      expect(result.filtered.dates.length).toBe(5);
+      expect(result.baseline.totalEvents).toBe(5);
     });
   });
 
