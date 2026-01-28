@@ -89,7 +89,7 @@ bookmarklets[script.filename] %} {% assign bm = bookmarklets[script.filename] %}
 <h3>Desktop bookmarklet</h3>
 <p>Drag this link to your bookmarks bar:</p>
 <p>
-  <a href="{{ bm.bookmarklet }}">{{ script.name }} bookmarklet</a>
+  <a href="{{ bm.bookmarklet | escape }}">{{ script.name }} bookmarklet</a>
 </p>
 
 <h3>Mobile bookmarklet</h3>
