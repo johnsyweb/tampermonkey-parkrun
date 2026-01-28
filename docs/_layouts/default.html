@@ -172,7 +172,7 @@
   <body>
     <a href="#content" class="skip-link">Skip to main content</a>
     <header id="header">
-      <h1><a href="{{ site.url }}/">{{ site.name }}</a></h1>
+      <h1><a href="{{ site.url }}{{ site.baseurl }}/">{{ site.name }}</a></h1>
       <p>{{ site.description_html }}</p>
     </header>
 
@@ -182,7 +182,7 @@
           <ul class="main-nav">
             <li>
               <a
-                href="{{ site.url }}/"
+                href="{{ site.url }}{{ site.baseurl }}/"
                 accesskey="h"
                 title="Home (Access key: Alt+Shift+H on Windows, Control+Option+H on macOS)"
                 ><span class="accesskey-letter">H</span><span class="accesskey-rest">ome</span></a
