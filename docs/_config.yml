@@ -10,6 +10,7 @@ application_name: parkrun Userscripts
 baseurl: /tampermonkey-parkrun
 url: https://www.johnsy.com
 plugins:
+  - jekyll-redirect-from
   - jekyll-sitemap
 
 apple_touch_icon_sizes:

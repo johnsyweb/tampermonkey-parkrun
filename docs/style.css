@@ -82,3 +82,37 @@ p img {
 .script-item a[href*='raw.githubusercontent']:hover {
   background: #3d2f4f;
 }
+
+.script-item h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.script-item h3 a:hover {
+  text-decoration: underline;
+}
+
+/* Per-script page metadata */
+.script-meta {
+  margin: 1.5em 0;
+}
+
+.script-meta dt {
+  font-weight: bold;
+  margin-top: 0.5em;
+}
+
+.script-meta dd {
+  margin-left: 1em;
+}
+
+/* Scripts index list */
+.script-list {
+  margin: 1em 0;
+  list-style: disc;
+  padding-left: 2em;
+}
+
+.script-list a {
+  text-decoration: underline;
+}

@@ -1,6 +1,8 @@
 ---
 layout: default
 title: parkrun Userscripts - Enhance your parkrun experience
+redirect_from:
+  - /scripts/
 og_image: /tampermonkey-parkrun/images/alphabet-challenge.png
 description: A collection of userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges for parkrun participants.
 keywords: parkrun, userscript, userscripts, tampermonkey, parkrun statistics, parkrun analysis, parkrun challenges, parkrun visualisations, parkrun charts, parkrun bingo, parkrun alphabet challenge, parkrun compass, parkrun data analysis
@@ -38,7 +40,7 @@ I wrote these scripts while participating in and volunteering at parkrun, to mak
 {% for script in scripts %}
 {% assign script_id = script.filename | replace: '.user.js', '' %}
 <div class="script-item" id="{{ script_id }}">
-<h3>{{ script.name }}</h3>
+<h3><a href="{{ site.baseurl }}/{{ script_id }}/">{{ script.name }}</a></h3>
 <p>{{ script.description }}</p>
 <a href="{{ site.url }}{{ script.screenshot }}" class="screenshot-link" title="View full-size screenshot" target="_blank" rel="noopener">
 <picture>

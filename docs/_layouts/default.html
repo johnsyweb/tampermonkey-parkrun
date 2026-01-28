@@ -70,7 +70,7 @@
     site.url | append: og_image_source %} {% endif %}
 
     <meta property="og:title" content="{{ page.title | default: site.title }}" />
-    <meta property="og:url" content="{{ site.url }}{{ page.url }}" />
+    <meta property="og:url" content="{{ page.url | absolute_url }}" />
     {% if page.date %}
     <meta property="og:type" content="article" />
     {% else %}
@@ -78,7 +78,11 @@
     {% endif %}
     <meta property="og:site_name" content="johnsy.com" />
     <meta property="og:image" content="{{ image_url }}" />
-    {% if page.og_image_alt %}
+    {% if page.og_image_width %}
+    <meta property="og:image:width" content="{{ page.og_image_width }}" />
+    {% endif %} {% if page.og_image_height %}
+    <meta property="og:image:height" content="{{ page.og_image_height }}" />
+    {% endif %} {% if page.og_image_alt %}
     <meta property="og:image:alt" content="{{ page.og_image_alt }}" />
     {% endif %} {% if page.date %}
     <meta property="article:published_time" content="{{ page.date | date: '%Y-%m-%d %H:%M:%S' }}" />
@@ -166,7 +170,26 @@
     <link rel="Help" href="{{ site.url }}/about/" title="What is the point of this website?" />
     <link rel="alternate" type="text/xml" title="Atom" href="{{ site.url }}/feed.xml" />
 
-    {% include enhanced-meta.html %}
+    {% assign meta_script = site.data.scripts | where: "slug", page.slug | first %} {% assign
+    meta_name = meta_script.name | default: "parkrun Userscripts" %} {% assign meta_description =
+    meta_script.description | default: page.description | default: "A collection of Tampermonkey
+    userscripts that enhance parkrun pages with additional statistics, visualisations, and
+    challenges." %} {% assign meta_url = page.url | absolute_url %} {% assign
+    default_screenshot_path = site.baseurl | append: "/images/alphabet-challenge.png" %} {% assign
+    meta_screenshot_path = meta_script.screenshot | default: default_screenshot_path %} {% assign
+    meta_screenshot = site.url | append: meta_screenshot_path %} {% assign default_download =
+    site.url | append: site.baseurl | append: "/#installation" %} {% assign meta_download_url =
+    meta_script.install_url | default: default_download %} {% assign meta_software_version =
+    meta_script.version | default: "1.0.6" %} {% assign meta_date_modified = page.last_modified_at |
+    date: "%Y-%m-%d" | default: site.time | date: "%Y-%m-%d" %} {% assign meta_browser_requirements
+    = "Requires a userscript manager such as Userscripts, Tampermonkey, or Violentmonkey. Works with
+    Firefox, Chrome, Safari, Edge, Orion, and other compatible browsers." %} {% assign
+    meta_author_name = "Pete Johns" %} {% assign meta_author_url = "https://www.johnsy.com" %} {%
+    assign meta_date_published = "2025-01-01" %} {% include enhanced-meta.html name=meta_name
+    description=meta_description url=meta_url screenshot=meta_screenshot
+    download_url=meta_download_url software_version=meta_software_version
+    date_modified=meta_date_modified browser_requirements=meta_browser_requirements
+    author_name=meta_author_name author_url=meta_author_url date_published=meta_date_published %}
   </head>
 
   <body>

@@ -1,0 +1,59 @@
+---
+layout: default
+---
+
+{% assign script = site.data.scripts | where: "slug", page.slug | first %} {% if script %}
+<h1>{{ script.name }}</h1>
+
+<p>{{ script.description }}</p>
+
+<p>
+  <a
+    href="{{ site.url }}{{ script.screenshot }}"
+    class="screenshot-link"
+    title="View full-size screenshot"
+    target="_blank"
+    rel="noopener"
+  >
+    <img
+      src="{{ script.screenshot }}"
+      alt="{{ script.name }} Screenshot"
+      width="{{ script.screenshot_full_width }}"
+      height="{{ script.screenshot_full_height }}"
+    />
+  </a>
+</p>
+
+<p><a href="{{ script.install_url }}">Install {{ script.name }}</a></p>
+
+<dl class="script-meta">
+  {% if page.last_modified_at %}
+  <dt>Last updated</dt>
+  <dd>
+    <time datetime="{{ page.last_modified_at }}"
+      >{{ page.last_modified_at | date: "%Y-%m-%d" }}</time
+    >
+  </dd>
+  {% endif %} {% if script.version %}
+  <dt>Version</dt>
+  <dd>{{ script.version }}</dd>
+  {% endif %} {% if script.author %}
+  <dt>Author</dt>
+  <dd>{{ script.author }}</dd>
+  {% endif %} {% if script.homepage %}
+  <dt>Homepage</dt>
+  <dd><a href="{{ script.homepage }}">{{ script.homepage }}</a></dd>
+  {% endif %} {% if script.supportURL %}
+  <dt>Support</dt>
+  <dd><a href="{{ script.supportURL }}">Issues / support</a></dd>
+  {% endif %} {% if script.license %}
+  <dt>License</dt>
+  <dd>
+    {% if script.license == "MIT" %}<a href="https://opensource.org/licenses/MIT">MIT</a>{% else
+    %}{{ script.license }}{% endif %}
+  </dd>
+  {% endif %}
+</dl>
+{% else %}
+<p>Script not found.</p>
+{% endif %}

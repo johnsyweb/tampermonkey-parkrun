@@ -2,6 +2,9 @@
 .pnpm-store/
 docs/_data/scripts.json
 docs/_site/
+# Generated script pages; index.md is hand-maintained
+docs/*.md
+!docs/index.md
 docs/vendor/
 pnpm-workspace.yaml
 screenshots.log

@@ -1,28 +1,25 @@
-<!-- Structured Data for parkrun Userscripts -->
+{% comment %} Single SoftwareApplication JSON-LD block. Caller passes all fields with sensible
+defaults. No branching: every value comes from include.*. {% endcomment %}
 <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "parkrun Userscripts",
-    "description": "A collection of Tampermonkey userscripts that enhance parkrun pages with additional statistics, visualisations, and challenges.",
-    "url": "{{ site.url }}",
+    "name": {{ include.name | jsonify }},
+    "description": {{ include.description | jsonify }},
+    "url": "{{ include.url }}",
     "applicationCategory": "BrowserExtension",
     "operatingSystem": ["Windows", "macOS", "Linux", "Android", "iOS"],
-    "browserRequirements": "Requires a userscript manager such as Userscripts, Tampermonkey, or Violentmonkey. Works with Firefox, Chrome, Safari, Edge, Orion, and other compatible browsers.",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
+    "browserRequirements": {{ include.browser_requirements | jsonify }},
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "author": {
       "@type": "Person",
-      "name": "Pete Johns",
-      "url": "https://www.johnsy.com"
+      "name": {{ include.author_name | jsonify }},
+      "url": "{{ include.author_url }}"
     },
-    "screenshot": "{{ site.url }}{{ site.baseurl }}/images/alphabet-challenge.png",
-    "downloadUrl": "{{ site.url }}{{ site.baseurl }}/#installation",
-    "softwareVersion": "1.0.6",
-    "datePublished": "2025-01-01",
-    "dateModified": "{{ site.time | date: '%Y-%m-%d' }}"
+    "screenshot": "{{ include.screenshot }}",
+    "downloadUrl": {{ include.download_url | jsonify }},
+    "softwareVersion": {{ include.software_version | jsonify }},
+    "datePublished": "{{ include.date_published }}",
+    "dateModified": "{{ include.date_modified }}"
   }
 </script>
