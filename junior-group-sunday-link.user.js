@@ -36,7 +36,7 @@
 // @version      0.1.1
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-28T08:18:07.327Z
+// Built: 2026-01-28T08:26:27.264Z
 
 function findConsolidatedClubLink() {
   var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
