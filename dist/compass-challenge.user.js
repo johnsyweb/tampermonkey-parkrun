@@ -39,10 +39,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.org.uk/parkrunner/1829613/all/
-// @screenshot-selector  .parkrun-compass-container
-// @screenshot-timeout   8000
-// @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/compass-challenge.user.js
 // @version      1.0.65
 // ==/UserScript==

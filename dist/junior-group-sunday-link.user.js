@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         junior parkrun Group Sunday Link
+// @name         parkrun Junior Group Sunday Link
 // @description  Adds a link to the consolidated club report for the most recent Sunday on junior parkrun group pages
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/junior-group-sunday-link.user.js
@@ -32,10 +32,6 @@
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.com.au/westerfolds-juniors/groups/24238/
-// @screenshot-selector  a[href*="/results/consolidatedclub/?"]
-// @screenshot-timeout   8000
-// @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/junior-group-sunday-link.user.js
 // @version      0.1.0
 // ==/UserScript==

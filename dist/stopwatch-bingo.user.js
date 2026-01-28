@@ -33,10 +33,6 @@
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.org.uk/parkrunner/4886000/all/
-// @screenshot-selector  #stopwatchBingoContainer
-// @screenshot-timeout   8000
-// @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/stopwatch-bingo.user.js
 // @version      1.0.65
 // ==/UserScript==

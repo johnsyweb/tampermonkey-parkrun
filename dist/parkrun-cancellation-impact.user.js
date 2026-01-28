@@ -52,10 +52,6 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.com.au/aurora/results/eventhistory/
-// @screenshot-selector  .parkrun-cancellation-impact
-// @screenshot-timeout   25000
-// @screenshot-viewport  1400x2000
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
 // @version      0.1.4
@@ -78,7 +74,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     successColor: '#10b981' // emerald 500
   };
   var GAP_THRESHOLD_DAYS = 7;
-  var BASELINE_EVENTS = 12;
+  var SEASONAL_WEEKS = 12;
   var CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
   var state = {
@@ -282,11 +278,11 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       volunteers: volunteers
     };
   }
-  function detectEventGap(historyData, referenceDate) {
+  function detectEventGap(historyData) {
     var dates = historyData.rawDates.map(function (d) {
       return parseDateUTC(d);
     });
-    if (dates.length < 1) {
+    if (dates.length < 2) {
       return null;
     }
     var gaps = [];
@@ -304,37 +300,21 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
         });
       }
     }
-    if (gaps.length > 0) {
-      var latestGap = gaps[gaps.length - 1];
-      console.log("Detected ".concat(gaps.length, " gap(s); using latest: ").concat(latestGap.daysDiff.toFixed(1), " days"));
-      console.log('All gaps detected:', gaps);
-      return latestGap;
+    if (gaps.length === 0) {
+      return null;
     }
 
-    // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
-    if (referenceDate && dates.length >= 1) {
-      var lastUTC = dates[dates.length - 1];
-      var refStr = referenceDate.toISOString().split('T')[0];
-      var refUTC = parseDateUTC(refStr);
-      var _daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
-      if (_daysDiff > GAP_THRESHOLD_DAYS) {
-        console.log("Detected ongoing gap: ".concat(_daysDiff.toFixed(1), " days from last event to ").concat(refStr));
-        return {
-          gapStartDate: lastUTC,
-          gapEndDate: refUTC,
-          daysDiff: _daysDiff,
-          eventsBefore: dates.length,
-          eventsAfter: 0
-        };
-      }
-    }
-    return null;
+    // Return latest gap
+    var latestGap = gaps[gaps.length - 1];
+    console.log("Detected ".concat(gaps.length, " gap(s); using latest: ").concat(latestGap.daysDiff.toFixed(1), " days"));
+    console.log('All gaps detected:', gaps);
+    return latestGap;
   }
-  function detectAllEventGaps(historyData, referenceDate) {
+  function detectAllEventGaps(historyData) {
     var dates = historyData.rawDates.map(function (d) {
       return parseDateUTC(d);
     });
-    if (dates.length < 1) {
+    if (dates.length < 2) {
       return [];
     }
     var gaps = [];
@@ -352,62 +332,18 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
         });
       }
     }
-
-    // Include ongoing gap (last event to reference/today) when > 7 days
-    if (referenceDate && dates.length >= 1) {
-      var lastUTC = dates[dates.length - 1];
-      var refStr = referenceDate.toISOString().split('T')[0];
-      var refUTC = parseDateUTC(refStr);
-      var _daysDiff2 = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
-      if (_daysDiff2 > GAP_THRESHOLD_DAYS) {
-        gaps.push({
-          gapStartDate: lastUTC,
-          gapEndDate: refUTC,
-          daysDiff: _daysDiff2,
-          eventsBefore: dates.length,
-          eventsAfter: 0
-        });
-      }
-    }
     console.log("Detected ".concat(gaps.length, " total gap(s)"));
     return gaps;
   }
-  function getBaselineEventsBefore(historyData, targetDate) {
-    var n = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : BASELINE_EVENTS;
-    var targetStr = targetDate.toISOString().split('T')[0];
-    var targetUTC = parseDateUTC(targetStr);
-    var indices = [];
-    for (var i = historyData.rawDates.length - 1; i >= 0; i--) {
-      var eventUTC = parseDateUTC(historyData.rawDates[i]);
-      if (eventUTC < targetUTC) {
-        indices.push(i);
-        if (indices.length >= n) break;
-      }
-    }
-    indices.reverse();
-    var filtered = {
-      dates: indices.map(function (i) {
-        return historyData.dates[i];
-      }),
-      finishers: indices.map(function (i) {
-        return historyData.finishers[i];
-      }),
-      volunteers: indices.map(function (i) {
-        return historyData.volunteers[i];
-      })
-    };
-    var baseline = calculateBaseline(filtered);
-    var window = indices.length > 0 ? {
-      start: parseDateUTC(historyData.rawDates[indices[0]]),
-      end: parseDateUTC(historyData.rawDates[indices[indices.length - 1]])
-    } : {
-      start: new Date(targetUTC),
-      end: new Date(targetUTC)
-    };
+  function getSeasonalWindow(referenceDate) {
+    var weeksAround = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : SEASONAL_WEEKS;
+    var start = new Date(referenceDate);
+    start.setUTCDate(start.getUTCDate() - weeksAround * 7);
+    var end = new Date(referenceDate);
+    end.setUTCDate(end.getUTCDate() + weeksAround * 7);
     return {
-      filtered: filtered,
-      window: window,
-      baseline: baseline
+      start: start,
+      end: end
     };
   }
   function getCancellationSaturdays(gapStartDate, gapEndDate) {
@@ -548,6 +484,22 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       }, _callee4, null, [[2, 4], [1, 8]]);
     }));
     return _fetchEventHistory.apply(this, arguments);
+  }
+  function filterEventsByDateRange(historyData, startDate, endDate) {
+    var filtered = {
+      dates: [],
+      finishers: [],
+      volunteers: []
+    };
+    historyData.rawDates.forEach(function (dateStr, index) {
+      var date = new Date(dateStr);
+      if (date >= startDate && date <= endDate) {
+        filtered.dates.push(historyData.dates[index]);
+        filtered.finishers.push(historyData.finishers[index]);
+        filtered.volunteers.push(historyData.volunteers[index]);
+      }
+    });
+    return filtered;
   }
   function calculateBaseline(data) {
     if (data.dates.length === 0) {
@@ -716,7 +668,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             console.log('No event history data found');
             return _context5.a(2);
           case 1:
-            gapInfo = detectEventGap(historyData, new Date());
+            gapInfo = detectEventGap(historyData);
             if (gapInfo) {
               _context5.n = 2;
               break;
@@ -809,7 +761,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
           case 0:
             eventInfo = getCurrentEventInfo();
             nearbyParkruns = state.nearbyParkruns; // Find all cancellation Saturdays from all gaps
-            allGaps = detectAllEventGaps(state.currentEvent, new Date());
+            allGaps = detectAllEventGaps(state.currentEvent);
             cancellationSaturdays = [];
             allGaps.forEach(function (gap) {
               var saturdays = getCancellationSaturdays(gap.gapStartDate, gap.gapEndDate);
@@ -879,12 +831,16 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             cancellationSaturdays.forEach(function (targetDate) {
               var dateKey = targetDate.toISOString().split('T')[0];
               var results = [];
+              var windowBefore = getSeasonalWindow(targetDate, SEASONAL_WEEKS);
+              windowBefore.end = new Date(targetDate);
+              windowBefore.end.setUTCDate(windowBefore.end.getUTCDate() - 1);
               nearbyHistories.forEach(function (_ref3) {
                 var parkrun = _ref3.parkrun,
                   historyData = _ref3.historyData,
                   shortName = _ref3.shortName,
                   distance = _ref3.distance;
-                var base = getBaselineEventsBefore(historyData, targetDate);
+                var beforeData = filterEventsByDateRange(historyData, windowBefore.start, windowBefore.end);
+                var baseline = calculateBaseline(beforeData);
 
                 // Find event on this cancellation date
                 var eventOnDate = findEventOnDate(historyData, targetDate);
@@ -893,14 +849,14 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
                   title: historyData.title,
                   displayName: shortName,
                   distance: distance,
-                  baseline: base.baseline,
+                  baseline: baseline,
                   eventOnDate: eventOnDate,
-                  seasonalTrend: base,
+                  seasonalTrend: buildSeasonalTrend(historyData, targetDate),
                   change: eventOnDate ? {
-                    finishersChange: eventOnDate.finishers - base.baseline.avgFinishers,
-                    volunteersChange: eventOnDate.volunteers - base.baseline.avgVolunteers,
-                    finishersPct: base.baseline.avgFinishers > 0 ? (eventOnDate.finishers - base.baseline.avgFinishers) / base.baseline.avgFinishers * 100 : 0,
-                    volunteersPct: base.baseline.avgVolunteers > 0 ? (eventOnDate.volunteers - base.baseline.avgVolunteers) / base.baseline.avgVolunteers * 100 : 0
+                    finishersChange: eventOnDate.finishers - baseline.avgFinishers,
+                    volunteersChange: eventOnDate.volunteers - baseline.avgVolunteers,
+                    finishersPct: baseline.avgFinishers > 0 ? (eventOnDate.finishers - baseline.avgFinishers) / baseline.avgFinishers * 100 : 0,
+                    volunteersPct: baseline.avgVolunteers > 0 ? (eventOnDate.volunteers - baseline.avgVolunteers) / baseline.avgVolunteers * 100 : 0
                   } : null
                 });
               });
@@ -1224,7 +1180,16 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return _generateReportBlob.apply(this, arguments);
   }
   function buildSeasonalTrend(historyData, targetDate) {
-    return getBaselineEventsBefore(historyData, targetDate);
+    var windowBefore = getSeasonalWindow(targetDate, SEASONAL_WEEKS);
+    windowBefore.end = new Date(targetDate);
+    windowBefore.end.setUTCDate(windowBefore.end.getUTCDate() - 1);
+    var filtered = filterEventsByDateRange(historyData, windowBefore.start, windowBefore.end);
+    var baseline = calculateBaseline(filtered);
+    return {
+      window: windowBefore,
+      filtered: filtered,
+      baseline: baseline
+    };
   }
   function renderImpactResults(resultsContainer, resultsByDate, cancellationDates, currentDateIndex) {
     // Get results for current date
@@ -1282,7 +1247,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       label: 'Baseline (Avg)',
       key: 'baseline',
       align: 'right',
-      info: "12-event baseline average (finishers/volunteers) for events before ".concat(dateStr, ".")
+      info: "12-week seasonal average (finishers/volunteers) ending the day before ".concat(dateStr, ".")
     }, {
       label: 'On Date',
       key: 'onDate',
@@ -1531,7 +1496,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     windowText.style.color = STYLES.textColor;
     windowText.style.fontSize = '13px';
     windowText.style.marginBottom = '6px';
-    windowText.innerHTML = "Window: ".concat(startStr, " \u2192 ").concat(endStr, " (12-event baseline)");
+    windowText.innerHTML = "Window: ".concat(startStr, " \u2192 ").concat(endStr, " (12-week baseline)");
     trendSection.appendChild(windowText);
     var trendStats = document.createElement('div');
     trendStats.style.color = STYLES.textColor;
@@ -1862,7 +1827,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
         data: {
           labels: finishersLabels,
           datasets: [{
-            label: 'Baseline (12-event avg)',
+            label: 'Baseline (12-week avg)',
             data: finishersBaseline,
             backgroundColor: STYLES.barColor,
             borderColor: STYLES.barColor,
@@ -1939,7 +1904,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
         data: {
           labels: finishersLabels,
           datasets: [{
-            label: 'Baseline (12-event avg)',
+            label: 'Baseline (12-week avg)',
             data: volunteersBaseline,
             backgroundColor: STYLES.barColor,
             borderColor: STYLES.barColor,
@@ -2026,7 +1991,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     var summaryText = document.createElement('div');
     summaryText.style.fontSize = '13px';
     summaryText.style.color = STYLES.textColor;
-    summaryText.innerHTML = "\n      <p style=\"margin: 4px 0;\">\n        <strong>".concat(results.length, "</strong> nearby parkruns analyzed\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"parkruns within 50km of the cancelled event in the same country and series\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        <strong>").concat(eventsWithData.length, "</strong> held events on ").concat(dateStr, "\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Number of nearby parkruns that ran on this date\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        Average change in finishers: <span style=\"color: ").concat(avgChangeFinishers < 0 ? STYLES.alertColor : STYLES.successColor, "; font-weight: bold;\">").concat(avgChangeFinishers > 0 ? '+' : '').concat(avgChangeFinishers, "</span>\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Mean difference between actual finishers and 12-event baseline average across events that ran\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        Average change in volunteers: <span style=\"color: ").concat(avgChangeVolunteers < 0 ? STYLES.alertColor : STYLES.successColor, "; font-weight: bold;\">").concat(avgChangeVolunteers > 0 ? '+' : '').concat(avgChangeVolunteers, "</span>\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Mean difference between actual volunteers and 12-event baseline average across events that ran\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        Estimated total additional finishers: <span style=\"color: ").concat(totalGain < 0 ? STYLES.alertColor : STYLES.successColor, "; font-weight: bold;\">").concat(totalGain > 0 ? '+' : '').concat(totalGain, "</span>\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Sum of all finisher changes across nearby parkruns - positive indicates runners redistributed from the cancelled event\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        Estimated total additional volunteers: <span style=\"color: ").concat(totalVolunteerGain < 0 ? STYLES.alertColor : STYLES.successColor, "; font-weight: bold;\">").concat(totalVolunteerGain > 0 ? '+' : '').concat(totalVolunteerGain, "</span>\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Sum of all volunteer changes across nearby parkruns - indicates how many extra volunteers were needed on the day\">\u2139</span>\n      </p>\n    ");
+    summaryText.innerHTML = "\n      <p style=\"margin: 4px 0;\">\n        <strong>".concat(results.length, "</strong> nearby parkruns analyzed\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"parkruns within 50km of the cancelled event in the same country and series\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        <strong>").concat(eventsWithData.length, "</strong> held events on ").concat(dateStr, "\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Number of nearby parkruns that ran on this date\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        Average change in finishers: <span style=\"color: ").concat(avgChangeFinishers < 0 ? STYLES.alertColor : STYLES.successColor, "; font-weight: bold;\">").concat(avgChangeFinishers > 0 ? '+' : '').concat(avgChangeFinishers, "</span>\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Mean difference between actual finishers and 12-week baseline average across events that ran\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        Average change in volunteers: <span style=\"color: ").concat(avgChangeVolunteers < 0 ? STYLES.alertColor : STYLES.successColor, "; font-weight: bold;\">").concat(avgChangeVolunteers > 0 ? '+' : '').concat(avgChangeVolunteers, "</span>\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Mean difference between actual volunteers and 12-week baseline average across events that ran\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        Estimated total additional finishers: <span style=\"color: ").concat(totalGain < 0 ? STYLES.alertColor : STYLES.successColor, "; font-weight: bold;\">").concat(totalGain > 0 ? '+' : '').concat(totalGain, "</span>\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Sum of all finisher changes across nearby parkruns - positive indicates runners redistributed from the cancelled event\">\u2139</span>\n      </p>\n      <p style=\"margin: 4px 0;\">\n        Estimated total additional volunteers: <span style=\"color: ").concat(totalVolunteerGain < 0 ? STYLES.alertColor : STYLES.successColor, "; font-weight: bold;\">").concat(totalVolunteerGain > 0 ? '+' : '').concat(totalVolunteerGain, "</span>\n        <span style=\"color: ").concat(STYLES.subtleTextColor, "; font-size: 11px; margin-left: 8px;\" title=\"Sum of all volunteer changes across nearby parkruns - indicates how many extra volunteers were needed on the day\">\u2139</span>\n      </p>\n    ");
     summary.appendChild(summaryText);
     resultsSection.appendChild(summary);
 

@@ -42,10 +42,6 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.org.uk/coronationpark/results/latestresults/
-// @screenshot-selector  #parkrun-launch-returnees
-// @screenshot-timeout   8000
-// @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/launch-returnees.user.js
 // @version      1.0.65
 // ==/UserScript==

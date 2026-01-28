@@ -52,10 +52,6 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.com.au/maribyrnong/results/eventhistory/
-// @screenshot-selector  .parkrun-annual-summary
-// @screenshot-timeout   9000
-// @screenshot-viewport  1200x1400
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-annual-summary.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
 // @version      0.2.8
