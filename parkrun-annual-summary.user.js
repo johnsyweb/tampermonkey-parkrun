@@ -37,7 +37,7 @@
 // @version      0.2.8
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
-// Built: 2026-01-28T07:59:50.639Z
+// Built: 2026-01-28T08:18:07.327Z
 
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
