@@ -40,5 +40,9 @@ for (const file of files) {
 scripts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
 const outPath = path.join(projectRoot, 'docs', '_data', 'scripts.json');
+const outDir = path.dirname(outPath);
+if (!fs.existsSync(outDir)) {
+  fs.mkdirSync(outDir, { recursive: true });
+}
 fs.writeFileSync(outPath, JSON.stringify(scripts, null, 2), 'utf8');
 console.log('✅ Generated', outPath);
