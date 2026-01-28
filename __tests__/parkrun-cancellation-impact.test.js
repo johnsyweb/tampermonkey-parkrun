@@ -17,10 +17,14 @@ describe('parkrun-cancellation-impact', () => {
     return R * c;
   }
 
-  function detectEventGap(historyData) {
-    const dates = historyData.rawDates.map((d) => new Date(d));
+  function parseDateUTC(dateStr) {
+    return new Date(`${dateStr}T00:00:00Z`);
+  }
 
-    if (dates.length < 2) {
+  function detectEventGap(historyData, referenceDate) {
+    const dates = historyData.rawDates.map((d) => parseDateUTC(d));
+
+    if (dates.length < 1) {
       return null;
     }
 
@@ -42,21 +46,34 @@ describe('parkrun-cancellation-impact', () => {
       }
     }
 
-    if (gaps.length === 0) {
-      return null;
+    if (gaps.length > 0) {
+      return gaps[gaps.length - 1];
     }
 
-    return gaps[gaps.length - 1];
+    // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
+    if (referenceDate && dates.length >= 1) {
+      const lastUTC = dates[dates.length - 1];
+      const refStr = referenceDate.toISOString().split('T')[0];
+      const refUTC = parseDateUTC(refStr);
+      const daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+      if (daysDiff > GAP_THRESHOLD_DAYS) {
+        return {
+          gapStartDate: lastUTC,
+          gapEndDate: refUTC,
+          daysDiff,
+          eventsBefore: dates.length,
+          eventsAfter: 0,
+        };
+      }
+    }
+
+    return null;
   }
 
-  function parseDateUTC(dateStr) {
-    return new Date(`${dateStr}T00:00:00Z`);
-  }
-
-  function detectAllEventGaps(historyData) {
+  function detectAllEventGaps(historyData, referenceDate) {
     const dates = historyData.rawDates.map((d) => parseDateUTC(d));
 
-    if (dates.length < 2) {
+    if (dates.length < 1) {
       return [];
     }
 
@@ -74,6 +91,22 @@ describe('parkrun-cancellation-impact', () => {
           daysDiff,
           eventsBefore: i,
           eventsAfter: dates.length - i,
+        });
+      }
+    }
+
+    if (referenceDate && dates.length >= 1) {
+      const lastUTC = dates[dates.length - 1];
+      const refStr = referenceDate.toISOString().split('T')[0];
+      const refUTC = parseDateUTC(refStr);
+      const daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+      if (daysDiff > GAP_THRESHOLD_DAYS) {
+        gaps.push({
+          gapStartDate: lastUTC,
+          gapEndDate: refUTC,
+          daysDiff,
+          eventsBefore: dates.length,
+          eventsAfter: 0,
         });
       }
     }
@@ -226,6 +259,91 @@ describe('parkrun-cancellation-impact', () => {
 
       expect(gap).not.toBeNull();
       expect(gap.daysDiff).toBeCloseTo(8, 0);
+    });
+  });
+
+  describe('Ongoing cancellation (gap from last event to reference date)', () => {
+    test('detects ongoing cancellation when reference date is more than 7 days after last event', () => {
+      const historyData = {
+        rawDates: ['2025-01-04', '2025-01-11', '2025-01-18'],
+        dates: ['4 Jan 2025', '11 Jan 2025', '18 Jan 2025'],
+        finishers: [900, 950, 940],
+        volunteers: [45, 50, 48],
+      };
+      const referenceDate = parseDateUTC('2025-01-30');
+
+      const gap = detectEventGap(historyData, referenceDate);
+
+      expect(gap).not.toBeNull();
+      expect(gap.gapStartDate.toISOString().split('T')[0]).toBe('2025-01-18');
+      expect(gap.gapEndDate.toISOString().split('T')[0]).toBe('2025-01-30');
+      expect(gap.daysDiff).toBeCloseTo(12, 0);
+      expect(gap.eventsBefore).toBe(3);
+      expect(gap.eventsAfter).toBe(0);
+    });
+
+    test('does not treat as gap when reference is exactly 7 days after last event', () => {
+      const historyData = {
+        rawDates: ['2025-01-04', '2025-01-11', '2025-01-18'],
+        dates: ['4 Jan 2025', '11 Jan 2025', '18 Jan 2025'],
+        finishers: [900, 950, 940],
+        volunteers: [45, 50, 48],
+      };
+      const referenceDate = parseDateUTC('2025-01-25');
+
+      const gap = detectEventGap(historyData, referenceDate);
+
+      expect(gap).toBeNull();
+    });
+
+    test('does not treat as gap when reference is ≤7 days after last event', () => {
+      const historyData = {
+        rawDates: ['2025-01-04', '2025-01-11', '2025-01-18'],
+        dates: ['4 Jan 2025', '11 Jan 2025', '18 Jan 2025'],
+        finishers: [900, 950, 940],
+        volunteers: [45, 50, 48],
+      };
+      const referenceDate = parseDateUTC('2025-01-20');
+
+      const gap = detectEventGap(historyData, referenceDate);
+
+      expect(gap).toBeNull();
+    });
+
+    test('single event: detects ongoing cancellation when reference > 7 days after', () => {
+      const historyData = {
+        rawDates: ['2025-01-18'],
+        dates: ['18 Jan 2025'],
+        finishers: [940],
+        volunteers: [48],
+      };
+      const referenceDate = parseDateUTC('2025-01-30');
+
+      const gap = detectEventGap(historyData, referenceDate);
+
+      expect(gap).not.toBeNull();
+      expect(gap.gapStartDate.toISOString().split('T')[0]).toBe('2025-01-18');
+      expect(gap.gapEndDate.toISOString().split('T')[0]).toBe('2025-01-30');
+      expect(gap.daysDiff).toBeCloseTo(12, 0);
+      expect(gap.eventsBefore).toBe(1);
+      expect(gap.eventsAfter).toBe(0);
+    });
+
+    test('detectAllEventGaps includes ongoing gap when reference > 7 days after last event', () => {
+      const historyData = {
+        rawDates: ['2025-01-04', '2025-01-11', '2025-01-18'],
+        dates: ['4 Jan 2025', '11 Jan 2025', '18 Jan 2025'],
+        finishers: [900, 950, 940],
+        volunteers: [45, 50, 48],
+      };
+      const referenceDate = parseDateUTC('2025-01-30');
+
+      const gaps = detectAllEventGaps(historyData, referenceDate);
+
+      expect(gaps.length).toBe(1);
+      expect(gaps[0].gapStartDate.toISOString().split('T')[0]).toBe('2025-01-18');
+      expect(gaps[0].gapEndDate.toISOString().split('T')[0]).toBe('2025-01-30');
+      expect(gaps[0].eventsAfter).toBe(0);
     });
   });
 

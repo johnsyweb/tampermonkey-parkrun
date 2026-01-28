@@ -256,10 +256,10 @@
     };
   }
 
-  function detectEventGap(historyData) {
+  function detectEventGap(historyData, referenceDate) {
     const dates = historyData.rawDates.map((d) => parseDateUTC(d));
 
-    if (dates.length < 2) {
+    if (dates.length < 1) {
       return null;
     }
 
@@ -281,24 +281,42 @@
       }
     }
 
-    if (gaps.length === 0) {
-      return null;
+    if (gaps.length > 0) {
+      const latestGap = gaps[gaps.length - 1];
+      console.log(
+        `Detected ${gaps.length} gap(s); using latest: ${latestGap.daysDiff.toFixed(1)} days`
+      );
+      console.log('All gaps detected:', gaps);
+      return latestGap;
     }
 
-    // Return latest gap
-    const latestGap = gaps[gaps.length - 1];
-    console.log(
-      `Detected ${gaps.length} gap(s); using latest: ${latestGap.daysDiff.toFixed(1)} days`
-    );
-    console.log('All gaps detected:', gaps);
+    // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
+    if (referenceDate && dates.length >= 1) {
+      const lastUTC = dates[dates.length - 1];
+      const refStr = referenceDate.toISOString().split('T')[0];
+      const refUTC = parseDateUTC(refStr);
+      const daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+      if (daysDiff > GAP_THRESHOLD_DAYS) {
+        console.log(
+          `Detected ongoing gap: ${daysDiff.toFixed(1)} days from last event to ${refStr}`
+        );
+        return {
+          gapStartDate: lastUTC,
+          gapEndDate: refUTC,
+          daysDiff,
+          eventsBefore: dates.length,
+          eventsAfter: 0,
+        };
+      }
+    }
 
-    return latestGap;
+    return null;
   }
 
-  function detectAllEventGaps(historyData) {
+  function detectAllEventGaps(historyData, referenceDate) {
     const dates = historyData.rawDates.map((d) => parseDateUTC(d));
 
-    if (dates.length < 2) {
+    if (dates.length < 1) {
       return [];
     }
 
@@ -316,6 +334,23 @@
           daysDiff,
           eventsBefore: i,
           eventsAfter: dates.length - i,
+        });
+      }
+    }
+
+    // Include ongoing gap (last event to reference/today) when > 7 days
+    if (referenceDate && dates.length >= 1) {
+      const lastUTC = dates[dates.length - 1];
+      const refStr = referenceDate.toISOString().split('T')[0];
+      const refUTC = parseDateUTC(refStr);
+      const daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+      if (daysDiff > GAP_THRESHOLD_DAYS) {
+        gaps.push({
+          gapStartDate: lastUTC,
+          gapEndDate: refUTC,
+          daysDiff,
+          eventsBefore: dates.length,
+          eventsAfter: 0,
         });
       }
     }
@@ -666,7 +701,7 @@
       return;
     }
 
-    const gapInfo = detectEventGap(historyData);
+    const gapInfo = detectEventGap(historyData, new Date());
     if (!gapInfo) {
       console.log('No cancellation gap detected');
       return;
@@ -745,7 +780,7 @@
     const nearbyParkruns = state.nearbyParkruns;
 
     // Find all cancellation Saturdays from all gaps
-    const allGaps = detectAllEventGaps(state.currentEvent);
+    const allGaps = detectAllEventGaps(state.currentEvent, new Date());
     const cancellationSaturdays = [];
 
     allGaps.forEach((gap) => {
