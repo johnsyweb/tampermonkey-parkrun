@@ -78,6 +78,33 @@ layout: default
 
 <p><a href="{{ script.install_url }}">Install {{ script.name }}</a></p>
 
+{% assign bookmarklets = site.data.bookmarklets %} {% if bookmarklets and
+bookmarklets[script.filename] %} {% assign bm = bookmarklets[script.filename] %}
+<h2>Bookmarklet version</h2>
+<p>
+  You can also use this script as a bookmarklet (a bookmark whose URL is JavaScript), which can be
+  useful on browsers that support bookmarks but not userscript managers.
+</p>
+
+<h3>Desktop bookmarklet</h3>
+<p>Drag this link to your bookmarks bar:</p>
+<p>
+  <a href="{{ bm.bookmarklet }}">{{ script.name }} bookmarklet</a>
+</p>
+
+<h3>Mobile bookmarklet</h3>
+<p>On mobile browsers that let you edit bookmark URLs:</p>
+<ol>
+  <li>Copy the JavaScript code below to your clipboard.</li>
+  <li>Create a new bookmark for any page.</li>
+  <li>Edit the bookmark and replace its URL with the code you copied.</li>
+  <li>Navigate to the relevant parkrun page.</li>
+  <li>Select the bookmark to run the script.</li>
+</ol>
+
+<pre><code class="language-js">{{ bm.bookmarklet | escape }}</code></pre>
+{% endif %}
+
 <dl class="script-meta">
   {% if page.last_modified_at %}
   <dt>Last updated</dt>
@@ -108,31 +135,6 @@ layout: default
   {% endif %}
 </dl>
 
-{% assign bookmarklets = site.data.bookmarklets %} {% if bookmarklets and
-bookmarklets[script.filename] %} {% assign bm = bookmarklets[script.filename] %}
-<h2>Bookmarklet version</h2>
-<p>
-  You can also use this script as a bookmarklet (a bookmark whose URL is JavaScript), which can be
-  useful on browsers that support bookmarks but not userscript managers.
-</p>
-
-<h3>Desktop bookmarklet</h3>
-<p>Drag this link to your bookmarks bar:</p>
-<p>
-  <a href="{{ bm.bookmarklet }}">{{ script.name }} bookmarklet</a>
-</p>
-
-<h3>Mobile bookmarklet</h3>
-<p>On mobile browsers that let you edit bookmark URLs:</p>
-<ol>
-  <li>Copy the JavaScript code below to your clipboard.</li>
-  <li>Create a new bookmark for any page.</li>
-  <li>Edit the bookmark and replace its URL with the code you copied.</li>
-  <li>Navigate to the relevant parkrun page.</li>
-  <li>Select the bookmark to run the script.</li>
-</ol>
-
-<pre><code class="language-js">{{ bm.bookmarklet | escape }}</code></pre>
-{% endif %} {% else %}
+{% else %}
 <p>Script not found.</p>
 {% endif %}

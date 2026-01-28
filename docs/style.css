@@ -94,16 +94,37 @@ p img {
 
 /* Per-script page metadata */
 .script-meta {
-  margin: 1.5em 0;
+  margin: 2em 0 0;
+  padding: 1.5em 1.75em;
+  border-radius: 12px;
+  background: #f9f9fb;
+  border: 1px solid #e3e3f0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  column-gap: 1.75em;
+  row-gap: 0.5em;
 }
 
 .script-meta dt {
-  font-weight: bold;
-  margin-top: 0.5em;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #55516a;
 }
 
 .script-meta dd {
-  margin-left: 1em;
+  margin: 0;
+  font-size: 0.95rem;
+  color: #1f1633;
+}
+
+@media (max-width: 768px) {
+  .script-meta {
+    grid-template-columns: 1fr;
+    row-gap: 0.25em;
+  }
 }
 
 /* Scripts index list */
