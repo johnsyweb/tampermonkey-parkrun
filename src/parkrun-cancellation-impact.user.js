@@ -270,7 +270,7 @@
       const currDate = dates[i];
       const daysDiff = (currDate - prevDate) / (1000 * 60 * 60 * 24);
 
-      if (daysDiff > GAP_THRESHOLD_DAYS) {
+      if (daysDiff >= GAP_THRESHOLD_DAYS) {
         gaps.push({
           gapStartDate: prevDate,
           gapEndDate: currDate,
@@ -290,13 +290,13 @@
       return latestGap;
     }
 
-    // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
+    // No inter-event gap >= 7 days: check ongoing cancellation (last event to reference/today)
     if (referenceDate && dates.length >= 1) {
       const lastUTC = dates[dates.length - 1];
       const refStr = referenceDate.toISOString().split('T')[0];
       const refUTC = parseDateUTC(refStr);
       const daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
-      if (daysDiff > GAP_THRESHOLD_DAYS) {
+      if (daysDiff >= GAP_THRESHOLD_DAYS) {
         console.log(
           `Detected ongoing gap: ${daysDiff.toFixed(1)} days from last event to ${refStr}`
         );

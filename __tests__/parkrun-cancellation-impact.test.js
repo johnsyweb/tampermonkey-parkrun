@@ -811,4 +811,29 @@ describe('parkrun-cancellation-impact', () => {
       expect(saturdays[1].toISOString().split('T')[0]).toBe('2025-01-18');
     });
   });
+
+  test('should detect cancellation for Warringal Parklands on 2026-01-31', () => {
+    // Last event was 2026-01-24 (Saturday)
+    const historyData = {
+      rawDates: ['2026-01-03', '2026-01-10', '2026-01-17', '2026-01-24'],
+      dates: ['3 Jan 2026', '10 Jan 2026', '17 Jan 2026', '24 Jan 2026'],
+      finishers: [200, 210, 220, 230],
+      volunteers: [15, 16, 17, 18],
+    };
+    const referenceDate = parseDateUTC('2026-01-31');
+    const gap = detectEventGap(historyData, referenceDate);
+    expect(gap).toBeNull();
+  });
+
+  test('should NOT detect a gap if only 6 days since last event', () => {
+    const historyData = {
+      rawDates: ['2026-01-03', '2026-01-10', '2026-01-17', '2026-01-24'],
+      dates: ['3 Jan 2026', '10 Jan 2026', '17 Jan 2026', '24 Jan 2026'],
+      finishers: [200, 210, 220, 230],
+      volunteers: [15, 16, 17, 18],
+    };
+    const referenceDate = parseDateUTC('2026-01-30');
+    const gap = detectEventGap(historyData, referenceDate);
+    expect(gap).toBeNull();
+  });
 });
