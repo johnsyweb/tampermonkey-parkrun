@@ -243,18 +243,13 @@
         </nav>
       </div>
 
-      <main id="content" role="main">
-        {% include header.html %} {{ content }} {% include footer.html %}
-      </main>
+      <main id="content" role="main">{{ content }}</main>
     </div>
 
     <footer id="footer">
       <p>
-        Copyright &copy; 2000-{{ site.time | date: '%Y' }}
-        <a rel="author" href="{{ site.url }}/about/"
-          ><em><abbr title="Peter Alexander Johns">paj</abbr></em></a
-        >
-        All rights (and some wrongs) reserved.
+        Licensed under MIT. Not officially associated with parkrun. Written by parkrun volunteers
+        for parkrun volunteers.
       </p>
       <p>
         Hosted by <a href="https://github.com">GitHub</a>, powered by
