@@ -34,17 +34,13 @@
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @version      0.1.7
+// @version      0.1.4
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -52,14 +48,213 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 
+var BASELINE_EVENTS = 12;
+var GAP_THRESHOLD_DAYS = 7;
+function calculateBaseline(data) {
+  if (data.dates.length === 0) {
+    return {
+      avgFinishers: 0,
+      avgVolunteers: 0,
+      totalEvents: 0,
+      minFinishers: 0,
+      maxFinishers: 0,
+      minVolunteers: 0,
+      maxVolunteers: 0
+    };
+  }
+  var avgFinishers = Math.round(data.finishers.reduce(function (a, b) {
+    return a + b;
+  }, 0) / data.dates.length);
+  var avgVolunteers = Math.round(data.volunteers.reduce(function (a, b) {
+    return a + b;
+  }, 0) / data.dates.length);
+  return {
+    avgFinishers: avgFinishers,
+    avgVolunteers: avgVolunteers,
+    totalEvents: data.dates.length,
+    minFinishers: Math.min.apply(Math, _toConsumableArray(data.finishers)),
+    maxFinishers: Math.max.apply(Math, _toConsumableArray(data.finishers)),
+    minVolunteers: Math.min.apply(Math, _toConsumableArray(data.volunteers)),
+    maxVolunteers: Math.max.apply(Math, _toConsumableArray(data.volunteers))
+  };
+}
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  var R = 6371;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLon = (lon2 - lon1) * Math.PI / 180;
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+function detectAllEventGaps(historyData, referenceDate) {
+  var dates = historyData.rawDates.map(function (d) {
+    return parseDateUTC(d);
+  });
+  if (dates.length < 1) {
+    return [];
+  }
+  var gaps = [];
+  for (var i = 1; i < dates.length; i++) {
+    var prevDate = dates[i - 1];
+    var currDate = dates[i];
+    var daysDiff = (currDate - prevDate) / (1000 * 60 * 60 * 24);
+    if (daysDiff > GAP_THRESHOLD_DAYS) {
+      gaps.push({
+        gapStartDate: prevDate,
+        gapEndDate: currDate,
+        daysDiff: daysDiff,
+        eventsBefore: i,
+        eventsAfter: dates.length - i
+      });
+    }
+  }
+  if (referenceDate && dates.length >= 1) {
+    var lastUTC = dates[dates.length - 1];
+    var refStr = referenceDate.toISOString().split('T')[0];
+    var refUTC = parseDateUTC(refStr);
+    var _daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+    if (_daysDiff > GAP_THRESHOLD_DAYS) {
+      gaps.push({
+        gapStartDate: lastUTC,
+        gapEndDate: refUTC,
+        daysDiff: _daysDiff,
+        eventsBefore: dates.length,
+        eventsAfter: 0
+      });
+    }
+  }
+  return gaps;
+}
+function detectEventGap(historyData, referenceDate) {
+  var dates = historyData.rawDates.map(function (d) {
+    return parseDateUTC(d);
+  });
+  if (dates.length < 1) {
+    return null;
+  }
+  var gaps = [];
+  for (var i = 1; i < dates.length; i++) {
+    var prevDate = dates[i - 1];
+    var currDate = dates[i];
+    var daysDiff = (currDate - prevDate) / (1000 * 60 * 60 * 24);
+    if (daysDiff > GAP_THRESHOLD_DAYS) {
+      gaps.push({
+        gapStartDate: prevDate,
+        gapEndDate: currDate,
+        daysDiff: daysDiff,
+        eventsBefore: i,
+        eventsAfter: dates.length - i
+      });
+    }
+  }
+  if (gaps.length > 0) {
+    return gaps[gaps.length - 1];
+  }
+
+  // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
+  if (referenceDate && dates.length >= 1) {
+    var lastUTC = dates[dates.length - 1];
+    var refStr = referenceDate.toISOString().split('T')[0];
+    var refUTC = parseDateUTC(refStr);
+    var _daysDiff2 = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+    if (_daysDiff2 > GAP_THRESHOLD_DAYS) {
+      return {
+        gapStartDate: lastUTC,
+        gapEndDate: refUTC,
+        daysDiff: _daysDiff2,
+        eventsBefore: dates.length,
+        eventsAfter: 0
+      };
+    }
+  }
+  return null;
+}
+function filterEventsByDateRange(historyData, startDate, endDate) {
+  var filtered = {
+    dates: [],
+    finishers: [],
+    volunteers: []
+  };
+  historyData.rawDates.forEach(function (dateStr, index) {
+    var date = new Date(dateStr);
+    if (date >= startDate && date <= endDate) {
+      filtered.dates.push(historyData.dates[index]);
+      filtered.finishers.push(historyData.finishers[index]);
+      filtered.volunteers.push(historyData.volunteers[index]);
+    }
+  });
+  return filtered;
+}
+function getBaselineEventsBefore(historyData, targetDate) {
+  var n = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : BASELINE_EVENTS;
+  var targetStr = targetDate.toISOString().split('T')[0];
+  var targetUTC = parseDateUTC(targetStr);
+  var indices = [];
+  for (var i = historyData.rawDates.length - 1; i >= 0; i--) {
+    var eventUTC = parseDateUTC(historyData.rawDates[i]);
+    if (eventUTC < targetUTC) {
+      indices.push(i);
+      if (indices.length >= n) break;
+    }
+  }
+  indices.reverse();
+  var filtered = {
+    dates: indices.map(function (i) {
+      return historyData.dates[i];
+    }),
+    finishers: indices.map(function (i) {
+      return historyData.finishers[i];
+    }),
+    volunteers: indices.map(function (i) {
+      return historyData.volunteers[i];
+    })
+  };
+  var baseline = calculateBaseline(filtered);
+  var window = indices.length > 0 ? {
+    start: parseDateUTC(historyData.rawDates[indices[0]]),
+    end: parseDateUTC(historyData.rawDates[indices[indices.length - 1]])
+  } : {
+    start: new Date(targetUTC),
+    end: new Date(targetUTC)
+  };
+  return {
+    filtered: filtered,
+    window: window,
+    baseline: baseline
+  };
+}
+function getCancellationSaturdays(gapStartDate, gapEndDate) {
+  var saturdays = [];
+  var startStr = gapStartDate.toISOString().split('T')[0];
+  var startDate = parseDateUTC(startStr);
+  var startDayOfWeek = startDate.getUTCDay();
+  var daysUntilSaturday = (6 - startDayOfWeek) % 7;
+  if (daysUntilSaturday === 0) {
+    daysUntilSaturday = 7;
+  }
+  var current = new Date(startDate);
+  current.setUTCDate(current.getUTCDate() + daysUntilSaturday);
+  while (current < gapEndDate) {
+    saturdays.push(new Date(current));
+    current.setUTCDate(current.getUTCDate() + 7);
+  }
+  return saturdays;
+}
+function parseDateUTC(dateStr) {
+  return new Date("".concat(dateStr, "T00:00:00Z"));
+}
 (function () {
   'use strict';
 
@@ -76,8 +271,6 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     gridColor: 'rgba(243, 244, 246, 0.18)',
     successColor: '#10b981' // emerald 500
   };
-  var GAP_THRESHOLD_DAYS = 7;
-  var BASELINE_EVENTS = 12;
   var CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
   var state = {
@@ -93,11 +286,6 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     sortColumn: 'distance',
     sortDirection: 'asc'
   };
-
-  // Parse a YYYY-MM-DD date string as midnight UTC to avoid timezone drift in calculations
-  function parseDateUTC(dateStr) {
-    return new Date("".concat(dateStr, "T00:00:00Z"));
-  }
   function insertAfterFirst(selector, element) {
     var pageTitle = document.querySelector(selector);
     if (pageTitle && pageTitle.parentNode) {
@@ -195,14 +383,6 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       url: window.location.origin
     };
   }
-  function calculateDistance(lat1, lon1, lat2, lon2) {
-    var R = 6371;
-    var dLat = (lat2 - lat1) * Math.PI / 180;
-    var dLon = (lon2 - lon1) * Math.PI / 180;
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
   function findNearbyParkruns(currentEvent, allParkruns) {
     var maxDistanceKm = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 50;
     var current = allParkruns.find(function (p) {
@@ -280,153 +460,6 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       finishers: finishers,
       volunteers: volunteers
     };
-  }
-  function detectEventGap(historyData, referenceDate) {
-    var dates = historyData.rawDates.map(function (d) {
-      return parseDateUTC(d);
-    });
-    if (dates.length < 1) {
-      return null;
-    }
-    var gaps = [];
-    for (var i = 1; i < dates.length; i++) {
-      var prevDate = dates[i - 1];
-      var currDate = dates[i];
-      var daysDiff = (currDate - prevDate) / (1000 * 60 * 60 * 24);
-      if (daysDiff > GAP_THRESHOLD_DAYS) {
-        gaps.push({
-          gapStartDate: prevDate,
-          gapEndDate: currDate,
-          daysDiff: daysDiff,
-          eventsBefore: i,
-          eventsAfter: dates.length - i
-        });
-      }
-    }
-    if (gaps.length > 0) {
-      var latestGap = gaps[gaps.length - 1];
-      console.log("Detected ".concat(gaps.length, " gap(s); using latest: ").concat(latestGap.daysDiff.toFixed(1), " days"));
-      console.log('All gaps detected:', gaps);
-      return latestGap;
-    }
-
-    // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
-    if (referenceDate && dates.length >= 1) {
-      var lastUTC = dates[dates.length - 1];
-      var refStr = referenceDate.toISOString().split('T')[0];
-      var refUTC = parseDateUTC(refStr);
-      var _daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
-      if (_daysDiff > GAP_THRESHOLD_DAYS) {
-        console.log("Detected ongoing gap: ".concat(_daysDiff.toFixed(1), " days from last event to ").concat(refStr));
-        return {
-          gapStartDate: lastUTC,
-          gapEndDate: refUTC,
-          daysDiff: _daysDiff,
-          eventsBefore: dates.length,
-          eventsAfter: 0
-        };
-      }
-    }
-    return null;
-  }
-  function detectAllEventGaps(historyData, referenceDate) {
-    var dates = historyData.rawDates.map(function (d) {
-      return parseDateUTC(d);
-    });
-    if (dates.length < 1) {
-      return [];
-    }
-    var gaps = [];
-    for (var i = 1; i < dates.length; i++) {
-      var prevDate = dates[i - 1];
-      var currDate = dates[i];
-      var daysDiff = (currDate - prevDate) / (1000 * 60 * 60 * 24);
-      if (daysDiff > GAP_THRESHOLD_DAYS) {
-        gaps.push({
-          gapStartDate: prevDate,
-          gapEndDate: currDate,
-          daysDiff: daysDiff,
-          eventsBefore: i,
-          eventsAfter: dates.length - i
-        });
-      }
-    }
-
-    // Include ongoing gap (last event to reference/today) when > 7 days
-    if (referenceDate && dates.length >= 1) {
-      var lastUTC = dates[dates.length - 1];
-      var refStr = referenceDate.toISOString().split('T')[0];
-      var refUTC = parseDateUTC(refStr);
-      var _daysDiff2 = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
-      if (_daysDiff2 > GAP_THRESHOLD_DAYS) {
-        gaps.push({
-          gapStartDate: lastUTC,
-          gapEndDate: refUTC,
-          daysDiff: _daysDiff2,
-          eventsBefore: dates.length,
-          eventsAfter: 0
-        });
-      }
-    }
-    console.log("Detected ".concat(gaps.length, " total gap(s)"));
-    return gaps;
-  }
-  function getBaselineEventsBefore(historyData, targetDate) {
-    var n = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : BASELINE_EVENTS;
-    var targetStr = targetDate.toISOString().split('T')[0];
-    var targetUTC = parseDateUTC(targetStr);
-    var indices = [];
-    for (var i = historyData.rawDates.length - 1; i >= 0; i--) {
-      var eventUTC = parseDateUTC(historyData.rawDates[i]);
-      if (eventUTC < targetUTC) {
-        indices.push(i);
-        if (indices.length >= n) break;
-      }
-    }
-    indices.reverse();
-    var filtered = {
-      dates: indices.map(function (i) {
-        return historyData.dates[i];
-      }),
-      finishers: indices.map(function (i) {
-        return historyData.finishers[i];
-      }),
-      volunteers: indices.map(function (i) {
-        return historyData.volunteers[i];
-      })
-    };
-    var baseline = calculateBaseline(filtered);
-    var window = indices.length > 0 ? {
-      start: parseDateUTC(historyData.rawDates[indices[0]]),
-      end: parseDateUTC(historyData.rawDates[indices[indices.length - 1]])
-    } : {
-      start: new Date(targetUTC),
-      end: new Date(targetUTC)
-    };
-    return {
-      filtered: filtered,
-      window: window,
-      baseline: baseline
-    };
-  }
-  function getCancellationSaturdays(gapStartDate, gapEndDate) {
-    var saturdays = [];
-
-    // Normalize start date to UTC midnight to avoid timezone drift
-    var startStr = gapStartDate.toISOString().split('T')[0];
-    var startDate = parseDateUTC(startStr);
-    var startDay = startDate.getUTCDay();
-    var daysUntilSaturday = (6 - startDay) % 7;
-    if (daysUntilSaturday === 0) {
-      daysUntilSaturday = 7; // if already Saturday, move to next Saturday
-    }
-    var current = new Date(startDate);
-    current.setUTCDate(current.getUTCDate() + daysUntilSaturday);
-    while (current < gapEndDate) {
-      saturdays.push(new Date(current));
-      current.setUTCDate(current.getUTCDate() + 7);
-    }
-    return saturdays;
   }
   function findEventOnDate(historyData, targetDate) {
     var targetStr = targetDate.toISOString().split('T')[0];
@@ -547,34 +580,6 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       }, _callee4, null, [[2, 4], [1, 8]]);
     }));
     return _fetchEventHistory.apply(this, arguments);
-  }
-  function calculateBaseline(data) {
-    if (data.dates.length === 0) {
-      return {
-        avgFinishers: 0,
-        avgVolunteers: 0,
-        totalEvents: 0,
-        minFinishers: 0,
-        maxFinishers: 0,
-        minVolunteers: 0,
-        maxVolunteers: 0
-      };
-    }
-    var avgFinishers = Math.round(data.finishers.reduce(function (a, b) {
-      return a + b;
-    }, 0) / data.dates.length);
-    var avgVolunteers = Math.round(data.volunteers.reduce(function (a, b) {
-      return a + b;
-    }, 0) / data.dates.length);
-    return {
-      avgFinishers: avgFinishers,
-      avgVolunteers: avgVolunteers,
-      totalEvents: data.dates.length,
-      minFinishers: Math.min.apply(Math, _toConsumableArray(data.finishers)),
-      maxFinishers: Math.max.apply(Math, _toConsumableArray(data.finishers)),
-      minVolunteers: Math.min.apply(Math, _toConsumableArray(data.volunteers)),
-      maxVolunteers: Math.max.apply(Math, _toConsumableArray(data.volunteers))
-    };
   }
   function createProgressUI() {
     var progressSection = document.createElement('div');
@@ -2225,3 +2230,15 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
   init();
 })();
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    calculateBaseline: calculateBaseline,
+    calculateDistance: calculateDistance,
+    detectAllEventGaps: detectAllEventGaps,
+    detectEventGap: detectEventGap,
+    filterEventsByDateRange: filterEventsByDateRange,
+    getBaselineEventsBefore: getBaselineEventsBefore,
+    getCancellationSaturdays: getCancellationSaturdays,
+    parseDateUTC: parseDateUTC
+  };
+}
