@@ -6,6 +6,7 @@ const {
   filterEventsByDateRange,
   getBaselineEventsBefore,
   getCancellationSaturdays,
+  isFinishersMaxUpToEvent,
   parseDateUTC,
 } = require('../src/parkrun-cancellation-impact.user.js');
 
@@ -627,5 +628,107 @@ describe('parkrun-cancellation-impact', () => {
     const referenceDate = parseDateUTC('2026-01-30');
     const gap = detectEventGap(historyData, referenceDate);
     expect(gap).toBeNull();
+  });
+});
+
+describe('isFinishersMaxUpToEvent', () => {
+  test('returns true when finishers is the max up to the given event number', () => {
+    const historyData = {
+      eventNumbers: ['1', '2', '3', '4', '5'],
+      finishers: [100, 150, 120, 110, 200],
+    };
+
+    // Event 5 with 200 finishers is the max up to event 5
+    expect(isFinishersMaxUpToEvent(historyData, '5', 200)).toBe(true);
+  });
+
+  test('returns false when finishers is not the max up to the given event number', () => {
+    const historyData = {
+      eventNumbers: ['1', '2', '3', '4', '5'],
+      finishers: [100, 150, 120, 110, 200],
+    };
+
+    // Event 5 with 150 finishers is not the max up to event 5 (max is 200)
+    expect(isFinishersMaxUpToEvent(historyData, '5', 150)).toBe(false);
+  });
+
+  test('returns true when finishers matches the max in the middle of history', () => {
+    const historyData = {
+      eventNumbers: ['1', '2', '3', '4', '5'],
+      finishers: [100, 200, 120, 110, 150],
+    };
+
+    // Event 3 with 120 finishers: max up to event 3 is 200 (event 2), so false
+    expect(isFinishersMaxUpToEvent(historyData, '3', 120)).toBe(false);
+
+    // Event 2 with 200 finishers is the max up to event 2
+    expect(isFinishersMaxUpToEvent(historyData, '2', 200)).toBe(true);
+  });
+
+  test('returns true when finishers is max from event 1 only', () => {
+    const historyData = {
+      eventNumbers: ['1', '2', '3', '4', '5'],
+      finishers: [250, 200, 150, 100, 50],
+    };
+
+    // Event 1 with 250 is the max
+    expect(isFinishersMaxUpToEvent(historyData, '1', 250)).toBe(true);
+  });
+
+  test('returns false when event number not found in history', () => {
+    const historyData = {
+      eventNumbers: ['1', '2', '3', '4', '5'],
+      finishers: [100, 150, 120, 110, 200],
+    };
+
+    // Event 999 doesn't exist
+    expect(isFinishersMaxUpToEvent(historyData, '999', 200)).toBe(false);
+  });
+
+  test('returns false when historyData is empty', () => {
+    const historyData = {
+      eventNumbers: [],
+      finishers: [],
+    };
+
+    expect(isFinishersMaxUpToEvent(historyData, '1', 100)).toBe(false);
+  });
+
+  test('returns false when historyData is null', () => {
+    expect(isFinishersMaxUpToEvent(null, '1', 100)).toBe(false);
+  });
+
+  test('handles real-world example: Diamond Creek event 567', () => {
+    // Simulating Diamond Creek history where event 567 had 451 finishers
+    // and this was their maximum
+    const historyData = {
+      eventNumbers: Array.from({ length: 567 }, (_, i) => String(i + 1)),
+      finishers: Array.from({ length: 566 }, (_, i) => {
+        // Create a trend where most events have fewer finishers
+        if (i < 200) return 300 + Math.random() * 50;
+        if (i < 400) return 350 + Math.random() * 50;
+        return 400 + Math.random() * 40; // gradually approaching 451
+      }).concat([451]), // Event 567 has 451 finishers (the max)
+    };
+
+    expect(isFinishersMaxUpToEvent(historyData, '567', 451)).toBe(true);
+
+    // If a previous event had 451, it would still be true (tied for max)
+    historyData.finishers[400] = 451; // Event 401 also had 451
+    expect(isFinishersMaxUpToEvent(historyData, '567', 451)).toBe(true);
+
+    // But if a later event had MORE, then event 567 would not be max
+    historyData.finishers[500] = 500; // Event 501 had 500 finishers (higher than 451)
+    expect(isFinishersMaxUpToEvent(historyData, '567', 451)).toBe(false);
+  });
+
+  test('returns true when finishers equals a previous max (tied for max)', () => {
+    const historyData = {
+      eventNumbers: ['1', '2', '3', '4', '5'],
+      finishers: [100, 200, 150, 200, 180],
+    };
+
+    // Event 4 with 200 finishers equals the max from event 2, so it's a max
+    expect(isFinishersMaxUpToEvent(historyData, '4', 200)).toBe(true);
   });
 });

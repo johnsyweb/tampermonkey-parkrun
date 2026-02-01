@@ -255,6 +255,23 @@ function parseDateUTC(dateStr) {
   return new Date(`${dateStr}T00:00:00Z`);
 }
 
+function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers) {
+  if (!historyData || !historyData.eventNumbers || historyData.eventNumbers.length === 0) {
+    return false;
+  }
+
+  const targetIdx = historyData.eventNumbers.indexOf(String(targetEventNumber));
+  if (targetIdx === -1) {
+    return false;
+  }
+
+  // Check if targetFinishers is the max from event 1 (index 0) to targetEventNumber (targetIdx, inclusive)
+  const eventFinishersUpToTarget = historyData.finishers.slice(0, targetIdx + 1);
+  const maxUpToTarget = Math.max(...eventFinishersUpToTarget);
+
+  return targetFinishers === maxUpToTarget;
+}
+
 (function () {
   'use strict';
 
@@ -858,6 +875,7 @@ function parseDateUTC(dateStr) {
           distance,
           baseline: base.baseline,
           eventOnDate,
+          historyData,
           seasonalTrend: base,
           change: eventOnDate
             ? {
@@ -1430,7 +1448,13 @@ function parseDateUTC(dateStr) {
         onDateCell.style.padding = '10px';
         onDateCell.style.textAlign = 'right';
         if (result.eventOnDate) {
-          onDateCell.innerHTML = `<strong>${result.eventOnDate.finishers}</strong> / ${result.eventOnDate.volunteers}`;
+          const isMax = isFinishersMaxUpToEvent(
+            result.historyData,
+            result.eventOnDate.eventNumber,
+            result.eventOnDate.finishers
+          );
+          const emoji = isMax ? ' 🏆' : '';
+          onDateCell.innerHTML = `<strong>${result.eventOnDate.finishers}${emoji}</strong> / ${result.eventOnDate.volunteers}`;
         } else {
           onDateCell.textContent = '—';
           onDateCell.style.color = STYLES.subtleTextColor;
@@ -2250,6 +2274,7 @@ if (typeof module !== 'undefined' && module.exports) {
     filterEventsByDateRange,
     getBaselineEventsBefore,
     getCancellationSaturdays,
+    isFinishersMaxUpToEvent,
     parseDateUTC,
   };
 }
