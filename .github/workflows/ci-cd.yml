@@ -83,7 +83,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dist-
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist
           path: dist
@@ -134,7 +134,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dist-
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist
           path: dist
