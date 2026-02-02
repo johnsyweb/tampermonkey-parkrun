@@ -21,7 +21,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -39,7 +39,7 @@ jobs:
         run: pnpm build:scripts
       - name: Cache build artifacts
         if: github.ref == 'refs/heads/main'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: dist
           key: ${{ runner.os }}-dist-${{ github.sha }}
@@ -67,7 +67,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -76,7 +76,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: dist
           key: ${{ runner.os }}-dist-${{ github.sha }}
@@ -118,7 +118,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -127,7 +127,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: dist
           key: ${{ runner.os }}-dist-${{ github.sha }}
@@ -139,7 +139,7 @@ jobs:
           name: dist
           path: dist
       - name: Cache bundle
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: docs/vendor/bundle
           key: ${{ runner.os }}-bundle-${{ hashFiles('docs/Gemfile.lock') }}
