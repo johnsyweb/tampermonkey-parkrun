@@ -5,7 +5,7 @@ const {
   findJuniorParkrunTotalHeading,
   findAgeCategory,
   findVolunteerDaysTotal,
-  findMostRecentRunDate,
+  findMostRecentFinishDate,
   getNextMilestone,
   getNextMilestoneDefinition,
   getNextSaturday,
@@ -259,8 +259,8 @@ describe('next-milestone', () => {
     });
   });
 
-  describe('findMostRecentRunDate', () => {
-    it('extracts most recent run date from results table', () => {
+  describe('findMostRecentFinishDate', () => {
+    it('extracts most recent finish date from results table', () => {
       document.body.innerHTML = `
         <table id="results">
           <tbody>
@@ -272,19 +272,19 @@ describe('next-milestone', () => {
           </tbody>
         </table>
       `;
-      const result = findMostRecentRunDate(document);
+      const result = findMostRecentFinishDate(document);
       expect(result).not.toBeNull();
       expect(result.toDateString()).toBe(new Date(2026, 0, 31).toDateString());
     });
 
     it('returns null if no results table', () => {
       document.body.innerHTML = '<div></div>';
-      expect(findMostRecentRunDate(document)).toBeNull();
+      expect(findMostRecentFinishDate(document)).toBeNull();
     });
 
     it('returns null if no rows in table', () => {
       document.body.innerHTML = '<table id="results"><tbody></tbody></table>';
-      expect(findMostRecentRunDate(document)).toBeNull();
+      expect(findMostRecentFinishDate(document)).toBeNull();
     });
   });
 

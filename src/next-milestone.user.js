@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun Next Milestone Estimate
-// @description  Estimates when a parkrunner will reach their next milestone based on Saturday parkruns
+// @description  Estimates when a parkrunner will reach their next milestone, assuming a parkrun every Saturday
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/next-milestone.user.js
 // @grant        none
@@ -155,7 +155,7 @@
     return { value: nextValue, definition: milestoneMap[nextValue] };
   }
 
-  function findMostRecentRunDate(doc = document) {
+  function findMostRecentFinishDate(doc = document) {
     const resultsTable = doc.querySelector('table#results tbody');
     if (!resultsTable) return null;
 
@@ -181,15 +181,15 @@
     return new Date(year, month, day);
   }
 
-  function getNextSaturday(date = new Date(), mostRecentRunDate = null) {
+  function getNextSaturday(date = new Date(), mostRecentFinishDate = null) {
     const result = new Date(date);
     const day = result.getDay();
 
     if (day === 6) {
-      if (mostRecentRunDate) {
-        const recentYear = mostRecentRunDate.getFullYear();
-        const recentMonth = mostRecentRunDate.getMonth();
-        const recentDay = mostRecentRunDate.getDate();
+      if (mostRecentFinishDate) {
+        const recentYear = mostRecentFinishDate.getFullYear();
+        const recentMonth = mostRecentFinishDate.getMonth();
+        const recentDay = mostRecentFinishDate.getDate();
         const currentYear = date.getFullYear();
         const currentMonth = date.getMonth();
         const currentDay = date.getDate();
@@ -212,15 +212,15 @@
     return result;
   }
 
-  function getNextSunday(date = new Date(), mostRecentRunDate = null) {
+  function getNextSunday(date = new Date(), mostRecentFinishDate = null) {
     const result = new Date(date);
     const day = result.getDay();
 
     if (day === 0) {
-      if (mostRecentRunDate) {
-        const recentYear = mostRecentRunDate.getFullYear();
-        const recentMonth = mostRecentRunDate.getMonth();
-        const recentDay = mostRecentRunDate.getDate();
+      if (mostRecentFinishDate) {
+        const recentYear = mostRecentFinishDate.getFullYear();
+        const recentMonth = mostRecentFinishDate.getMonth();
+        const recentDay = mostRecentFinishDate.getDate();
         const currentYear = date.getFullYear();
         const currentMonth = date.getMonth();
         const currentDay = date.getDate();
@@ -247,14 +247,14 @@
     currentTotal,
     nextMilestone,
     startDate = new Date(),
-    mostRecentRunDate = null
+    mostRecentFinishDate = null
   ) {
     if (!nextMilestone || nextMilestone <= currentTotal) return null;
 
-    const runsNeeded = nextMilestone - currentTotal;
-    const firstRunDate = getNextSaturday(startDate, mostRecentRunDate);
-    const targetDate = new Date(firstRunDate);
-    targetDate.setDate(firstRunDate.getDate() + (runsNeeded - 1) * 7);
+    const finishesNeeded = nextMilestone - currentTotal;
+    const firstFinishDate = getNextSaturday(startDate, mostRecentFinishDate);
+    const targetDate = new Date(firstFinishDate);
+    targetDate.setDate(firstFinishDate.getDate() + (finishesNeeded - 1) * 7);
     return targetDate;
   }
 
@@ -262,14 +262,14 @@
     currentTotal,
     nextMilestone,
     startDate = new Date(),
-    mostRecentRunDate = null
+    mostRecentFinishDate = null
   ) {
     if (!nextMilestone || nextMilestone <= currentTotal) return null;
 
-    const runsNeeded = nextMilestone - currentTotal;
-    const firstRunDate = getNextSunday(startDate, mostRecentRunDate);
-    const targetDate = new Date(firstRunDate);
-    targetDate.setDate(firstRunDate.getDate() + (runsNeeded - 1) * 7);
+    const finishesNeeded = nextMilestone - currentTotal;
+    const firstFinishDate = getNextSunday(startDate, mostRecentFinishDate);
+    const targetDate = new Date(firstFinishDate);
+    targetDate.setDate(firstFinishDate.getDate() + (finishesNeeded - 1) * 7);
     return targetDate;
   }
 
@@ -539,8 +539,13 @@
       return;
     }
 
-    const mostRecentRunDate = findMostRecentRunDate(doc);
-    const targetDate = calculateMilestoneDate(result.total, nextMilestone, now, mostRecentRunDate);
+    const mostRecentFinishDate = findMostRecentFinishDate(doc);
+    const targetDate = calculateMilestoneDate(
+      result.total,
+      nextMilestone,
+      now,
+      mostRecentFinishDate
+    );
     if (!targetDate) {
       console.log('Unable to calculate milestone date');
       return;
@@ -609,7 +614,7 @@
       findJuniorParkrunTotalHeading,
       findAgeCategory,
       findVolunteerDaysTotal,
-      findMostRecentRunDate,
+      findMostRecentFinishDate,
       getNextMilestone,
       getNextMilestoneDefinition,
       getNextSaturday,
