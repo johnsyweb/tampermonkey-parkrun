@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun Next Milestone Estimate
-// @description  Estimates when a parkrunner will reach their next milestone, assuming a parkrun every Saturday
+// @description  Estimates when a parkrunner will reach their next milestone. Assumes participation at every available parkrun (regular, junior, or volunteer) on Saturdays or Sundays. Special events are excluded from calculations.
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/next-milestone.user.js
 // @grant        none
@@ -32,7 +32,7 @@
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.com.au/parkrunner/1001388/
+// @screenshot-url       https://www.parkrun.com.au/parkrunner/2080650/
 // @screenshot-selector  h3
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
@@ -525,6 +525,53 @@
     }
   }
 
+  function appendAssumptionsInfo(heading) {
+    if (!heading || heading.dataset.assumptionsInfoApplied === 'true') return;
+
+    const infoBox = document.createElement('div');
+    infoBox.id = 'milestone-assumptions-info';
+    infoBox.style.marginTop = '1em';
+    infoBox.style.padding = '0.75em';
+    infoBox.style.backgroundColor = '#f5f5f5';
+    infoBox.style.border = '1px solid #ddd';
+    infoBox.style.borderRadius = '4px';
+    infoBox.style.fontSize = '0.85em';
+    infoBox.style.color = '#555';
+
+    const headingText = document.createElement('strong');
+    headingText.textContent = 'ℹ️ Assumptions behind expected dates:';
+    headingText.style.display = 'block';
+    headingText.style.marginBottom = '0.5em';
+
+    const assumptions = document.createElement('ul');
+    assumptions.style.margin = '0.5em 0 0 0';
+    assumptions.style.padding = '0 0 0 1.25em';
+    assumptions.style.listStyle = 'none';
+
+    const assumption1 = document.createElement('li');
+    assumption1.textContent = 'You participate at every available parkrun day';
+    assumption1.style.margin = '0.25em 0';
+
+    const assumption2 = document.createElement('li');
+    assumption2.textContent = 'Special events are excluded from the calculations';
+    assumption2.style.margin = '0.25em 0';
+
+    assumptions.appendChild(assumption1);
+    assumptions.appendChild(assumption2);
+
+    infoBox.appendChild(headingText);
+    infoBox.appendChild(assumptions);
+
+    // Insert after volunteer preferences if they exist, otherwise after heading
+    const prefsContainer = heading.parentElement?.querySelector('#volunteer-days-preferences');
+    if (prefsContainer) {
+      prefsContainer.insertAdjacentElement('afterend', infoBox);
+    } else {
+      heading.insertAdjacentElement('afterend', infoBox);
+    }
+    heading.dataset.assumptionsInfoApplied = 'true';
+  }
+
   function applyMilestoneEstimate(doc = document, now = new Date()) {
     const result = findParkrunTotalHeading(doc);
     if (!result) {
@@ -603,6 +650,8 @@
         }
       }
     }
+
+    appendAssumptionsInfo(result.heading);
   }
 
   if (typeof module !== 'undefined' && module.exports) {
@@ -630,6 +679,7 @@
       appendMilestoneEstimate,
       appendJuniorMilestoneEstimate,
       appendVolunteerDaysSummary,
+      appendAssumptionsInfo,
       applyMilestoneEstimate,
     };
   } else {
