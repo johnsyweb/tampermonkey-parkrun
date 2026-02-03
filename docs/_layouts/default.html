@@ -21,47 +21,10 @@
     <link rel="canonical" href="{{ canonical_candidate | absolute_url }}" />
     {% endif %}
 
-    <!-- Default icons -->
-    <link rel="shortcut icon" href="{{ site.url }}/favicon.ico" />
-    <link rel="apple-touch-icon" href="{{ site.url }}/icons/apple-touch-icon.png" />
-    <link
-      rel="apple-touch-icon-precomposed"
-      href="{{ site.url }}/icons/apple-touch-icon-precomposed.png"
-    />
-
-    <!-- Sized apple touch icons -->
-    {% for size in site.apple_touch_icon_sizes %}
-    <link
-      rel="apple-touch-icon"
-      sizes="{{ size }}x{{ size }}"
-      href="{{ site.url }}/icons/apple-touch-icon-{{ size }}x{{ size }}.png"
-    />
-    {% endfor %}
-
-    <!-- Favicon icons -->
-    {% for size in site.favicon_sizes %}
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="{{ size }}x{{ size }}"
-      href="{{ site.url }}/icons/favicon-{{ size }}x{{ size }}.png"
-    />
-    {% endfor %}
-
-    <!-- Microsoft application metadata -->
     <meta
       name="application-name"
       content="{{ page.application_name | default: site.application_name | default: site.name }}"
     />
-    <meta name="msapplication-TileColor" content="#FFFFFF" />
-    <meta name="msapplication-TileImage" content="{{ site.url }}/icons/mstile-144x144.png" />
-
-    {% for size in site.mstile_sizes %}
-    <meta
-      name="msapplication-{{ size.type }}"
-      content="{{ site.url }}/icons/mstile-{{ size.dimensions }}.png"
-    />
-    {% endfor %}
 
     <meta property="og:description" content="{{ page_description }}" />
 
