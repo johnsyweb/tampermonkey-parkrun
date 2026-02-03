@@ -61,6 +61,16 @@
     250: { restricted_age: 'J', name: 'junior parkrun 250' },
   };
 
+  const volunteerMilestones = {
+    10: {},
+    25: {},
+    50: {},
+    100: {},
+    250: {},
+    500: {},
+    1000: {},
+  };
+
   function findParkrunTotalHeading(doc = document) {
     const headings = doc.querySelectorAll('h3');
     for (const heading of headings) {
@@ -97,6 +107,30 @@
       }
     }
     return null;
+  }
+
+  function findVolunteerDaysTotal(doc = document) {
+    const heading = doc.querySelector('#volunteer-summary');
+    if (!heading) return null;
+
+    let table = heading.nextElementSibling;
+    if (!table || table.tagName !== 'TABLE') {
+      table = heading.parentElement?.querySelector('table');
+    }
+    if (!table) return null;
+
+    const footerRow = table.querySelector('tfoot tr');
+    if (!footerRow) return null;
+
+    const cells = footerRow.querySelectorAll('td');
+    if (cells.length < 2) return null;
+
+    const totalCell = cells[1].querySelector('strong');
+    if (!totalCell) return null;
+
+    const totalText = totalCell.textContent?.trim() ?? '';
+    const total = parseInt(totalText.replace(/,/g, ''), 10);
+    return Number.isNaN(total) ? null : total;
   }
 
   function getNextMilestone(total, ageCategory = null, milestoneMap = milestones) {
@@ -248,6 +282,92 @@
     });
   }
 
+  function getVolunteerDayPreferences(storageKey = 'parkrun-volunteer-days') {
+    if (typeof localStorage === 'undefined') {
+      return { saturday: true, sunday: true };
+    }
+    const stored = localStorage.getItem(storageKey);
+    if (!stored) {
+      return { saturday: true, sunday: true };
+    }
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return { saturday: true, sunday: true };
+    }
+  }
+
+  function setVolunteerDayPreferences(preferences, storageKey = 'parkrun-volunteer-days') {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(storageKey, JSON.stringify(preferences));
+    }
+  }
+
+  function getNextVolunteerMilestoneDate(
+    currentVolunteerDays,
+    nextMilestone,
+    startDate = new Date(),
+    preferences = null
+  ) {
+    if (!nextMilestone || nextMilestone <= currentVolunteerDays) return null;
+
+    const prefs = preferences || getVolunteerDayPreferences();
+    const daysNeeded = nextMilestone - currentVolunteerDays;
+
+    if (!prefs.saturday && !prefs.sunday) return null;
+
+    // If volunteering on both days, they volunteer twice per week
+    if (prefs.saturday && prefs.sunday) {
+      const nextSaturday = new Date(startDate);
+      const daysUntilSaturday = (6 - nextSaturday.getDay() + 7) % 7;
+      nextSaturday.setDate(nextSaturday.getDate() + daysUntilSaturday);
+
+      const nextSunday = new Date(startDate);
+      const daysUntilSunday = (0 - nextSunday.getDay() + 7) % 7;
+      nextSunday.setDate(nextSunday.getDate() + daysUntilSunday);
+
+      // Determine which day comes first
+      const firstDay = nextSaturday < nextSunday ? nextSaturday : nextSunday;
+      const firstIsSaturday = nextSaturday < nextSunday;
+
+      // Calculate complete weeks (2 volunteers per week)
+      const completeWeeks = Math.floor((daysNeeded - 1) / 2);
+      const remainder = (daysNeeded - 1) % 2;
+
+      const targetDate = new Date(firstDay);
+      targetDate.setDate(firstDay.getDate() + completeWeeks * 7);
+
+      // If there's a remainder, add days to get to the second volunteer day of that week
+      if (remainder === 1) {
+        targetDate.setDate(targetDate.getDate() + (firstIsSaturday ? 1 : 6));
+      }
+
+      targetDate.setHours(0, 0, 0, 0);
+      return targetDate;
+    }
+
+    // Only one day selected
+    if (prefs.saturday) {
+      const saturdayDate = new Date(startDate);
+      const daysUntilSaturday = (6 - saturdayDate.getDay() + 7) % 7;
+      saturdayDate.setDate(saturdayDate.getDate() + daysUntilSaturday);
+      saturdayDate.setDate(saturdayDate.getDate() + (daysNeeded - 1) * 7);
+      saturdayDate.setHours(0, 0, 0, 0);
+      return saturdayDate;
+    }
+
+    if (prefs.sunday) {
+      const sundayDate = new Date(startDate);
+      const daysUntilSunday = (0 - sundayDate.getDay() + 7) % 7;
+      sundayDate.setDate(sundayDate.getDate() + daysUntilSunday);
+      sundayDate.setDate(sundayDate.getDate() + (daysNeeded - 1) * 7);
+      sundayDate.setHours(0, 0, 0, 0);
+      return sundayDate;
+    }
+
+    return null;
+  }
+
   function appendMilestoneEstimate(heading, milestone, dateString) {
     if (!heading || heading.dataset.milestoneEstimateApplied === 'true') return;
     const estimateNode = document.createTextNode(
@@ -277,6 +397,62 @@
       heading.appendChild(estimateNode);
     }
     heading.dataset.milestoneEstimateApplied = 'true';
+  }
+
+  function appendVolunteerDaysSummary(heading, totalDays, nextMilestone = null, targetDate = null) {
+    if (!heading || heading.dataset.volunteerDaysApplied === 'true') return;
+    const summary = document.createElement('p');
+    summary.id = 'volunteer-days-summary';
+    let text = `${totalDays} volunteer days total`;
+    if (nextMilestone && targetDate) {
+      text += ` (expected to reach ${nextMilestone} around ${targetDate})`;
+    }
+    summary.textContent = text;
+
+    const prefsContainer = document.createElement('div');
+    prefsContainer.id = 'volunteer-days-preferences';
+    prefsContainer.style.marginTop = '0.5em';
+    prefsContainer.style.fontSize = '0.9em';
+
+    const preferences = getVolunteerDayPreferences();
+
+    const saturdayLabel = document.createElement('label');
+    saturdayLabel.style.marginRight = '1em';
+    saturdayLabel.style.cursor = 'pointer';
+    const saturdayCheckbox = document.createElement('input');
+    saturdayCheckbox.type = 'checkbox';
+    saturdayCheckbox.checked = preferences.saturday;
+    saturdayCheckbox.id = 'volunteer-saturday';
+    saturdayCheckbox.addEventListener('change', () => {
+      const updated = getVolunteerDayPreferences();
+      updated.saturday = saturdayCheckbox.checked;
+      setVolunteerDayPreferences(updated);
+      window.location.reload();
+    });
+    saturdayLabel.appendChild(saturdayCheckbox);
+    saturdayLabel.appendChild(document.createTextNode(' Volunteer on Saturdays'));
+
+    const sundayLabel = document.createElement('label');
+    sundayLabel.style.cursor = 'pointer';
+    const sundayCheckbox = document.createElement('input');
+    sundayCheckbox.type = 'checkbox';
+    sundayCheckbox.checked = preferences.sunday;
+    sundayCheckbox.id = 'volunteer-sunday';
+    sundayCheckbox.addEventListener('change', () => {
+      const updated = getVolunteerDayPreferences();
+      updated.sunday = sundayCheckbox.checked;
+      setVolunteerDayPreferences(updated);
+      window.location.reload();
+    });
+    sundayLabel.appendChild(sundayCheckbox);
+    sundayLabel.appendChild(document.createTextNode(' Volunteer on Sundays'));
+
+    prefsContainer.appendChild(saturdayLabel);
+    prefsContainer.appendChild(sundayLabel);
+
+    heading.insertAdjacentElement('afterend', summary);
+    summary.insertAdjacentElement('afterend', prefsContainer);
+    heading.dataset.volunteerDaysApplied = 'true';
   }
 
   function appendJuniorMilestoneEstimate(heading, milestoneName, dateString) {
@@ -310,6 +486,33 @@
 
     appendMilestoneEstimate(result.heading, nextMilestone, formatDate(targetDate));
 
+    const volunteerDaysTotal = findVolunteerDaysTotal(doc);
+    if (volunteerDaysTotal !== null) {
+      const nextVolunteerMilestone = getNextMilestone(
+        volunteerDaysTotal,
+        null,
+        volunteerMilestones
+      );
+      let volunteerTargetDate = null;
+      let volunteerTargetDateFormatted = null;
+      if (nextVolunteerMilestone) {
+        volunteerTargetDate = getNextVolunteerMilestoneDate(
+          volunteerDaysTotal,
+          nextVolunteerMilestone,
+          now
+        );
+        if (volunteerTargetDate) {
+          volunteerTargetDateFormatted = formatDate(volunteerTargetDate);
+        }
+      }
+      appendVolunteerDaysSummary(
+        result.heading,
+        volunteerDaysTotal,
+        nextVolunteerMilestone,
+        volunteerTargetDateFormatted
+      );
+    }
+
     const juniorResult = findJuniorParkrunTotalHeading(doc);
     if (juniorResult && ageCategory?.startsWith('J')) {
       const juniorNext = getNextMilestoneDefinition(
@@ -338,9 +541,11 @@
     module.exports = {
       milestones,
       juniorMilestones,
+      volunteerMilestones,
       findParkrunTotalHeading,
       findJuniorParkrunTotalHeading,
       findAgeCategory,
+      findVolunteerDaysTotal,
       findMostRecentRunDate,
       getNextMilestone,
       getNextMilestoneDefinition,
@@ -349,8 +554,12 @@
       calculateMilestoneDate,
       calculateJuniorMilestoneDate,
       formatDate,
+      getVolunteerDayPreferences,
+      setVolunteerDayPreferences,
+      getNextVolunteerMilestoneDate,
       appendMilestoneEstimate,
       appendJuniorMilestoneEstimate,
+      appendVolunteerDaysSummary,
       applyMilestoneEstimate,
     };
   } else {

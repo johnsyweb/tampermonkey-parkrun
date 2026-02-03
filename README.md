@@ -177,9 +177,7 @@ Contributions are welcome! Here's how to get started:
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
-<!-- Links -->
-
-[husky]: https://typicode.github.io/husky/
+<!-- Links -->[husky]: https://typicode.github.io/husky/
 [microsite]: https://www.johnsy.com/tampermonkey-parkrun/
 [mise]: https://mise.jdx.dev/
 [tampermonkey]: https://www.tampermonkey.net

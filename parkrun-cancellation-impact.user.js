@@ -34,7 +34,7 @@
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @version      0.1.6
+// @version      0.1.4
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
@@ -254,6 +254,20 @@ function getCancellationSaturdays(gapStartDate, gapEndDate) {
 }
 function parseDateUTC(dateStr) {
   return new Date("".concat(dateStr, "T00:00:00Z"));
+}
+function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers) {
+  if (!historyData || !historyData.eventNumbers || historyData.eventNumbers.length === 0) {
+    return false;
+  }
+  var targetIdx = historyData.eventNumbers.indexOf(String(targetEventNumber));
+  if (targetIdx === -1) {
+    return false;
+  }
+
+  // Check if targetFinishers is the max from event 1 (index 0) to targetEventNumber (targetIdx, inclusive)
+  var eventFinishersUpToTarget = historyData.finishers.slice(0, targetIdx + 1);
+  var maxUpToTarget = Math.max.apply(Math, _toConsumableArray(eventFinishersUpToTarget));
+  return targetFinishers === maxUpToTarget;
 }
 (function () {
   'use strict';
@@ -899,6 +913,7 @@ function parseDateUTC(dateStr) {
                   distance: distance,
                   baseline: base.baseline,
                   eventOnDate: eventOnDate,
+                  historyData: historyData,
                   seasonalTrend: base,
                   change: eventOnDate ? {
                     finishersChange: eventOnDate.finishers - base.baseline.avgFinishers,
@@ -1379,7 +1394,9 @@ function parseDateUTC(dateStr) {
         onDateCell.style.padding = '10px';
         onDateCell.style.textAlign = 'right';
         if (result.eventOnDate) {
-          onDateCell.innerHTML = "<strong>".concat(result.eventOnDate.finishers, "</strong> / ").concat(result.eventOnDate.volunteers);
+          var isMax = isFinishersMaxUpToEvent(result.historyData, result.eventOnDate.eventNumber, result.eventOnDate.finishers);
+          var emoji = isMax ? ' 🏆' : '';
+          onDateCell.innerHTML = "<strong>".concat(result.eventOnDate.finishers).concat(emoji, "</strong> / ").concat(result.eventOnDate.volunteers);
         } else {
           onDateCell.textContent = '—';
           onDateCell.style.color = STYLES.subtleTextColor;
@@ -2239,6 +2256,7 @@ if (typeof module !== 'undefined' && module.exports) {
     filterEventsByDateRange: filterEventsByDateRange,
     getBaselineEventsBefore: getBaselineEventsBefore,
     getCancellationSaturdays: getCancellationSaturdays,
+    isFinishersMaxUpToEvent: isFinishersMaxUpToEvent,
     parseDateUTC: parseDateUTC
   };
 }

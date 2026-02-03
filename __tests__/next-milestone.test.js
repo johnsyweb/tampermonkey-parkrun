@@ -4,6 +4,7 @@ const {
   findParkrunTotalHeading,
   findJuniorParkrunTotalHeading,
   findAgeCategory,
+  findVolunteerDaysTotal,
   findMostRecentRunDate,
   getNextMilestone,
   getNextMilestoneDefinition,
@@ -13,6 +14,10 @@ const {
   calculateJuniorMilestoneDate,
   appendMilestoneEstimate,
   appendJuniorMilestoneEstimate,
+  appendVolunteerDaysSummary,
+  getVolunteerDayPreferences,
+  setVolunteerDayPreferences,
+  getNextVolunteerMilestoneDate,
 } = require('../src/next-milestone.user.js');
 
 describe('next-milestone', () => {
@@ -200,6 +205,16 @@ describe('next-milestone', () => {
     });
   });
 
+  describe('appendVolunteerDaysSummary', () => {
+    it('adds volunteer days summary under heading once', () => {
+      document.body.innerHTML = '<h3>77 parkruns total</h3>';
+      const heading = document.querySelector('h3');
+      appendVolunteerDaysSummary(heading, 317);
+      appendVolunteerDaysSummary(heading, 317);
+      expect(heading.nextElementSibling?.textContent).toBe('317 volunteer days total');
+    });
+  });
+
   describe('findAgeCategory', () => {
     it('extracts age category from page', () => {
       document.body.innerHTML = `
@@ -217,6 +232,28 @@ describe('next-milestone', () => {
     it('handles junior age categories', () => {
       document.body.innerHTML = '<p>Most recent age category was J20-24</p>';
       expect(findAgeCategory(document)).toBe('J20-24');
+    });
+  });
+
+  describe('findVolunteerDaysTotal', () => {
+    it('extracts total volunteer days from summary table', () => {
+      document.body.innerHTML = `
+        <h3 id="volunteer-summary">Volunteer Summary</h3>
+        <table id="results">
+          <tfoot>
+            <tr>
+              <td><strong>Total Credits</strong></td>
+              <td><strong>317</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      expect(findVolunteerDaysTotal(document)).toBe(317);
+    });
+
+    it('returns null when volunteer summary is missing', () => {
+      document.body.innerHTML = '<div></div>';
+      expect(findVolunteerDaysTotal(document)).toBeNull();
     });
   });
 
@@ -246,6 +283,157 @@ describe('next-milestone', () => {
     it('returns null if no rows in table', () => {
       document.body.innerHTML = '<table id="results"><tbody></tbody></table>';
       expect(findMostRecentRunDate(document)).toBeNull();
+    });
+  });
+
+  describe('getVolunteerDayPreferences', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('returns default preferences when none are stored', () => {
+      const prefs = getVolunteerDayPreferences();
+      expect(prefs).toEqual({ saturday: true, sunday: true });
+    });
+
+    it('retrieves stored preferences', () => {
+      setVolunteerDayPreferences({ saturday: true, sunday: false });
+      const prefs = getVolunteerDayPreferences();
+      expect(prefs).toEqual({ saturday: true, sunday: false });
+    });
+
+    it('returns default preferences if stored data is invalid', () => {
+      localStorage.setItem('parkrun-volunteer-days', 'invalid json');
+      const prefs = getVolunteerDayPreferences();
+      expect(prefs).toEqual({ saturday: true, sunday: true });
+    });
+  });
+
+  describe('getNextVolunteerMilestoneDate', () => {
+    it('returns next milestone date for Saturday-only volunteering', () => {
+      const startDate = new Date(2026, 1, 3); // Tuesday, Feb 3, 2026
+      const targetDate = getNextVolunteerMilestoneDate(77, 100, startDate, {
+        saturday: true,
+        sunday: false,
+      });
+      expect(targetDate).not.toBeNull();
+      expect(targetDate.getDay()).toBe(6); // Saturday
+      // 23 volunteers needed, starting Saturday Feb 7, + 22 more weeks
+      const expected = new Date(2026, 6, 11); // Saturday, July 11, 2026
+      expect(targetDate.toDateString()).toBe(expected.toDateString());
+    });
+
+    it('returns next milestone date for Sunday-only volunteering', () => {
+      const startDate = new Date(2026, 1, 3); // Tuesday, Feb 3, 2026
+      const targetDate = getNextVolunteerMilestoneDate(77, 100, startDate, {
+        saturday: false,
+        sunday: true,
+      });
+      expect(targetDate).not.toBeNull();
+      expect(targetDate.getDay()).toBe(0); // Sunday
+      // 23 volunteers needed, starting Sunday Feb 8, + 22 more weeks
+      const expected = new Date(2026, 6, 12); // Sunday, July 12, 2026
+      expect(targetDate.toDateString()).toBe(expected.toDateString());
+    });
+
+    it('returns earlier date when both Saturday and Sunday volunteering', () => {
+      const startDate = new Date(2026, 1, 3); // Tuesday, Feb 3, 2026
+      const targetDate = getNextVolunteerMilestoneDate(77, 100, startDate, {
+        saturday: true,
+        sunday: true,
+      });
+      expect(targetDate).not.toBeNull();
+      // 23 volunteers needed, 2 per week = 11 complete weeks (22 volunteers) + 1 more
+      // Next Saturday is Feb 7 (first day)
+      // After 11 weeks (77 days): April 25, 2026 (Saturday) = 23rd volunteer
+      const expected = new Date(2026, 3, 25); // Saturday, April 25, 2026
+      expect(targetDate.toDateString()).toBe(expected.toDateString());
+    });
+
+    it('calculates correctly for larger volunteer count with both days', () => {
+      const startDate = new Date(2026, 1, 3); // Tuesday, Feb 3, 2026
+      const targetDate = getNextVolunteerMilestoneDate(317, 500, startDate, {
+        saturday: true,
+        sunday: true,
+      });
+      expect(targetDate).not.toBeNull();
+      // 183 volunteers needed, 2 per week = 91 complete weeks (182 volunteers) + 1 more
+      // Next Saturday is Feb 7, 2026
+      // 91 weeks later: Saturday, November 6, 2027
+      const expected = new Date(2027, 10, 6); // Saturday, Nov 6, 2027
+      expect(targetDate.toDateString()).toBe(expected.toDateString());
+    });
+
+    it('returns null when current total is already at milestone', () => {
+      const startDate = new Date(2026, 1, 3);
+      const targetDate = getNextVolunteerMilestoneDate(100, 100, startDate, {
+        saturday: true,
+        sunday: true,
+      });
+      expect(targetDate).toBeNull();
+    });
+
+    it('returns null when milestone is less than current total', () => {
+      const startDate = new Date(2026, 1, 3);
+      const targetDate = getNextVolunteerMilestoneDate(150, 100, startDate, {
+        saturday: true,
+        sunday: true,
+      });
+      expect(targetDate).toBeNull();
+    });
+
+    it('returns null when neither day is selected', () => {
+      const startDate = new Date(2026, 1, 3);
+      const targetDate = getNextVolunteerMilestoneDate(77, 100, startDate, {
+        saturday: false,
+        sunday: false,
+      });
+      expect(targetDate).toBeNull();
+    });
+  });
+
+  describe('appendVolunteerDaysSummary', () => {
+    it('appends volunteer days summary with milestone estimate', () => {
+      document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
+      const heading = document.querySelector('h3');
+      appendVolunteerDaysSummary(heading, 317, 500, 'Saturday 2 May 2026');
+      const summary = document.querySelector('#volunteer-days-summary');
+      expect(summary).not.toBeNull();
+      expect(summary.textContent).toBe(
+        '317 volunteer days total (expected to reach 500 around Saturday 2 May 2026)'
+      );
+    });
+
+    it('appends volunteer days summary without milestone estimate', () => {
+      document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
+      const heading = document.querySelector('h3');
+      appendVolunteerDaysSummary(heading, 317, null, null);
+      const summary = document.querySelector('#volunteer-days-summary');
+      expect(summary).not.toBeNull();
+      expect(summary.textContent).toBe('317 volunteer days total');
+    });
+
+    it('appends preferences toggles', () => {
+      document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
+      const heading = document.querySelector('h3');
+      appendVolunteerDaysSummary(heading, 317, 500, 'Saturday 2 May 2026');
+      const prefsContainer = document.querySelector('#volunteer-days-preferences');
+      const saturdayCheckbox = document.querySelector('#volunteer-saturday');
+      const sundayCheckbox = document.querySelector('#volunteer-sunday');
+      expect(prefsContainer).not.toBeNull();
+      expect(saturdayCheckbox).not.toBeNull();
+      expect(sundayCheckbox).not.toBeNull();
+      expect(saturdayCheckbox.checked).toBe(true);
+      expect(sundayCheckbox.checked).toBe(true);
+    });
+
+    it('does not append if already applied', () => {
+      document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
+      const heading = document.querySelector('h3');
+      heading.dataset.volunteerDaysApplied = 'true';
+      appendVolunteerDaysSummary(heading, 317, 500, 'Saturday 2 May 2026');
+      const summary = document.querySelector('#volunteer-days-summary');
+      expect(summary).toBeNull();
     });
   });
 });
