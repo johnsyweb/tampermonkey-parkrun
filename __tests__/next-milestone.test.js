@@ -18,6 +18,8 @@ const {
   getVolunteerDayPreferences,
   setVolunteerDayPreferences,
   getNextVolunteerMilestoneDate,
+  isDateInNextWeek,
+  highlightDateIfNeeded,
 } = require('../src/next-milestone.user.js');
 
 describe('next-milestone', () => {
@@ -434,6 +436,80 @@ describe('next-milestone', () => {
       appendVolunteerDaysSummary(heading, 317, 500, 'Saturday 2 May 2026');
       const summary = document.querySelector('#volunteer-days-summary');
       expect(summary).toBeNull();
+    });
+  });
+
+  describe('isDateInNextWeek', () => {
+    it('returns true for date today', () => {
+      const today = new Date(2026, 1, 3);
+      expect(isDateInNextWeek(today, today)).toBe(true);
+    });
+
+    it('returns true for date within next 7 days', () => {
+      const today = new Date(2026, 1, 3);
+      const inFiveDays = new Date(2026, 1, 8);
+      expect(isDateInNextWeek(inFiveDays, today)).toBe(true);
+    });
+
+    it('returns false for date exactly 7 days away', () => {
+      const today = new Date(2026, 1, 3);
+      const inSevenDays = new Date(2026, 1, 10);
+      expect(isDateInNextWeek(inSevenDays, today)).toBe(false);
+    });
+
+    it('returns false for date in the past', () => {
+      const today = new Date(2026, 1, 3);
+      const yesterday = new Date(2026, 1, 2);
+      expect(isDateInNextWeek(yesterday, today)).toBe(false);
+    });
+
+    it('returns false for date more than 7 days away', () => {
+      const today = new Date(2026, 1, 3);
+      const inTenDays = new Date(2026, 1, 13);
+      expect(isDateInNextWeek(inTenDays, today)).toBe(false);
+    });
+  });
+
+  describe('highlightDateIfNeeded', () => {
+    it('highlights date within next week', () => {
+      const today = new Date(2026, 1, 3); // Tuesday, Feb 3
+      const targetDate = new Date(2026, 1, 8); // Sunday, Feb 8 (5 days from today)
+      const formattedDate = targetDate.toLocaleDateString(undefined, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      document.body.innerHTML = `<p>expected to reach 500 around ${formattedDate}</p>`;
+      const container = document.querySelector('p');
+      highlightDateIfNeeded(container, targetDate, today);
+
+      const highlights = container.querySelectorAll('span');
+      expect(highlights.length).toBeGreaterThan(0);
+      expect(highlights[0].style.backgroundColor).toBe('rgb(255, 235, 59)');
+    });
+
+    it('does not highlight date outside next week', () => {
+      const today = new Date(2026, 1, 3);
+      const targetDate = new Date(2026, 1, 17); // More than 7 days away
+      const formattedDate = targetDate.toLocaleDateString(undefined, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      document.body.innerHTML = `<p>expected to reach 500 around ${formattedDate}</p>`;
+      const container = document.querySelector('p');
+      highlightDateIfNeeded(container, targetDate, today);
+
+      const highlights = container.querySelectorAll('span');
+      expect(highlights.length).toBe(0);
+    });
+
+    it('handles null target date gracefully', () => {
+      document.body.innerHTML = '<p>some text</p>';
+      const container = document.querySelector('p');
+      expect(() => highlightDateIfNeeded(container, null)).not.toThrow();
     });
   });
 });

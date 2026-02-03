@@ -282,6 +282,51 @@
     });
   }
 
+  function isDateInNextWeek(date, now = new Date()) {
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    const endOfNextWeek = new Date(startOfToday);
+    endOfNextWeek.setDate(endOfNextWeek.getDate() + 7);
+
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+
+    return checkDate >= startOfToday && checkDate < endOfNextWeek;
+  }
+
+  function highlightDateIfNeeded(parentElement, targetDate, now = new Date()) {
+    if (!targetDate || !parentElement) return;
+
+    if (!isDateInNextWeek(targetDate, now)) return;
+
+    // Find all text nodes and highlight the formatted date string
+    const dateString = formatDate(targetDate);
+    const textNodes = [];
+
+    function collectTextNodes(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        textNodes.push(node);
+      } else {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          collectTextNodes(node.childNodes[i]);
+        }
+      }
+    }
+
+    collectTextNodes(parentElement);
+
+    textNodes.forEach((textNode) => {
+      if (textNode.textContent.includes(dateString)) {
+        const span = document.createElement('span');
+        span.style.backgroundColor = '#ffeb3b';
+        span.style.padding = '0 2px';
+        span.style.borderRadius = '2px';
+        span.textContent = textNode.textContent;
+        textNode.parentNode.replaceChild(span, textNode);
+      }
+    });
+  }
+
   function getVolunteerDayPreferences(storageKey = 'parkrun-volunteer-days') {
     if (typeof localStorage === 'undefined') {
       return { saturday: true, sunday: true };
@@ -368,7 +413,7 @@
     return null;
   }
 
-  function appendMilestoneEstimate(heading, milestone, dateString) {
+  function appendMilestoneEstimate(heading, milestone, dateString, targetDate = null) {
     if (!heading || heading.dataset.milestoneEstimateApplied === 'true') return;
     const estimateNode = document.createTextNode(
       ` (expected to reach ${milestone} around ${dateString})`
@@ -397,6 +442,10 @@
       heading.appendChild(estimateNode);
     }
     heading.dataset.milestoneEstimateApplied = 'true';
+
+    if (targetDate) {
+      highlightDateIfNeeded(heading, targetDate);
+    }
   }
 
   function appendVolunteerDaysSummary(heading, totalDays, nextMilestone = null, targetDate = null) {
@@ -453,14 +502,27 @@
     heading.insertAdjacentElement('afterend', summary);
     summary.insertAdjacentElement('afterend', prefsContainer);
     heading.dataset.volunteerDaysApplied = 'true';
+
+    // Extract date from targetDate string and highlight if in next week
+    if (targetDate) {
+      // Parse the formatted date string back to a Date object
+      const dateObj = new Date(targetDate);
+      if (!Number.isNaN(dateObj.getTime())) {
+        highlightDateIfNeeded(summary, dateObj);
+      }
+    }
   }
 
-  function appendJuniorMilestoneEstimate(heading, milestoneName, dateString) {
+  function appendJuniorMilestoneEstimate(heading, milestoneName, dateString, targetDate = null) {
     if (!heading || heading.dataset.juniorMilestoneEstimateApplied === 'true') return;
     heading.appendChild(
       document.createTextNode(` (expected to reach ${milestoneName} around ${dateString})`)
     );
     heading.dataset.juniorMilestoneEstimateApplied = 'true';
+
+    if (targetDate) {
+      highlightDateIfNeeded(heading, targetDate);
+    }
   }
 
   function applyMilestoneEstimate(doc = document, now = new Date()) {
@@ -484,7 +546,7 @@
       return;
     }
 
-    appendMilestoneEstimate(result.heading, nextMilestone, formatDate(targetDate));
+    appendMilestoneEstimate(result.heading, nextMilestone, formatDate(targetDate), targetDate);
 
     const volunteerDaysTotal = findVolunteerDaysTotal(doc);
     if (volunteerDaysTotal !== null) {
@@ -530,7 +592,8 @@
           appendJuniorMilestoneEstimate(
             juniorResult.heading,
             juniorNext.definition.name,
-            formatDate(juniorTargetDate)
+            formatDate(juniorTargetDate),
+            juniorTargetDate
           );
         }
       }
@@ -554,6 +617,8 @@
       calculateMilestoneDate,
       calculateJuniorMilestoneDate,
       formatDate,
+      isDateInNextWeek,
+      highlightDateIfNeeded,
       getVolunteerDayPreferences,
       setVolunteerDayPreferences,
       getNextVolunteerMilestoneDate,
