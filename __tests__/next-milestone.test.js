@@ -2,12 +2,17 @@
 
 const {
   findParkrunTotalHeading,
+  findJuniorParkrunTotalHeading,
   findAgeCategory,
   findMostRecentRunDate,
   getNextMilestone,
+  getNextMilestoneDefinition,
   getNextSaturday,
+  getNextSunday,
   calculateMilestoneDate,
+  calculateJuniorMilestoneDate,
   appendMilestoneEstimate,
+  appendJuniorMilestoneEstimate,
 } = require('../src/next-milestone.user.js');
 
 describe('next-milestone', () => {
@@ -33,6 +38,20 @@ describe('next-milestone', () => {
     });
   });
 
+  describe('findJuniorParkrunTotalHeading', () => {
+    it('extracts junior parkrun total', () => {
+      document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
+      const result = findJuniorParkrunTotalHeading(document);
+      expect(result).not.toBeNull();
+      expect(result.total).toBe(135);
+    });
+
+    it('returns null when junior total is missing', () => {
+      document.body.innerHTML = '<h3>77 parkruns total</h3>';
+      expect(findJuniorParkrunTotalHeading(document)).toBeNull();
+    });
+  });
+
   describe('getNextMilestone', () => {
     it('returns the next milestone after the total', () => {
       expect(getNextMilestone(443)).toBe(500);
@@ -48,6 +67,19 @@ describe('next-milestone', () => {
 
     it('returns next unrestricted milestone when no matching restricted ones exist', () => {
       expect(getNextMilestone(9, 'SM25-29')).toBe(25);
+    });
+  });
+
+  describe('getNextMilestoneDefinition', () => {
+    it('returns milestone definition for the next milestone', () => {
+      const milestoneMap = {
+        11: { restricted_age: 'J', name: 'Half marathon' },
+        250: { restricted_age: 'J', name: 'junior parkrun 250' },
+      };
+      const result = getNextMilestoneDefinition(135, 'J20-24', milestoneMap);
+      expect(result).not.toBeNull();
+      expect(result.value).toBe(250);
+      expect(result.definition.name).toBe('junior parkrun 250');
     });
   });
 
@@ -81,6 +113,26 @@ describe('next-milestone', () => {
     });
   });
 
+  describe('getNextSunday', () => {
+    it('returns today when today is Sunday', () => {
+      const sunday = new Date(2026, 1, 1);
+      expect(getNextSunday(sunday).toDateString()).toBe(sunday.toDateString());
+    });
+
+    it('returns next Sunday when today is Tuesday', () => {
+      const tuesday = new Date(2026, 1, 3);
+      const expected = new Date(2026, 1, 8);
+      expect(getNextSunday(tuesday).toDateString()).toBe(expected.toDateString());
+    });
+
+    it('returns next week Sunday when today is Sunday and run happened today', () => {
+      const sunday = new Date(2026, 1, 1);
+      const mostRecentRunDate = new Date(2026, 1, 1);
+      const expected = new Date(2026, 1, 8);
+      expect(getNextSunday(sunday, mostRecentRunDate).toDateString()).toBe(expected.toDateString());
+    });
+  });
+
   describe('calculateMilestoneDate', () => {
     it('calculates milestone date based on weekly Saturdays', () => {
       const startDate = new Date(2026, 1, 3);
@@ -104,6 +156,15 @@ describe('next-milestone', () => {
     });
   });
 
+  describe('calculateJuniorMilestoneDate', () => {
+    it('calculates milestone date based on weekly Sundays', () => {
+      const startDate = new Date(2026, 1, 3);
+      const result = calculateJuniorMilestoneDate(135, 250, startDate);
+      const expected = new Date(2028, 3, 16);
+      expect(result.toDateString()).toBe(expected.toDateString());
+    });
+  });
+
   describe('appendMilestoneEstimate', () => {
     it('appends milestone estimate once', () => {
       document.body.innerHTML = '<h3>443 parkruns total</h3>';
@@ -122,6 +183,20 @@ describe('next-milestone', () => {
       expect(heading.textContent).toContain(
         '77 parkruns (expected to reach 100 around Friday, April 4, 2026) & 135 junior parkruns total'
       );
+    });
+  });
+
+  describe('appendJuniorMilestoneEstimate', () => {
+    it('appends junior milestone estimate once', () => {
+      document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
+      const heading = document.querySelector('h3');
+      appendJuniorMilestoneEstimate(heading, 'junior parkrun 250', 'Sunday, July 11, 2026');
+      appendJuniorMilestoneEstimate(heading, 'junior parkrun 250', 'Sunday, July 11, 2026');
+      expect(heading.textContent).toContain(
+        'expected to reach junior parkrun 250 around Sunday, July 11, 2026'
+      );
+      const occurrences = heading.textContent.match(/junior parkrun 250/g) || [];
+      expect(occurrences.length).toBe(1);
     });
   });
 

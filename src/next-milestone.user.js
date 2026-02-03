@@ -53,11 +53,32 @@
     1000: {},
   };
 
+  const juniorMilestones = {
+    11: { restricted_age: 'J', name: 'Half marathon' },
+    21: { restricted_age: 'J', name: 'Marathon' },
+    50: { restricted_age: 'J', name: 'Ultra marathon' },
+    100: { restricted_age: 'J', name: 'junior parkrun 100' },
+    250: { restricted_age: 'J', name: 'junior parkrun 250' },
+  };
+
   function findParkrunTotalHeading(doc = document) {
     const headings = doc.querySelectorAll('h3');
     for (const heading of headings) {
       const text = heading.textContent?.trim() ?? '';
       const match = text.match(/([\d,]+)\s+parkruns?\b/i);
+      if (match) {
+        const total = parseInt(match[1].replace(/,/g, ''), 10);
+        return { heading, total };
+      }
+    }
+    return null;
+  }
+
+  function findJuniorParkrunTotalHeading(doc = document) {
+    const headings = doc.querySelectorAll('h3');
+    for (const heading of headings) {
+      const text = heading.textContent?.trim() ?? '';
+      const match = text.match(/([\d,]+)\s+junior\s+parkruns?\s+total/i);
       if (match) {
         const total = parseInt(match[1].replace(/,/g, ''), 10);
         return { heading, total };
@@ -92,6 +113,12 @@
         return !milestone.restricted_age;
       }) ?? null
     );
+  }
+
+  function getNextMilestoneDefinition(total, ageCategory, milestoneMap) {
+    const nextValue = getNextMilestone(total, ageCategory, milestoneMap);
+    if (!nextValue) return null;
+    return { value: nextValue, definition: milestoneMap[nextValue] };
   }
 
   function findMostRecentRunDate(doc = document) {
@@ -151,6 +178,37 @@
     return result;
   }
 
+  function getNextSunday(date = new Date(), mostRecentRunDate = null) {
+    const result = new Date(date);
+    const day = result.getDay();
+
+    if (day === 0) {
+      if (mostRecentRunDate) {
+        const recentYear = mostRecentRunDate.getFullYear();
+        const recentMonth = mostRecentRunDate.getMonth();
+        const recentDay = mostRecentRunDate.getDate();
+        const currentYear = date.getFullYear();
+        const currentMonth = date.getMonth();
+        const currentDay = date.getDate();
+
+        if (
+          recentYear === currentYear &&
+          recentMonth === currentMonth &&
+          recentDay === currentDay
+        ) {
+          result.setDate(result.getDate() + 7);
+        }
+      }
+      result.setHours(0, 0, 0, 0);
+      return result;
+    }
+
+    const daysUntilSunday = (0 - day + 7) % 7;
+    result.setDate(result.getDate() + daysUntilSunday);
+    result.setHours(0, 0, 0, 0);
+    return result;
+  }
+
   function calculateMilestoneDate(
     currentTotal,
     nextMilestone,
@@ -161,6 +219,21 @@
 
     const runsNeeded = nextMilestone - currentTotal;
     const firstRunDate = getNextSaturday(startDate, mostRecentRunDate);
+    const targetDate = new Date(firstRunDate);
+    targetDate.setDate(firstRunDate.getDate() + (runsNeeded - 1) * 7);
+    return targetDate;
+  }
+
+  function calculateJuniorMilestoneDate(
+    currentTotal,
+    nextMilestone,
+    startDate = new Date(),
+    mostRecentRunDate = null
+  ) {
+    if (!nextMilestone || nextMilestone <= currentTotal) return null;
+
+    const runsNeeded = nextMilestone - currentTotal;
+    const firstRunDate = getNextSunday(startDate, mostRecentRunDate);
     const targetDate = new Date(firstRunDate);
     targetDate.setDate(firstRunDate.getDate() + (runsNeeded - 1) * 7);
     return targetDate;
@@ -206,6 +279,14 @@
     heading.dataset.milestoneEstimateApplied = 'true';
   }
 
+  function appendJuniorMilestoneEstimate(heading, milestoneName, dateString) {
+    if (!heading || heading.dataset.juniorMilestoneEstimateApplied === 'true') return;
+    heading.appendChild(
+      document.createTextNode(` (expected to reach ${milestoneName} around ${dateString})`)
+    );
+    heading.dataset.juniorMilestoneEstimateApplied = 'true';
+  }
+
   function applyMilestoneEstimate(doc = document, now = new Date()) {
     const result = findParkrunTotalHeading(doc);
     if (!result) {
@@ -228,19 +309,48 @@
     }
 
     appendMilestoneEstimate(result.heading, nextMilestone, formatDate(targetDate));
+
+    const juniorResult = findJuniorParkrunTotalHeading(doc);
+    if (juniorResult && ageCategory?.startsWith('J')) {
+      const juniorNext = getNextMilestoneDefinition(
+        juniorResult.total,
+        ageCategory,
+        juniorMilestones
+      );
+      if (juniorNext?.definition?.name) {
+        const juniorTargetDate = calculateJuniorMilestoneDate(
+          juniorResult.total,
+          juniorNext.value,
+          now
+        );
+        if (juniorTargetDate) {
+          appendJuniorMilestoneEstimate(
+            juniorResult.heading,
+            juniorNext.definition.name,
+            formatDate(juniorTargetDate)
+          );
+        }
+      }
+    }
   }
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       milestones,
+      juniorMilestones,
       findParkrunTotalHeading,
+      findJuniorParkrunTotalHeading,
       findAgeCategory,
       findMostRecentRunDate,
       getNextMilestone,
+      getNextMilestoneDefinition,
       getNextSaturday,
+      getNextSunday,
       calculateMilestoneDate,
+      calculateJuniorMilestoneDate,
       formatDate,
       appendMilestoneEstimate,
+      appendJuniorMilestoneEstimate,
       applyMilestoneEstimate,
     };
   } else {
