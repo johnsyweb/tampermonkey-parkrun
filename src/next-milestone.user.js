@@ -62,7 +62,7 @@
   };
 
   const volunteerMilestones = {
-    10: {},
+    10: { restricted_age: 'J' },
     25: {},
     50: {},
     100: {},
