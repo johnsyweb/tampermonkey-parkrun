@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun Next Milestone Estimate
-// @description  Estimates when a parkrunner will reach their next milestone based on Saturday parkruns
+// @description  Estimates when a parkrunner will reach their next milestone. Assumes participation at every available parkrun (regular, junior, or volunteer) on Saturdays or Sundays. Special events are excluded from calculations.
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/next-milestone.user.js
 // @grant        none
@@ -206,7 +206,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       definition: milestoneMap[nextValue]
     };
   }
-  function findMostRecentRunDate() {
+  function findMostRecentFinishDate() {
     var _dateLink$textContent;
     var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
     var resultsTable = doc.querySelector('table#results tbody');
@@ -228,14 +228,14 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function getNextSaturday() {
     var date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date();
-    var mostRecentRunDate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+    var mostRecentFinishDate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     var result = new Date(date);
     var day = result.getDay();
     if (day === 6) {
-      if (mostRecentRunDate) {
-        var recentYear = mostRecentRunDate.getFullYear();
-        var recentMonth = mostRecentRunDate.getMonth();
-        var recentDay = mostRecentRunDate.getDate();
+      if (mostRecentFinishDate) {
+        var recentYear = mostRecentFinishDate.getFullYear();
+        var recentMonth = mostRecentFinishDate.getMonth();
+        var recentDay = mostRecentFinishDate.getDate();
         var currentYear = date.getFullYear();
         var currentMonth = date.getMonth();
         var currentDay = date.getDate();
@@ -253,14 +253,14 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function getNextSunday() {
     var date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date();
-    var mostRecentRunDate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+    var mostRecentFinishDate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     var result = new Date(date);
     var day = result.getDay();
     if (day === 0) {
-      if (mostRecentRunDate) {
-        var recentYear = mostRecentRunDate.getFullYear();
-        var recentMonth = mostRecentRunDate.getMonth();
-        var recentDay = mostRecentRunDate.getDate();
+      if (mostRecentFinishDate) {
+        var recentYear = mostRecentFinishDate.getFullYear();
+        var recentMonth = mostRecentFinishDate.getMonth();
+        var recentDay = mostRecentFinishDate.getDate();
         var currentYear = date.getFullYear();
         var currentMonth = date.getMonth();
         var currentDay = date.getDate();
@@ -278,22 +278,22 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   function calculateMilestoneDate(currentTotal, nextMilestone) {
     var startDate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
-    var mostRecentRunDate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    var mostRecentFinishDate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
     if (!nextMilestone || nextMilestone <= currentTotal) return null;
-    var runsNeeded = nextMilestone - currentTotal;
-    var firstRunDate = getNextSaturday(startDate, mostRecentRunDate);
-    var targetDate = new Date(firstRunDate);
-    targetDate.setDate(firstRunDate.getDate() + (runsNeeded - 1) * 7);
+    var finishesNeeded = nextMilestone - currentTotal;
+    var firstFinishDate = getNextSaturday(startDate, mostRecentFinishDate);
+    var targetDate = new Date(firstFinishDate);
+    targetDate.setDate(firstFinishDate.getDate() + (finishesNeeded - 1) * 7);
     return targetDate;
   }
   function calculateJuniorMilestoneDate(currentTotal, nextMilestone) {
     var startDate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
-    var mostRecentRunDate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    var mostRecentFinishDate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
     if (!nextMilestone || nextMilestone <= currentTotal) return null;
-    var runsNeeded = nextMilestone - currentTotal;
-    var firstRunDate = getNextSunday(startDate, mostRecentRunDate);
-    var targetDate = new Date(firstRunDate);
-    targetDate.setDate(firstRunDate.getDate() + (runsNeeded - 1) * 7);
+    var finishesNeeded = nextMilestone - currentTotal;
+    var firstFinishDate = getNextSunday(startDate, mostRecentFinishDate);
+    var targetDate = new Date(firstFinishDate);
+    targetDate.setDate(firstFinishDate.getDate() + (finishesNeeded - 1) * 7);
     return targetDate;
   }
   function formatDate(date) {
@@ -302,6 +302,45 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       year: 'numeric',
       month: 'long',
       day: 'numeric'
+    });
+  }
+  function isDateInNextWeek(date) {
+    var now = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Date();
+    var startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    var endOfNextWeek = new Date(startOfToday);
+    endOfNextWeek.setDate(endOfNextWeek.getDate() + 7);
+    var checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    return checkDate >= startOfToday && checkDate < endOfNextWeek;
+  }
+  function highlightDateIfNeeded(parentElement, targetDate) {
+    var now = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
+    if (!targetDate || !parentElement) return;
+    if (!isDateInNextWeek(targetDate, now)) return;
+
+    // Find all text nodes and highlight the formatted date string
+    var dateString = formatDate(targetDate);
+    var textNodes = [];
+    function collectTextNodes(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        textNodes.push(node);
+      } else {
+        for (var i = 0; i < node.childNodes.length; i++) {
+          collectTextNodes(node.childNodes[i]);
+        }
+      }
+    }
+    collectTextNodes(parentElement);
+    textNodes.forEach(function (textNode) {
+      if (textNode.textContent.includes(dateString)) {
+        var span = document.createElement('span');
+        span.style.backgroundColor = '#ffeb3b';
+        span.style.padding = '0 2px';
+        span.style.borderRadius = '2px';
+        span.textContent = textNode.textContent;
+        textNode.parentNode.replaceChild(span, textNode);
+      }
     });
   }
   function getVolunteerDayPreferences() {
@@ -389,6 +428,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     return null;
   }
   function appendMilestoneEstimate(heading, milestone, dateString) {
+    var targetDate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
     if (!heading || heading.dataset.milestoneEstimateApplied === 'true') return;
     var estimateNode = document.createTextNode(" (expected to reach ".concat(milestone, " around ").concat(dateString, ")"));
     var textNodes = Array.from(heading.childNodes).filter(function (node) {
@@ -418,6 +458,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       heading.appendChild(estimateNode);
     }
     heading.dataset.milestoneEstimateApplied = 'true';
+    if (targetDate) {
+      highlightDateIfNeeded(heading, targetDate);
+    }
   }
   function appendVolunteerDaysSummary(heading, totalDays) {
     var nextMilestone = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -469,11 +512,64 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     heading.insertAdjacentElement('afterend', summary);
     summary.insertAdjacentElement('afterend', prefsContainer);
     heading.dataset.volunteerDaysApplied = 'true';
+
+    // Extract date from targetDate string and highlight if in next week
+    if (targetDate) {
+      // Parse the formatted date string back to a Date object
+      var dateObj = new Date(targetDate);
+      if (!Number.isNaN(dateObj.getTime())) {
+        highlightDateIfNeeded(summary, dateObj);
+      }
+    }
   }
   function appendJuniorMilestoneEstimate(heading, milestoneName, dateString) {
+    var targetDate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
     if (!heading || heading.dataset.juniorMilestoneEstimateApplied === 'true') return;
     heading.appendChild(document.createTextNode(" (expected to reach ".concat(milestoneName, " around ").concat(dateString, ")")));
     heading.dataset.juniorMilestoneEstimateApplied = 'true';
+    if (targetDate) {
+      highlightDateIfNeeded(heading, targetDate);
+    }
+  }
+  function appendAssumptionsInfo(heading) {
+    var _heading$parentElemen2;
+    if (!heading || heading.dataset.assumptionsInfoApplied === 'true') return;
+    var infoBox = document.createElement('div');
+    infoBox.id = 'milestone-assumptions-info';
+    infoBox.style.marginTop = '1em';
+    infoBox.style.padding = '0.75em';
+    infoBox.style.backgroundColor = '#f5f5f5';
+    infoBox.style.border = '1px solid #ddd';
+    infoBox.style.borderRadius = '4px';
+    infoBox.style.fontSize = '0.85em';
+    infoBox.style.color = '#555';
+    var headingText = document.createElement('strong');
+    headingText.textContent = 'ℹ️ Assumptions behind expected dates:';
+    headingText.style.display = 'block';
+    headingText.style.marginBottom = '0.5em';
+    var assumptions = document.createElement('ul');
+    assumptions.style.margin = '0.5em 0 0 0';
+    assumptions.style.padding = '0 0 0 1.25em';
+    assumptions.style.listStyle = 'none';
+    var assumption1 = document.createElement('li');
+    assumption1.textContent = 'You participate at every available parkrun day';
+    assumption1.style.margin = '0.25em 0';
+    var assumption2 = document.createElement('li');
+    assumption2.textContent = 'Special events are excluded from the calculations';
+    assumption2.style.margin = '0.25em 0';
+    assumptions.appendChild(assumption1);
+    assumptions.appendChild(assumption2);
+    infoBox.appendChild(headingText);
+    infoBox.appendChild(assumptions);
+
+    // Insert after volunteer preferences if they exist, otherwise after heading
+    var prefsContainer = (_heading$parentElemen2 = heading.parentElement) === null || _heading$parentElemen2 === void 0 ? void 0 : _heading$parentElemen2.querySelector('#volunteer-days-preferences');
+    if (prefsContainer) {
+      prefsContainer.insertAdjacentElement('afterend', infoBox);
+    } else {
+      heading.insertAdjacentElement('afterend', infoBox);
+    }
+    heading.dataset.assumptionsInfoApplied = 'true';
   }
   function applyMilestoneEstimate() {
     var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
@@ -489,13 +585,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       console.log('No upcoming milestone found');
       return;
     }
-    var mostRecentRunDate = findMostRecentRunDate(doc);
-    var targetDate = calculateMilestoneDate(result.total, nextMilestone, now, mostRecentRunDate);
+    var mostRecentFinishDate = findMostRecentFinishDate(doc);
+    var targetDate = calculateMilestoneDate(result.total, nextMilestone, now, mostRecentFinishDate);
     if (!targetDate) {
       console.log('Unable to calculate milestone date');
       return;
     }
-    appendMilestoneEstimate(result.heading, nextMilestone, formatDate(targetDate));
+    appendMilestoneEstimate(result.heading, nextMilestone, formatDate(targetDate), targetDate);
     var volunteerDaysTotal = findVolunteerDaysTotal(doc);
     if (volunteerDaysTotal !== null) {
       var nextVolunteerMilestone = getNextMilestone(volunteerDaysTotal, null, volunteerMilestones);
@@ -516,10 +612,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       if (juniorNext !== null && juniorNext !== void 0 && (_juniorNext$definitio = juniorNext.definition) !== null && _juniorNext$definitio !== void 0 && _juniorNext$definitio.name) {
         var juniorTargetDate = calculateJuniorMilestoneDate(juniorResult.total, juniorNext.value, now);
         if (juniorTargetDate) {
-          appendJuniorMilestoneEstimate(juniorResult.heading, juniorNext.definition.name, formatDate(juniorTargetDate));
+          appendJuniorMilestoneEstimate(juniorResult.heading, juniorNext.definition.name, formatDate(juniorTargetDate), juniorTargetDate);
         }
       }
     }
+    appendAssumptionsInfo(result.heading);
   }
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -530,7 +627,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       findJuniorParkrunTotalHeading: findJuniorParkrunTotalHeading,
       findAgeCategory: findAgeCategory,
       findVolunteerDaysTotal: findVolunteerDaysTotal,
-      findMostRecentRunDate: findMostRecentRunDate,
+      findMostRecentFinishDate: findMostRecentFinishDate,
       getNextMilestone: getNextMilestone,
       getNextMilestoneDefinition: getNextMilestoneDefinition,
       getNextSaturday: getNextSaturday,
@@ -538,12 +635,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       calculateMilestoneDate: calculateMilestoneDate,
       calculateJuniorMilestoneDate: calculateJuniorMilestoneDate,
       formatDate: formatDate,
+      isDateInNextWeek: isDateInNextWeek,
+      highlightDateIfNeeded: highlightDateIfNeeded,
       getVolunteerDayPreferences: getVolunteerDayPreferences,
       setVolunteerDayPreferences: setVolunteerDayPreferences,
       getNextVolunteerMilestoneDate: getNextVolunteerMilestoneDate,
       appendMilestoneEstimate: appendMilestoneEstimate,
       appendJuniorMilestoneEstimate: appendJuniorMilestoneEstimate,
       appendVolunteerDaysSummary: appendVolunteerDaysSummary,
+      appendAssumptionsInfo: appendAssumptionsInfo,
       applyMilestoneEstimate: applyMilestoneEstimate
     };
   } else {
