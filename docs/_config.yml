@@ -39,6 +39,11 @@ mstile_sizes:
 include:
   - icons
   - images
+  - style.css
+
+keep_files:
+  - icons
+  - images
 
 exclude:
   - Gemfile

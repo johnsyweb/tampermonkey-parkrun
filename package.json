@@ -15,7 +15,7 @@
     "update-scripts-data": "node scripts/extract-script-info.js",
     "docs:assets": "pnpm run build:scripts && pnpm run screenshots && node scripts/generate-thumbnails.js && pnpm run update-scripts-data",
     "docs:build": "pnpm run docs:assets && cd docs && bundle exec jekyll build && node ../scripts/generate-sitemap.js",
-    "docs:check": "cd docs && bundle exec htmlproofer ./_site --disable-external || echo \"htmlproofer reported issues (non-fatal)\"",
+    "docs:check": "cd docs && bundle exec htmlproofer ./_site --disable-external --root-dir \"$(pwd)/_site\" --swap-urls 'tampermonkey-parkrun/:' || echo \"htmlproofer reported issues (non-fatal)\"",
     "docs:install": "cd docs && bundle install",
     "docs:serve": "pnpm run docs:assets && cd docs && bundle exec jekyll serve",
     "build:scripts": "node scripts/build-scripts.js",

@@ -33,7 +33,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/next-milestone.user.js
-// @version      1.0.3
+// @version      1.0.0
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
@@ -79,7 +79,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
   };
   var volunteerMilestones = {
-    10: {},
+    10: {
+      restricted_age: 'J'
+    },
     25: {},
     50: {},
     100: {},
