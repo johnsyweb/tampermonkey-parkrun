@@ -81,6 +81,22 @@ pnpm docs:serve
 
 The site will be available at http://localhost:4000/tampermonkey-parkrun/
 
+### Avoiding Merge Conflicts in Built Files
+
+The root directory contains built `.user.js` files that are generated from `src/` by `pnpm run build:scripts`. To prevent merge conflicts during rebases or pulls:
+
+1. **`.gitattributes`** marks these files with the `ours` merge strategy, which automatically keeps your local version during conflicts
+2. After any merge/rebase, simply run `pnpm run build:scripts` to regenerate them from `src/`
+3. The git config `merge.ours.driver` should be set to `true`:
+   ```bash
+   git config merge.ours.driver true
+   ```
+
+This approach ensures that:
+- Source files in `src/` are the single source of truth
+- Merge conflicts only occur in source files where they matter
+- Built files are automatically regenerated after conflict resolution
+
 ### Git Hooks
 
 This project uses [husky][husky] to manage git hooks. Hooks are automatically installed when you run `pnpm install`.

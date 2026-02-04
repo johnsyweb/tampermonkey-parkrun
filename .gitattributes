@@ -1,0 +1,8 @@
+# Generated userscript files in the root directory
+# These are built from src/ by scripts/build-scripts.js
+# Use "ours" merge strategy to avoid conflicts - always take local version
+# and rebuild from src/ after merge/rebase
+*.user.js merge=ours
+
+# Generated documentation data
+docs/_data/bookmarklets.json merge=ours
