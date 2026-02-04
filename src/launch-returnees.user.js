@@ -264,9 +264,30 @@
   }
 
   /**
+   * Determines if the latest results page is the launch event (#1)
+   * @param {Document} doc - The document to inspect
+   * @returns {boolean} True if the page indicates event #1
+   */
+  function isLaunchEvent(doc) {
+    const dateSpan = doc.querySelector('h3 span.format-date');
+    const heading = dateSpan?.closest('h3');
+    if (!heading) {
+      return false;
+    }
+
+    const spans = heading.querySelectorAll('span');
+    const lastSpan = spans[spans.length - 1];
+    return lastSpan?.textContent.trim() === '#1';
+  }
+
+  /**
    * Main function to initialize the userscript
    */
   async function init() {
+    if (isLaunchEvent(document)) {
+      return;
+    }
+
     const pathname = window.location.pathname;
     const locationMatch = pathname.match(/\/([^/]+)\/results\/latestresults/);
     const location = locationMatch[1];
@@ -281,5 +302,15 @@
     displayReturnees(returnees, currentParticipants, launchParticipants, origin);
   }
 
-  init();
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      extractCurrentPageParticipants,
+      fetchEventParticipants,
+      displayReturnees,
+      isLaunchEvent,
+      init,
+    };
+  } else {
+    init();
+  }
 })();
