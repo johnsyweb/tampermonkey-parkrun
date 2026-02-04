@@ -1182,12 +1182,18 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
           return parseFloat(result.distance);
         case 'eventNumber':
           return result.eventOnDate ? parseInt(result.eventOnDate.eventNumber, 10) : -1;
-        case 'baseline':
+        case 'baselineFinishers':
           return result.baseline.avgFinishers;
-        case 'onDate':
+        case 'baselineVolunteers':
+          return result.baseline.avgVolunteers;
+        case 'onDateFinishers':
           return result.eventOnDate ? result.eventOnDate.finishers : -1;
-        case 'change':
+        case 'onDateVolunteers':
+          return result.eventOnDate ? result.eventOnDate.volunteers : -1;
+        case 'changeFinishers':
           return result.change ? result.change.finishersChange : -999999;
+        case 'changeVolunteers':
+          return result.change ? result.change.volunteersChange : -999999;
         case 'changePct':
           return result.change ? result.change.finishersPct : -999999;
         default:
@@ -1338,25 +1344,43 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
         info: `Event number on ${dateStr}. Lower numbers indicate newer parkruns.`,
       },
       {
-        label: 'Baseline (Avg)',
-        key: 'baseline',
+        label: 'Baseline (Avg) Finishers',
+        key: 'baselineFinishers',
         align: 'right',
-        info: `12-event baseline average (finishers/volunteers) for events before ${dateStr}.`,
+        info: `12-event baseline average finishers for events before ${dateStr}.`,
       },
       {
-        label: 'On Date',
-        key: 'onDate',
+        label: 'Baseline (Avg) Volunteers',
+        key: 'baselineVolunteers',
         align: 'right',
-        info: `Actual attendance (finishers/volunteers) on ${dateStr}.`,
+        info: `12-event baseline average volunteers for events before ${dateStr}.`,
       },
       {
-        label: 'Change',
-        key: 'change',
+        label: 'On Date Finishers',
+        key: 'onDateFinishers',
         align: 'right',
-        info: 'Difference between actual and baseline (finishers/volunteers).',
+        info: `Actual finishers on ${dateStr}.`,
       },
       {
-        label: 'Change %',
+        label: 'On Date Volunteers',
+        key: 'onDateVolunteers',
+        align: 'right',
+        info: `Actual volunteers on ${dateStr}.`,
+      },
+      {
+        label: 'Change Finishers',
+        key: 'changeFinishers',
+        align: 'right',
+        info: 'Difference between actual and baseline finishers.',
+      },
+      {
+        label: 'Change Volunteers',
+        key: 'changeVolunteers',
+        align: 'right',
+        info: 'Difference between actual and baseline volunteers.',
+      },
+      {
+        label: 'Change % (Finishers)',
         key: 'changePct',
         align: 'right',
         info: 'Percentage change in finishers compared to baseline.',
@@ -1438,15 +1462,21 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
         }
         row.appendChild(eventNumberCell);
 
-        const baselineCell = document.createElement('td');
-        baselineCell.style.padding = '10px';
-        baselineCell.style.textAlign = 'right';
-        baselineCell.innerHTML = `<strong>${result.baseline.avgFinishers}</strong> / ${result.baseline.avgVolunteers}`;
-        row.appendChild(baselineCell);
+        const baselineFinishersCell = document.createElement('td');
+        baselineFinishersCell.style.padding = '10px';
+        baselineFinishersCell.style.textAlign = 'right';
+        baselineFinishersCell.innerHTML = `<strong>${result.baseline.avgFinishers}</strong>`;
+        row.appendChild(baselineFinishersCell);
 
-        const onDateCell = document.createElement('td');
-        onDateCell.style.padding = '10px';
-        onDateCell.style.textAlign = 'right';
+        const baselineVolunteersCell = document.createElement('td');
+        baselineVolunteersCell.style.padding = '10px';
+        baselineVolunteersCell.style.textAlign = 'right';
+        baselineVolunteersCell.textContent = `${result.baseline.avgVolunteers}`;
+        row.appendChild(baselineVolunteersCell);
+
+        const onDateFinishersCell = document.createElement('td');
+        onDateFinishersCell.style.padding = '10px';
+        onDateFinishersCell.style.textAlign = 'right';
         if (result.eventOnDate) {
           const isMax = isFinishersMaxUpToEvent(
             result.historyData,
@@ -1454,32 +1484,51 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
             result.eventOnDate.finishers
           );
           const emoji = isMax ? ' 🏆' : '';
-          onDateCell.innerHTML = `<strong>${result.eventOnDate.finishers}${emoji}</strong> / ${result.eventOnDate.volunteers}`;
+          onDateFinishersCell.innerHTML = `<strong>${result.eventOnDate.finishers}${emoji}</strong>`;
         } else {
-          onDateCell.textContent = '—';
-          onDateCell.style.color = STYLES.subtleTextColor;
+          onDateFinishersCell.textContent = '—';
+          onDateFinishersCell.style.color = STYLES.subtleTextColor;
         }
-        row.appendChild(onDateCell);
+        row.appendChild(onDateFinishersCell);
 
-        const changeCell = document.createElement('td');
-        changeCell.style.padding = '10px';
-        changeCell.style.textAlign = 'right';
+        const onDateVolunteersCell = document.createElement('td');
+        onDateVolunteersCell.style.padding = '10px';
+        onDateVolunteersCell.style.textAlign = 'right';
+        if (result.eventOnDate) {
+          onDateVolunteersCell.textContent = `${result.eventOnDate.volunteers}`;
+        } else {
+          onDateVolunteersCell.textContent = '—';
+          onDateVolunteersCell.style.color = STYLES.subtleTextColor;
+        }
+        row.appendChild(onDateVolunteersCell);
+
+        const changeFinishersCell = document.createElement('td');
+        changeFinishersCell.style.padding = '10px';
+        changeFinishersCell.style.textAlign = 'right';
         if (result.change) {
           const finishersSign = result.change.finishersChange > 0 ? '+' : '';
-          const volunteersSign = result.change.volunteersChange > 0 ? '+' : '';
           const finishersColor =
             result.change.finishersChange > 0 ? STYLES.successColor : STYLES.alertColor;
+          changeFinishersCell.innerHTML = `<span style="color: ${finishersColor};">${finishersSign}${result.change.finishersChange}</span>`;
+        } else {
+          changeFinishersCell.textContent = '—';
+          changeFinishersCell.style.color = STYLES.subtleTextColor;
+        }
+        row.appendChild(changeFinishersCell);
+
+        const changeVolunteersCell = document.createElement('td');
+        changeVolunteersCell.style.padding = '10px';
+        changeVolunteersCell.style.textAlign = 'right';
+        if (result.change) {
+          const volunteersSign = result.change.volunteersChange > 0 ? '+' : '';
           const volunteersColor =
             result.change.volunteersChange > 0 ? STYLES.successColor : STYLES.alertColor;
-          changeCell.innerHTML = `
-          <span style="color: ${finishersColor};">${finishersSign}${result.change.finishersChange}</span> /
-          <span style="color: ${volunteersColor};">${volunteersSign}${result.change.volunteersChange}</span>
-        `;
+          changeVolunteersCell.innerHTML = `<span style="color: ${volunteersColor};">${volunteersSign}${result.change.volunteersChange}</span>`;
         } else {
-          changeCell.textContent = '—';
-          changeCell.style.color = STYLES.subtleTextColor;
+          changeVolunteersCell.textContent = '—';
+          changeVolunteersCell.style.color = STYLES.subtleTextColor;
         }
-        row.appendChild(changeCell);
+        row.appendChild(changeVolunteersCell);
 
         const changePctCell = document.createElement('td');
         changePctCell.style.padding = '10px';

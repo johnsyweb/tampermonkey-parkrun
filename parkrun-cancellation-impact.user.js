@@ -1162,12 +1162,18 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
           return parseFloat(result.distance);
         case 'eventNumber':
           return result.eventOnDate ? parseInt(result.eventOnDate.eventNumber, 10) : -1;
-        case 'baseline':
+        case 'baselineFinishers':
           return result.baseline.avgFinishers;
-        case 'onDate':
+        case 'baselineVolunteers':
+          return result.baseline.avgVolunteers;
+        case 'onDateFinishers':
           return result.eventOnDate ? result.eventOnDate.finishers : -1;
-        case 'change':
+        case 'onDateVolunteers':
+          return result.eventOnDate ? result.eventOnDate.volunteers : -1;
+        case 'changeFinishers':
           return result.change ? result.change.finishersChange : -999999;
+        case 'changeVolunteers':
+          return result.change ? result.change.volunteersChange : -999999;
         case 'changePct':
           return result.change ? result.change.finishersPct : -999999;
         default:
@@ -1298,22 +1304,37 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
       align: 'right',
       info: "Event number on ".concat(dateStr, ". Lower numbers indicate newer parkruns.")
     }, {
-      label: 'Baseline (Avg)',
-      key: 'baseline',
+      label: 'Baseline (Avg) Finishers',
+      key: 'baselineFinishers',
       align: 'right',
-      info: "12-event baseline average (finishers/volunteers) for events before ".concat(dateStr, ".")
+      info: "12-event baseline average finishers for events before ".concat(dateStr, ".")
     }, {
-      label: 'On Date',
-      key: 'onDate',
+      label: 'Baseline (Avg) Volunteers',
+      key: 'baselineVolunteers',
       align: 'right',
-      info: "Actual attendance (finishers/volunteers) on ".concat(dateStr, ".")
+      info: "12-event baseline average volunteers for events before ".concat(dateStr, ".")
     }, {
-      label: 'Change',
-      key: 'change',
+      label: 'On Date Finishers',
+      key: 'onDateFinishers',
       align: 'right',
-      info: 'Difference between actual and baseline (finishers/volunteers).'
+      info: "Actual finishers on ".concat(dateStr, ".")
     }, {
-      label: 'Change %',
+      label: 'On Date Volunteers',
+      key: 'onDateVolunteers',
+      align: 'right',
+      info: "Actual volunteers on ".concat(dateStr, ".")
+    }, {
+      label: 'Change Finishers',
+      key: 'changeFinishers',
+      align: 'right',
+      info: 'Difference between actual and baseline finishers.'
+    }, {
+      label: 'Change Volunteers',
+      key: 'changeVolunteers',
+      align: 'right',
+      info: 'Difference between actual and baseline volunteers.'
+    }, {
+      label: 'Change % (Finishers)',
       key: 'changePct',
       align: 'right',
       info: 'Percentage change in finishers compared to baseline.'
@@ -1385,37 +1406,62 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
           eventNumberCell.style.color = STYLES.subtleTextColor;
         }
         row.appendChild(eventNumberCell);
-        var baselineCell = document.createElement('td');
-        baselineCell.style.padding = '10px';
-        baselineCell.style.textAlign = 'right';
-        baselineCell.innerHTML = "<strong>".concat(result.baseline.avgFinishers, "</strong> / ").concat(result.baseline.avgVolunteers);
-        row.appendChild(baselineCell);
-        var onDateCell = document.createElement('td');
-        onDateCell.style.padding = '10px';
-        onDateCell.style.textAlign = 'right';
+        var baselineFinishersCell = document.createElement('td');
+        baselineFinishersCell.style.padding = '10px';
+        baselineFinishersCell.style.textAlign = 'right';
+        baselineFinishersCell.innerHTML = "<strong>".concat(result.baseline.avgFinishers, "</strong>");
+        row.appendChild(baselineFinishersCell);
+        var baselineVolunteersCell = document.createElement('td');
+        baselineVolunteersCell.style.padding = '10px';
+        baselineVolunteersCell.style.textAlign = 'right';
+        baselineVolunteersCell.textContent = "".concat(result.baseline.avgVolunteers);
+        row.appendChild(baselineVolunteersCell);
+        var onDateFinishersCell = document.createElement('td');
+        onDateFinishersCell.style.padding = '10px';
+        onDateFinishersCell.style.textAlign = 'right';
         if (result.eventOnDate) {
           var isMax = isFinishersMaxUpToEvent(result.historyData, result.eventOnDate.eventNumber, result.eventOnDate.finishers);
           var emoji = isMax ? ' 🏆' : '';
-          onDateCell.innerHTML = "<strong>".concat(result.eventOnDate.finishers).concat(emoji, "</strong> / ").concat(result.eventOnDate.volunteers);
+          onDateFinishersCell.innerHTML = "<strong>".concat(result.eventOnDate.finishers).concat(emoji, "</strong>");
         } else {
-          onDateCell.textContent = '—';
-          onDateCell.style.color = STYLES.subtleTextColor;
+          onDateFinishersCell.textContent = '—';
+          onDateFinishersCell.style.color = STYLES.subtleTextColor;
         }
-        row.appendChild(onDateCell);
-        var changeCell = document.createElement('td');
-        changeCell.style.padding = '10px';
-        changeCell.style.textAlign = 'right';
+        row.appendChild(onDateFinishersCell);
+        var onDateVolunteersCell = document.createElement('td');
+        onDateVolunteersCell.style.padding = '10px';
+        onDateVolunteersCell.style.textAlign = 'right';
+        if (result.eventOnDate) {
+          onDateVolunteersCell.textContent = "".concat(result.eventOnDate.volunteers);
+        } else {
+          onDateVolunteersCell.textContent = '—';
+          onDateVolunteersCell.style.color = STYLES.subtleTextColor;
+        }
+        row.appendChild(onDateVolunteersCell);
+        var changeFinishersCell = document.createElement('td');
+        changeFinishersCell.style.padding = '10px';
+        changeFinishersCell.style.textAlign = 'right';
         if (result.change) {
           var finishersSign = result.change.finishersChange > 0 ? '+' : '';
-          var volunteersSign = result.change.volunteersChange > 0 ? '+' : '';
           var finishersColor = result.change.finishersChange > 0 ? STYLES.successColor : STYLES.alertColor;
-          var volunteersColor = result.change.volunteersChange > 0 ? STYLES.successColor : STYLES.alertColor;
-          changeCell.innerHTML = "\n          <span style=\"color: ".concat(finishersColor, ";\">").concat(finishersSign).concat(result.change.finishersChange, "</span> /\n          <span style=\"color: ").concat(volunteersColor, ";\">").concat(volunteersSign).concat(result.change.volunteersChange, "</span>\n        ");
+          changeFinishersCell.innerHTML = "<span style=\"color: ".concat(finishersColor, ";\">").concat(finishersSign).concat(result.change.finishersChange, "</span>");
         } else {
-          changeCell.textContent = '—';
-          changeCell.style.color = STYLES.subtleTextColor;
+          changeFinishersCell.textContent = '—';
+          changeFinishersCell.style.color = STYLES.subtleTextColor;
         }
-        row.appendChild(changeCell);
+        row.appendChild(changeFinishersCell);
+        var changeVolunteersCell = document.createElement('td');
+        changeVolunteersCell.style.padding = '10px';
+        changeVolunteersCell.style.textAlign = 'right';
+        if (result.change) {
+          var volunteersSign = result.change.volunteersChange > 0 ? '+' : '';
+          var volunteersColor = result.change.volunteersChange > 0 ? STYLES.successColor : STYLES.alertColor;
+          changeVolunteersCell.innerHTML = "<span style=\"color: ".concat(volunteersColor, ";\">").concat(volunteersSign).concat(result.change.volunteersChange, "</span>");
+        } else {
+          changeVolunteersCell.textContent = '—';
+          changeVolunteersCell.style.color = STYLES.subtleTextColor;
+        }
+        row.appendChild(changeVolunteersCell);
         var changePctCell = document.createElement('td');
         changePctCell.style.padding = '10px';
         changePctCell.style.textAlign = 'right';
