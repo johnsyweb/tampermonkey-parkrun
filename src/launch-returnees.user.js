@@ -128,7 +128,7 @@
    * @param {HTMLElement} element - The element to insert
    */
   function insertAfterTitle(element) {
-    const pageTitle = document.querySelector('h1');
+    const pageTitle = document.querySelector('h3');
     if (pageTitle && pageTitle.parentNode) {
       if (pageTitle.nextSibling) {
         pageTitle.parentNode.insertBefore(element, pageTitle.nextSibling);
