@@ -2,12 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    {% assign page_title = page.title | default: site.title %}
-    <title>{{ page_title }} | johnsy.com</title>
+    {% assign page_title_raw = page.title | default: '' %} {% assign clean_title = page_title_raw |
+    split: ' --' | first %} {% if page.url == '/' or page.url == '/tampermonkey-parkrun/' or
+    page.url == '/tampermonkey-parkrun/index.html' %}
+    <title>parkrun Userscripts | johnsy.com</title>
+    {% elsif page.title %}
+    <title>{{ clean_title }} | johnsy.com</title>
+    {% else %}
+    <title>parkrun Userscripts | johnsy.com</title>
+    {% endif %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#fdf6e3" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#002a35" media="(prefers-color-scheme: dark)" />
+
+    <meta http-equiv="Window-Target" content="_top" />
     <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+    <meta name="MSSmartTagsPreventParsing" content="TRUE" />
     {% assign page_description = page.description | default: site.description %} {% assign
     page_keywords = page.keywords %}
     <meta name="description" content="{{ page_description }}" />
@@ -16,12 +26,7 @@
     {% endif %} {% assign canonical_candidate = page.canonical_url | default: page.url %} {% if
     canonical_candidate %}
     <link rel="canonical" href="{{ canonical_candidate | absolute_url }}" />
-    {% endif %}
-
-    <meta
-      name="application-name"
-      content="{{ page.application_name | default: site.application_name | default: site.name }}"
-    />
+    {% endif %} {% include icons.html %}
 
     <meta property="og:description" content="{{ page_description }}" />
 
@@ -29,8 +34,8 @@
     contains '//' %} {% assign image_url = og_image_source %} {% else %} {% assign image_url =
     site.url | append: og_image_source %} {% endif %}
 
-    <meta property="og:title" content="{{ page.title | default: site.title }}" />
-    <meta property="og:url" content="{{ page.url | absolute_url }}" />
+    <meta property="og:title" content="{{ page.title | default: 'parkrun Userscripts' }}" />
+    <meta property="og:url" content="{{ site.url }}{{ page.url }}" />
     {% if page.date %}
     <meta property="og:type" content="article" />
     {% else %}
@@ -38,7 +43,6 @@
     {% endif %}
     <meta property="og:site_name" content="johnsy.com" />
     <meta property="og:image" content="{{ image_url }}" />
-    <link rel="preload" href="{{ image_url }}" as="image" />
     {% if page.lcp_preload %} {% assign first_script = site.data.scripts | first %} {% if
     first_script.screenshot %}
     <link rel="preload" href="{{ site.url }}{{ first_script.screenshot }}" as="image" />
@@ -62,7 +66,7 @@
     {% endif %}
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="{{ page.title | default: site.title }}" />
+    <meta name="twitter:title" content="{{ page.title | default: 'parkrun Userscripts' }}" />
     <meta name="twitter:description" content="{{ page_description }}" />
     <meta name="twitter:image" content="{{ image_url }}" />
 
@@ -76,32 +80,52 @@
     <meta name="twitter:data2" content="Updated: {{ page.updated | date: '%Y-%m-%d %H:%M:%S' }}" />
     {% endif %}
 
-    <!-- Preload only above-the-fold fonts to reduce CLS from "web font loaded" -->
+    <!-- JSON-LD Structured Data for Breadcrumbs -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {"@type":"ListItem","position":1,"name":"johnsy.com","item":"https://www.johnsy.com/"},
+          {"@type":"ListItem","position":2,"name":"parkrun utility","item":"https://www.johnsy.com/parkrun-utility/"},
+          {"@type":"ListItem","position":3,"name":"parkrun Userscripts","item":"https://www.johnsy.com{{ site.baseurl }}/"}
+          {% if page.url != '/' and page.url != '/tampermonkey-parkrun/' and page.url != '/tampermonkey-parkrun/index.html' %}
+          ,{"@type":"ListItem","position":4,"name":"{{ page.title | escape }}","item":"{{ page.url | absolute_url }}"}
+          {% endif %}
+        ]
+      }
+    </script>
+
     <link
       rel="preload"
-      href="{{ site.url }}/assets/fonts/Atkinson-Hyperlegible-Regular.woff2"
+      href="https://www.johnsy.com/assets/fonts/Atkinson-Hyperlegible-Regular.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
     <link
       rel="preload"
-      href="{{ site.url }}/assets/fonts/Atkinson-Hyperlegible-Bold.woff2"
+      href="https://www.johnsy.com/assets/fonts/Atkinson-Hyperlegible-Bold.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="https://www.johnsy.com/assets/fonts/Atkinson-Hyperlegible-Italic.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="https://www.johnsy.com/assets/fonts/Atkinson-Hyperlegible-BoldItalic.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
 
-    <link href="{{ site.url }}/assets/css/style.css" rel="stylesheet" />
-    <link
-      href="{{ site.url }}/assets/css/colors-dark.css"
-      rel="alternate stylesheet"
-      title="Dark"
-    />
-    <link href="{{ site.url }}/assets/css/colors-light.css" rel="stylesheet" title="Light" />
-    <link href="{{ site.baseurl }}/style.css" rel="stylesheet" />
-
-    {% include icons.html %}
+    <link href="{{ '/style.css' | relative_url }}" rel="stylesheet" />
 
     <link rel="Start" href="{{ site.url }}/" title="Back to the start" />
     <link rel="Help" href="{{ site.url }}/about/" title="What is the point of this website?" />
@@ -132,91 +156,45 @@
   <body>
     <a href="#content" class="skip-link">Skip to main content</a>
     <header id="header">
-      <h1><a href="{{ site.url }}{{ site.baseurl }}/">{{ site.name }}</a></h1>
-      <p>{{ site.description_html }}</p>
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="{{ site.url }}/">johnsy.com</a>
+        <span aria-hidden="true">/</span>
+        <a href="{{ site.url }}/parkrun-utility/">parkrun utility</a>
+        <span aria-hidden="true">/</span>
+        {% if page.url != '/' and page.url != '/tampermonkey-parkrun/' and page.url !=
+        '/tampermonkey-parkrun/index.html' %}
+        <a href="{{ site.url }}{{ site.baseurl }}/">parkrun Userscripts</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{{ page.title | default: 'Page' }}</span>
+        {% else %}
+        <span aria-current="page">parkrun Userscripts</span>
+        {% endif %}
+      </nav>
+      <h1>
+        {% if page.url != '/' and page.url != '/tampermonkey-parkrun/' and page.url !=
+        '/tampermonkey-parkrun/index.html' %}{{ page.title }}{% else %}parkrun Userscripts{% endif
+        %}
+      </h1>
     </header>
 
     <div id="page">
-      <div id="sidebar">
-        <nav aria-label="Main navigation">
-          <ul class="main-nav">
-            <li>
-              <a
-                href="{{ site.url }}{{ site.baseurl }}/"
-                accesskey="h"
-                title="Home (Access key: Alt+Shift+H on Windows, Control+Option+H on macOS)"
-                ><span class="accesskey-letter">H</span><span class="accesskey-rest">ome</span></a
-              >
-            </li>
-            <li>
-              <a
-                href="{{ site.url }}/about/"
-                accesskey="a"
-                title="About (Access key: Alt+Shift+A on Windows, Control+Option+A on macOS)"
-                ><span class="accesskey-letter">A</span><span class="accesskey-rest">bout</span></a
-              >
-            </li>
-            <li>
-              <a
-                href="{{ site.url }}/blog/"
-                accesskey="b"
-                title="Blog (Access key: Alt+Shift+B on Windows, Control+Option+B on macOS)"
-                ><span class="accesskey-letter">B</span><span class="accesskey-rest">log</span></a
-              >
-            </li>
-            <li>
-              <a
-                href="{{ site.url }}/contact/"
-                accesskey="c"
-                title="Contact (Access key: Alt+Shift+C on Windows, Control+Option+C on macOS)"
-                ><span class="accesskey-letter">C</span
-                ><span class="accesskey-rest">ontact</span></a
-              >
-            </li>
-            <li>
-              <a
-                href="{{ site.url }}/parkrun-utility/"
-                accesskey="p"
-                title="parkrun utility (Access key: Alt+Shift+P on Windows, Control+Option+P on macOS)"
-                ><span class="accesskey-letter">p</span
-                ><span class="accesskey-rest">arkrun utility</span></a
-              >
-            </li>
-            <li>
-              <a
-                href="{{ site.url }}/tampermonkey-parkrun/"
-                accesskey="u"
-                title="parkrun Userscripts (Access key: Alt+Shift+U on Windows, Control+Option+U on macOS)"
-                ><span class="accesskey-letter">U</span
-                ><span class="accesskey-rest">serscripts</span></a
-              >
-            </li>
-            <li>
-              <a
-                href="{{ site.url }}/search/"
-                accesskey="s"
-                title="Search (Access key: Alt+Shift+S on Windows, Control+Option+S on macOS)"
-                ><span class="accesskey-letter">S</span><span class="accesskey-rest">earch</span></a
-              >
-            </li>
-          </ul>
-        </nav>
-      </div>
-
-      <main id="content" role="main">{{ content }}</main>
+      <main id="content" role="main">{% include header.html %} {{ content }}</main>
     </div>
 
     <footer id="footer">
       <p>
-        Licensed under MIT. Not officially associated with parkrun. Written by parkrun volunteers
-        for parkrun volunteers.
+        By
+        <a href="{{ site.url }}/" rel="author">Pete Johns</a>
+        (<a href="https://github.com/johnsyweb" rel="me">@johnsyweb</a>
+        ) • Licensed under
+        <a href="https://github.com/johnsyweb/tampermonkey-parkrun/blob/main/LICENSE">MIT</a>
+        • Not officially associated with parkrun • Written by parkrun volunteers for parkrun
+        volunteers
       </p>
       <p>
         Hosted by <a href="https://github.com">GitHub</a>, powered by
         <a href="https://jekyllrb.com">Jekyll</a>.
       </p>
     </footer>
-
-    <script src="{{ site.url }}/assets/js/mobile-menu.min.js" defer></script>
   </body>
 </html>

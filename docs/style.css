@@ -1,3 +1,219 @@
+/* Atkinson Hyperlegible – loaded from main site assets */
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('https://www.johnsy.com/assets/fonts/Atkinson-Hyperlegible-Regular.woff2')
+    format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('https://www.johnsy.com/assets/fonts/Atkinson-Hyperlegible-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('https://www.johnsy.com/assets/fonts/Atkinson-Hyperlegible-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('https://www.johnsy.com/assets/fonts/Atkinson-Hyperlegible-BoldItalic.woff2')
+    format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* parkrun colour palette */
+:root {
+  --parkrun-aubergine: #4c1a57;
+  --parkrun-apricot: #f7a541;
+  --parkrun-white: #ffffff;
+  --parkrun-black: #000000;
+  --parkrun-grey: #666666;
+  --parkrun-light-grey: #f5f5f5;
+}
+
+body {
+  font-family:
+    'Atkinson Hyperlegible',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    sans-serif;
+  color: var(--parkrun-black);
+  background: var(--parkrun-light-grey);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--parkrun-apricot);
+  color: var(--parkrun-black);
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform 0.2s ease;
+  z-index: 1000;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Full-width breakout so header/footer span viewport when main site CSS constrains the page */
+#header,
+#footer {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  box-sizing: border-box;
+}
+
+#header {
+  background-color: var(--parkrun-aubergine);
+  color: var(--parkrun-white);
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#header h1 {
+  margin: 0.75rem 0 0 0;
+  color: var(--parkrun-white);
+}
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.breadcrumbs a {
+  color: var(--parkrun-apricot);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.breadcrumbs a:hover,
+.breadcrumbs a:focus-visible {
+  text-decoration: underline;
+}
+
+.breadcrumbs span[aria-hidden='true'] {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.breadcrumbs span[aria-current='page'] {
+  color: var(--parkrun-white);
+  font-weight: 600;
+}
+
+#footer {
+  background-color: var(--parkrun-aubergine);
+  color: var(--parkrun-white);
+  padding: 1rem 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin-top: 2rem;
+}
+
+#footer a {
+  color: var(--parkrun-apricot);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+#footer a:hover,
+#footer a:focus-visible {
+  text-decoration: underline;
+}
+
+#footer p {
+  margin: 0.5rem 0;
+}
+
+#page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: block;
+}
+
+#content {
+  background: var(--parkrun-white);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+#content h2 {
+  color: var(--parkrun-aubergine);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+#content h2:first-child {
+  margin-top: 0;
+}
+
+#content a {
+  color: var(--parkrun-aubergine);
+  text-decoration: underline;
+}
+
+#content a:hover,
+#content a:focus-visible {
+  color: var(--parkrun-apricot);
+}
+
+#content a.script-install-button,
+#content a.script-install-button:hover,
+#content a.script-install-button:focus-visible,
+#content a.script-install-button:active {
+  color: var(--parkrun-white);
+}
+
+#content .script-item a[href*='raw.githubusercontent'],
+#content .script-item a[href*='raw.githubusercontent']:hover,
+#content .script-item a[href*='raw.githubusercontent']:focus-visible {
+  color: var(--parkrun-white);
+}
+
+.back-link {
+  margin: 0 0 1rem 0;
+}
+
 ul {
   list-style-type: none;
 }
@@ -16,6 +232,28 @@ p img {
   width: 800px;
 }
 
+/* Code / pre blocks: contain long lines and scroll horizontally */
+#content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  background: var(--parkrun-light-grey);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  -webkit-overflow-scrolling: touch;
+}
+
+#content pre code {
+  display: block;
+  white-space: pre;
+  padding: 0;
+  background: none;
+  color: var(--parkrun-black);
+}
+
 /* Grid dimensions: scripts/docs-layout.js parses columns and gap from here for thumbnail max-width. */
 .scripts-grid {
   display: grid;
@@ -25,19 +263,13 @@ p img {
   width: 100%;
 }
 
-/* Override page width for wider layout */
-#page {
-  max-width: 1600px !important;
-  width: 95% !important;
-  margin: 0 auto !important;
-}
-
 .script-item {
-  background: #f9f9f9;
+  background: var(--parkrun-light-grey);
   border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .script-item h3 {
@@ -72,43 +304,16 @@ p img {
   display: inline-block;
   margin: 20px;
   padding: 10px 20px;
-  background: #2b223d;
-  color: white;
+  background: var(--parkrun-aubergine);
+  color: var(--parkrun-white);
   border-radius: 4px;
   text-decoration: none;
   font-weight: bold;
 }
 
-.script-item a[href*='raw.githubusercontent']:hover {
+.script-item a[href*='raw.githubusercontent']:hover,
+.script-item a[href*='raw.githubusercontent']:focus-visible {
   background: #3d2f4f;
-}
-
-/* Per-script install CTA button */
-.script-install-cta {
-  margin: 1.5em 0;
-}
-
-.script-install-button {
-  display: inline-block;
-  padding: 0.75em 1.75em;
-  background: #2b223d;
-  color: #ffffff;
-  border-radius: 999px;
-  font-weight: 700;
-  text-decoration: none;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-.script-install-button:hover {
-  background: #3d2f4f;
-}
-
-/* Bookmarklet CTA button (shares base style, tweaks spacing) */
-.script-bookmarklet-button {
-  margin-top: 0.5em;
 }
 
 .script-item h3 a {
@@ -120,13 +325,53 @@ p img {
   text-decoration: underline;
 }
 
+/* Per-script install CTA button */
+.script-install-cta {
+  margin: 1.5em 0;
+}
+
+.script-install-button {
+  display: inline-block;
+  padding: 0.75em 1.75em;
+  background: var(--parkrun-aubergine);
+  color: var(--parkrun-white);
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.script-install-button:hover {
+  background: #3d2f4f;
+  color: var(--parkrun-white);
+}
+
+.script-install-button:focus-visible {
+  color: var(--parkrun-white);
+  outline: 3px solid var(--parkrun-apricot);
+  outline-offset: 2px;
+}
+
+.script-install-button:active {
+  background: #1f1929;
+  color: var(--parkrun-white);
+}
+
+/* Bookmarklet CTA button (shares base style, tweaks spacing) */
+.script-bookmarklet-button {
+  margin-top: 0.5em;
+}
+
 /* Per-script page metadata */
 .script-meta {
   margin: 2em 0 0;
   padding: 1.5em 1.75em;
   border-radius: 12px;
-  background: #f9f9fb;
-  border: 1px solid #e3e3f0;
+  background: var(--parkrun-light-grey);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
@@ -139,13 +384,13 @@ p img {
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #55516a;
+  color: var(--parkrun-grey);
 }
 
 .script-meta dd {
   margin: 0;
   font-size: 0.95rem;
-  color: #1f1633;
+  color: var(--parkrun-black);
 }
 
 @media (max-width: 768px) {

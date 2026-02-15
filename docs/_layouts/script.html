@@ -3,8 +3,6 @@ layout: default
 ---
 
 {% assign script = site.data.scripts | where: "slug", page.slug | first %} {% if script %}
-<h1>{{ script.name }}</h1>
-
 <p>{{ script.description }}</p>
 
 <h2>What is a userscript?</h2>
