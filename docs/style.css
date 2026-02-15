@@ -394,6 +394,10 @@ p img {
 }
 
 @media (max-width: 768px) {
+  .scripts-grid {
+    grid-template-columns: 1fr;
+  }
+
   .script-meta {
     grid-template-columns: 1fr;
     row-gap: 0.25em;
