@@ -35,7 +35,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-charts.user.js
-// @version      1.1.2
+// @version      1.1.3
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
