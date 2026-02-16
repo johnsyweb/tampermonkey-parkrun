@@ -7,6 +7,7 @@ const {
   getBaselineEventsBefore,
   getCancellationSaturdays,
   isFinishersMaxUpToEvent,
+  isInvalidHistoryData,
   parseDateUTC,
 } = require('../src/parkrun-cancellation-impact.user.js');
 
@@ -730,5 +731,57 @@ describe('isFinishersMaxUpToEvent', () => {
 
     // Event 4 with 200 finishers equals the max from event 2, so it's a max
     expect(isFinishersMaxUpToEvent(historyData, '4', 200)).toBe(true);
+  });
+});
+
+describe('isInvalidHistoryData', () => {
+  test('returns true for null', () => {
+    expect(isInvalidHistoryData(null)).toBe(true);
+  });
+
+  test('returns true for undefined', () => {
+    expect(isInvalidHistoryData(undefined)).toBe(true);
+  });
+
+  test('returns true for WAF response (JavaScript is disabled)', () => {
+    expect(
+      isInvalidHistoryData({
+        eventName: 'berwicksprings',
+        title: 'JavaScript is disabled',
+        eventNumbers: [],
+        dates: [],
+        rawDates: [],
+        finishers: [],
+        volunteers: [],
+      })
+    ).toBe(true);
+  });
+
+  test('returns false for valid history data with events', () => {
+    expect(
+      isInvalidHistoryData({
+        eventName: 'albertmelbourne',
+        title: 'Albert Melbourne parkrun',
+        eventNumbers: ['1', '2', '3'],
+        dates: ['1 Jan 2025', '8 Jan 2025', '15 Jan 2025'],
+        rawDates: ['2025-01-01', '2025-01-08', '2025-01-15'],
+        finishers: [100, 120, 110],
+        volunteers: [20, 22, 21],
+      })
+    ).toBe(false);
+  });
+
+  test('returns false for valid history data with no events (new event)', () => {
+    expect(
+      isInvalidHistoryData({
+        eventName: 'newevent',
+        title: 'New Event parkrun',
+        eventNumbers: [],
+        dates: [],
+        rawDates: [],
+        finishers: [],
+        volunteers: [],
+      })
+    ).toBe(false);
   });
 });

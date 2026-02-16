@@ -272,6 +272,12 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
   return targetFinishers === maxUpToTarget;
 }
 
+const WAF_TITLE = 'JavaScript is disabled';
+
+function isInvalidHistoryData(data) {
+  return !data || data.title === WAF_TITLE;
+}
+
 (function () {
   'use strict';
 
@@ -487,18 +493,21 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
     const CACHE_KEY = `parkrun_history_${eventName}`;
 
     try {
-      // Check cache first
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         try {
           const { data, timestamp } = JSON.parse(cached);
-          const age = Date.now() - timestamp;
-
-          if (age < CACHE_DURATION_MS) {
-            console.log(
-              `Using cached history for ${eventName} (${Math.round(age / 1000 / 60)} minutes old)`
-            );
-            return data;
+          if (isInvalidHistoryData(data)) {
+            localStorage.removeItem(CACHE_KEY);
+            console.log(`Discarding invalid cached history for ${eventName}, re-fetching`);
+          } else {
+            const age = Date.now() - timestamp;
+            if (age < CACHE_DURATION_MS) {
+              console.log(
+                `Using cached history for ${eventName} (${Math.round(age / 1000 / 60)} minutes old)`
+              );
+              return data;
+            }
           }
         } catch (parseError) {
           console.log(`Cache parse error for ${eventName}, fetching fresh data`, parseError);
@@ -563,7 +572,13 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
         volunteers,
       };
 
-      // Cache the result
+      if (isInvalidHistoryData(historyData)) {
+        console.warn(
+          `Event history for ${eventName} looks invalid (e.g. WAF block), not caching. Retry later.`
+        );
+        return null;
+      }
+
       try {
         localStorage.setItem(
           CACHE_KEY,
@@ -2324,6 +2339,7 @@ if (typeof module !== 'undefined' && module.exports) {
     getBaselineEventsBefore,
     getCancellationSaturdays,
     isFinishersMaxUpToEvent,
+    isInvalidHistoryData,
     parseDateUTC,
   };
 }
