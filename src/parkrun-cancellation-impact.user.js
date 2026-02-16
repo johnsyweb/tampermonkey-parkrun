@@ -86,7 +86,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 function detectAllEventGaps(historyData, referenceDate) {
-  const dates = historyData.rawDates.map((d) => parseDateUTC(d));
+  const dates = historyData.rawDates.map((d) => parseDateString(d));
 
   if (dates.length < 1) {
     return [];
@@ -111,14 +111,14 @@ function detectAllEventGaps(historyData, referenceDate) {
   }
 
   if (referenceDate && dates.length >= 1) {
-    const lastUTC = dates[dates.length - 1];
-    const refStr = referenceDate.toISOString().split('T')[0];
-    const refUTC = parseDateUTC(refStr);
-    const daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+    const lastDate = dates[dates.length - 1];
+    const refStr = toLocalDateString(referenceDate);
+    const refDate = parseDateString(refStr);
+    const daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
     if (daysDiff > GAP_THRESHOLD_DAYS) {
       gaps.push({
-        gapStartDate: lastUTC,
-        gapEndDate: refUTC,
+        gapStartDate: lastDate,
+        gapEndDate: refDate,
         daysDiff,
         eventsBefore: dates.length,
         eventsAfter: 0,
@@ -130,7 +130,7 @@ function detectAllEventGaps(historyData, referenceDate) {
 }
 
 function detectEventGap(historyData, referenceDate) {
-  const dates = historyData.rawDates.map((d) => parseDateUTC(d));
+  const dates = historyData.rawDates.map((d) => parseDateString(d));
 
   if (dates.length < 1) {
     return null;
@@ -160,14 +160,14 @@ function detectEventGap(historyData, referenceDate) {
 
   // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
   if (referenceDate && dates.length >= 1) {
-    const lastUTC = dates[dates.length - 1];
-    const refStr = referenceDate.toISOString().split('T')[0];
-    const refUTC = parseDateUTC(refStr);
-    const daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+    const lastDate = dates[dates.length - 1];
+    const refStr = toLocalDateString(referenceDate);
+    const refDate = parseDateString(refStr);
+    const daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
     if (daysDiff > GAP_THRESHOLD_DAYS) {
       return {
-        gapStartDate: lastUTC,
-        gapEndDate: refUTC,
+        gapStartDate: lastDate,
+        gapEndDate: refDate,
         daysDiff,
         eventsBefore: dates.length,
         eventsAfter: 0,
@@ -199,12 +199,12 @@ function filterEventsByDateRange(historyData, startDate, endDate) {
 
 function getBaselineEventsBefore(historyData, targetDate, n = BASELINE_EVENTS) {
   const targetStr = targetDate.toISOString().split('T')[0];
-  const targetUTC = parseDateUTC(targetStr);
+  const parsedTarget = parseDateString(targetStr);
 
   const indices = [];
   for (let i = historyData.rawDates.length - 1; i >= 0; i--) {
-    const eventUTC = parseDateUTC(historyData.rawDates[i]);
-    if (eventUTC < targetUTC) {
+    const eventDate = parseDateString(historyData.rawDates[i]);
+    if (eventDate < parsedTarget) {
       indices.push(i);
       if (indices.length >= n) break;
     }
@@ -221,46 +221,72 @@ function getBaselineEventsBefore(historyData, targetDate, n = BASELINE_EVENTS) {
   const window =
     indices.length > 0
       ? {
-          start: parseDateUTC(historyData.rawDates[indices[0]]),
-          end: parseDateUTC(historyData.rawDates[indices[indices.length - 1]]),
+          start: parseDateString(historyData.rawDates[indices[0]]),
+          end: parseDateString(historyData.rawDates[indices[indices.length - 1]]),
         }
-      : { start: new Date(targetUTC), end: new Date(targetUTC) };
+      : { start: new Date(parsedTarget), end: new Date(parsedTarget) };
 
   return { filtered, window, baseline };
 }
+function dayOfWeekForDateString(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const q = d;
+  const month = m < 3 ? m + 12 : m;
+  const year = m < 3 ? y - 1 : y;
+  const K = year % 100;
+  const J = Math.floor(year / 100);
+  const h =
+    (q + Math.floor((13 * (month + 1)) / 5) + K + Math.floor(K / 4) + Math.floor(J / 4) - 2 * J) %
+    7;
+  return (h + 6) % 7; // 0=Sun, 6=Sat
+}
+
+function addDaysToDateString(dateStr, days) {
+  const d = parseDateString(dateStr);
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const result = new Date(d.getTime() + days * msPerDay);
+  return result.toISOString().split('T')[0];
+}
+
 function getCancellationSaturdays(gapStartDate, gapEndDate) {
   const saturdays = [];
-
   const startStr = gapStartDate.toISOString().split('T')[0];
-  const startDate = parseDateUTC(startStr);
-  const startDayOfWeek = startDate.getUTCDay();
+  const startDayOfWeek = dayOfWeekForDateString(startStr);
 
   let daysUntilSaturday = (6 - startDayOfWeek) % 7;
   if (daysUntilSaturday === 0) {
     daysUntilSaturday = 7;
   }
 
-  const current = new Date(startDate);
-  current.setUTCDate(current.getUTCDate() + daysUntilSaturday);
+  let currentStr = addDaysToDateString(startStr, daysUntilSaturday);
+  let current = parseDateString(currentStr);
 
   while (current < gapEndDate) {
     saturdays.push(new Date(current));
-    current.setUTCDate(current.getUTCDate() + 7);
+    currentStr = addDaysToDateString(currentStr, 7);
+    current = parseDateString(currentStr);
   }
 
   return saturdays;
 }
 
-function parseDateUTC(dateStr) {
+function parseDateString(dateStr) {
   return new Date(`${dateStr}T00:00:00Z`);
+}
+
+function toLocalDateString(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 function getNotHeldLabel(historyData, cancellationDate) {
   if (!historyData?.rawDates?.length) return null;
-  const launchUTC = parseDateUTC(historyData.rawDates[0]);
+  const launchDate = parseDateString(historyData.rawDates[0]);
   const cancelStr = cancellationDate.toISOString().split('T')[0];
-  const cancelUTC = parseDateUTC(cancelStr);
-  if (launchUTC <= cancelUTC) return null;
+  const cancelDate = parseDateString(cancelStr);
+  if (launchDate <= cancelDate) return null;
   return `Launched ${historyData.dates[0]}`;
 }
 
@@ -2351,6 +2377,7 @@ if (typeof module !== 'undefined' && module.exports) {
     getNotHeldLabel,
     isFinishersMaxUpToEvent,
     isInvalidHistoryData,
-    parseDateUTC,
+    parseDateString,
+    toLocalDateString,
   };
 }

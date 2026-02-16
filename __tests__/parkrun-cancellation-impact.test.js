@@ -9,7 +9,8 @@ const {
   getNotHeldLabel,
   isFinishersMaxUpToEvent,
   isInvalidHistoryData,
-  parseDateUTC,
+  parseDateString,
+  toLocalDateString,
 } = require('../src/parkrun-cancellation-impact.user.js');
 
 describe('parkrun-cancellation-impact', () => {
@@ -98,7 +99,7 @@ describe('parkrun-cancellation-impact', () => {
         finishers: [900, 950, 940],
         volunteers: [45, 50, 48],
       };
-      const referenceDate = parseDateUTC('2025-01-30');
+      const referenceDate = parseDateString('2025-01-30');
 
       const gap = detectEventGap(historyData, referenceDate);
 
@@ -117,7 +118,7 @@ describe('parkrun-cancellation-impact', () => {
         finishers: [900, 950, 940],
         volunteers: [45, 50, 48],
       };
-      const referenceDate = parseDateUTC('2025-01-25');
+      const referenceDate = parseDateString('2025-01-25');
 
       const gap = detectEventGap(historyData, referenceDate);
 
@@ -131,7 +132,7 @@ describe('parkrun-cancellation-impact', () => {
         finishers: [900, 950, 940],
         volunteers: [45, 50, 48],
       };
-      const referenceDate = parseDateUTC('2025-01-20');
+      const referenceDate = parseDateString('2025-01-20');
 
       const gap = detectEventGap(historyData, referenceDate);
 
@@ -145,7 +146,7 @@ describe('parkrun-cancellation-impact', () => {
         finishers: [940],
         volunteers: [48],
       };
-      const referenceDate = parseDateUTC('2025-01-30');
+      const referenceDate = parseDateString('2025-01-30');
 
       const gap = detectEventGap(historyData, referenceDate);
 
@@ -164,7 +165,7 @@ describe('parkrun-cancellation-impact', () => {
         finishers: [900, 950, 940],
         volunteers: [45, 50, 48],
       };
-      const referenceDate = parseDateUTC('2025-01-30');
+      const referenceDate = parseDateString('2025-01-30');
 
       const gaps = detectAllEventGaps(historyData, referenceDate);
 
@@ -191,7 +192,7 @@ describe('parkrun-cancellation-impact', () => {
         volunteers.push(15 + w);
       }
       const historyData = { rawDates, dates, finishers, volunteers };
-      const targetDate = parseDateUTC('2025-04-20'); // after all 15
+      const targetDate = parseDateString('2025-04-20'); // after all 15
 
       const result = getBaselineEventsBefore(historyData, targetDate);
 
@@ -210,7 +211,7 @@ describe('parkrun-cancellation-impact', () => {
         finishers: [180, 210, 240, 230],
         volunteers: [12, 14, 16, 15],
       };
-      const targetDate = parseDateUTC('2025-02-01'); // cancellation on week 5
+      const targetDate = parseDateString('2025-02-01'); // cancellation on week 5
 
       const result = getBaselineEventsBefore(historyData, targetDate);
 
@@ -237,7 +238,7 @@ describe('parkrun-cancellation-impact', () => {
         volunteers.push(10);
       }
       const historyData = { rawDates, dates, finishers, volunteers };
-      const targetDate = parseDateUTC('2025-03-29'); // after 12th event
+      const targetDate = parseDateString('2025-03-29'); // after 12th event
 
       const result = getBaselineEventsBefore(historyData, targetDate);
 
@@ -254,7 +255,7 @@ describe('parkrun-cancellation-impact', () => {
         finishers: [100, 110],
         volunteers: [10, 12],
       };
-      const targetDate = parseDateUTC('2025-01-15');
+      const targetDate = parseDateString('2025-01-15');
 
       const result = getBaselineEventsBefore(historyData, targetDate);
 
@@ -273,7 +274,7 @@ describe('parkrun-cancellation-impact', () => {
         finishers: [150, 180],
         volunteers: [12, 14],
       };
-      const targetDate = parseDateUTC('2025-01-11'); // cancel on week 2, only 4 Jan is before
+      const targetDate = parseDateString('2025-01-11'); // cancel on week 2, only 4 Jan is before
 
       const result = getBaselineEventsBefore(historyData, targetDate);
 
@@ -291,7 +292,7 @@ describe('parkrun-cancellation-impact', () => {
         finishers: [150, 180],
         volunteers: [12, 14],
       };
-      const targetDate = parseDateUTC('2025-01-18'); // cancel on week 3
+      const targetDate = parseDateString('2025-01-18'); // cancel on week 3
 
       const result = getBaselineEventsBefore(historyData, targetDate);
 
@@ -317,7 +318,7 @@ describe('parkrun-cancellation-impact', () => {
         volunteers.push(10);
       }
       const historyData = { rawDates, dates, finishers, volunteers };
-      const targetDate = parseDateUTC('2025-06-01');
+      const targetDate = parseDateString('2025-06-01');
 
       const result = getBaselineEventsBefore(historyData, targetDate, 5);
 
@@ -532,8 +533,8 @@ describe('parkrun-cancellation-impact', () => {
     });
 
     test('correctly calculates Saturdays for 1 Oct to 22 Oct gap (should be 8 Oct and 15 Oct)', () => {
-      const gapStart = parseDateUTC('2022-10-01');
-      const gapEnd = parseDateUTC('2022-10-22');
+      const gapStart = parseDateString('2022-10-01');
+      const gapEnd = parseDateString('2022-10-22');
 
       const saturdays = getCancellationSaturdays(gapStart, gapEnd);
 
@@ -543,8 +544,8 @@ describe('parkrun-cancellation-impact', () => {
     });
 
     test('correctly calculates Saturdays for 22 Oct to 5 Nov gap (should be 29 Oct)', () => {
-      const gapStart = parseDateUTC('2022-10-22');
-      const gapEnd = parseDateUTC('2022-11-05');
+      const gapStart = parseDateString('2022-10-22');
+      const gapEnd = parseDateString('2022-11-05');
 
       const saturdays = getCancellationSaturdays(gapStart, gapEnd);
 
@@ -553,8 +554,8 @@ describe('parkrun-cancellation-impact', () => {
     });
 
     test('verifies all calculated Saturdays are actually Saturdays', () => {
-      const gapStart = parseDateUTC('2022-10-01');
-      const gapEnd = parseDateUTC('2022-11-05');
+      const gapStart = parseDateString('2022-10-01');
+      const gapEnd = parseDateString('2022-11-05');
 
       const saturdays = getCancellationSaturdays(gapStart, gapEnd);
 
@@ -567,8 +568,8 @@ describe('parkrun-cancellation-impact', () => {
 
     test('gap with no Saturdays (end date same week)', () => {
       const saturdays = getCancellationSaturdays(
-        parseDateUTC('2025-01-08'),
-        parseDateUTC('2025-01-15')
+        parseDateString('2025-01-08'),
+        parseDateString('2025-01-15')
       );
       expect(saturdays.length).toBe(1);
       expect(saturdays[0].toISOString().split('T')[0]).toBe('2025-01-11');
@@ -576,8 +577,8 @@ describe('parkrun-cancellation-impact', () => {
 
     test('gap with exactly 15 days', () => {
       const saturdays = getCancellationSaturdays(
-        parseDateUTC('2025-01-08'),
-        parseDateUTC('2025-01-23')
+        parseDateString('2025-01-08'),
+        parseDateString('2025-01-23')
       );
       expect(saturdays.length).toBe(2);
       expect(saturdays[0].toISOString().split('T')[0]).toBe('2025-01-11');
@@ -586,8 +587,8 @@ describe('parkrun-cancellation-impact', () => {
 
     test('gap spanning multiple weeks', () => {
       const saturdays = getCancellationSaturdays(
-        parseDateUTC('2025-01-01'),
-        parseDateUTC('2025-02-01')
+        parseDateString('2025-01-01'),
+        parseDateString('2025-02-01')
       );
       expect(saturdays.length).toBe(4);
       expect(saturdays[0].toISOString().split('T')[0]).toBe('2025-01-04');
@@ -598,8 +599,8 @@ describe('parkrun-cancellation-impact', () => {
 
     test('gap starting on Saturday (normal case)', () => {
       const saturdays = getCancellationSaturdays(
-        parseDateUTC('2025-01-04'),
-        parseDateUTC('2025-01-25')
+        parseDateString('2025-01-04'),
+        parseDateString('2025-01-25')
       );
       expect(saturdays.length).toBe(2);
       expect(saturdays[0].toISOString().split('T')[0]).toBe('2025-01-11');
@@ -615,7 +616,7 @@ describe('parkrun-cancellation-impact', () => {
       finishers: [200, 210, 220, 230],
       volunteers: [15, 16, 17, 18],
     };
-    const referenceDate = parseDateUTC('2026-01-31');
+    const referenceDate = parseDateString('2026-01-31');
     const gap = detectEventGap(historyData, referenceDate);
     expect(gap).toBeNull();
   });
@@ -627,7 +628,7 @@ describe('parkrun-cancellation-impact', () => {
       finishers: [200, 210, 220, 230],
       volunteers: [15, 16, 17, 18],
     };
-    const referenceDate = parseDateUTC('2026-01-30');
+    const referenceDate = parseDateString('2026-01-30');
     const gap = detectEventGap(historyData, referenceDate);
     expect(gap).toBeNull();
   });
@@ -809,5 +810,17 @@ describe('getNotHeldLabel', () => {
   test('returns null when history has no dates', () => {
     expect(getNotHeldLabel({ rawDates: [], dates: [] }, new Date())).toBe(null);
     expect(getNotHeldLabel(null, new Date())).toBe(null);
+  });
+});
+
+describe('toLocalDateString', () => {
+  test('returns YYYY-MM-DD from local date parts', () => {
+    const date = new Date(2026, 0, 31, 14, 30, 0);
+    expect(toLocalDateString(date)).toBe('2026-01-31');
+  });
+
+  test('pads month and day with zero', () => {
+    const date = new Date(2026, 0, 7);
+    expect(toLocalDateString(date)).toBe('2026-01-07');
   });
 });
