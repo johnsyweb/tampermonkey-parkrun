@@ -46,12 +46,12 @@ function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t =
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -98,9 +98,19 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+function calculateBearing(lat1, lon1, lat2, lon2) {
+  var dLon = (lon2 - lon1) * Math.PI / 180;
+  var lat1r = lat1 * Math.PI / 180;
+  var lat2r = lat2 * Math.PI / 180;
+  var y = Math.sin(dLon) * Math.cos(lat2r);
+  var x = Math.cos(lat1r) * Math.sin(lat2r) - Math.sin(lat1r) * Math.cos(lat2r) * Math.cos(dLon);
+  var bearing = Math.atan2(y, x) * 180 / Math.PI;
+  if (bearing < 0) bearing += 360;
+  return bearing;
+}
 function detectAllEventGaps(historyData, referenceDate) {
   var dates = historyData.rawDates.map(function (d) {
-    return parseDateUTC(d);
+    return parseDateString(d);
   });
   if (dates.length < 1) {
     return [];
@@ -121,14 +131,14 @@ function detectAllEventGaps(historyData, referenceDate) {
     }
   }
   if (referenceDate && dates.length >= 1) {
-    var lastUTC = dates[dates.length - 1];
-    var refStr = referenceDate.toISOString().split('T')[0];
-    var refUTC = parseDateUTC(refStr);
-    var _daysDiff = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+    var lastDate = dates[dates.length - 1];
+    var refStr = toLocalDateString(referenceDate);
+    var refDate = parseDateString(refStr);
+    var _daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
     if (_daysDiff > GAP_THRESHOLD_DAYS) {
       gaps.push({
-        gapStartDate: lastUTC,
-        gapEndDate: refUTC,
+        gapStartDate: lastDate,
+        gapEndDate: refDate,
         daysDiff: _daysDiff,
         eventsBefore: dates.length,
         eventsAfter: 0
@@ -139,7 +149,7 @@ function detectAllEventGaps(historyData, referenceDate) {
 }
 function detectEventGap(historyData, referenceDate) {
   var dates = historyData.rawDates.map(function (d) {
-    return parseDateUTC(d);
+    return parseDateString(d);
   });
   if (dates.length < 1) {
     return null;
@@ -165,14 +175,14 @@ function detectEventGap(historyData, referenceDate) {
 
   // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
   if (referenceDate && dates.length >= 1) {
-    var lastUTC = dates[dates.length - 1];
-    var refStr = referenceDate.toISOString().split('T')[0];
-    var refUTC = parseDateUTC(refStr);
-    var _daysDiff2 = (refUTC - lastUTC) / (1000 * 60 * 60 * 24);
+    var lastDate = dates[dates.length - 1];
+    var refStr = toLocalDateString(referenceDate);
+    var refDate = parseDateString(refStr);
+    var _daysDiff2 = (refDate - lastDate) / (1000 * 60 * 60 * 24);
     if (_daysDiff2 > GAP_THRESHOLD_DAYS) {
       return {
-        gapStartDate: lastUTC,
-        gapEndDate: refUTC,
+        gapStartDate: lastDate,
+        gapEndDate: refDate,
         daysDiff: _daysDiff2,
         eventsBefore: dates.length,
         eventsAfter: 0
@@ -200,11 +210,11 @@ function filterEventsByDateRange(historyData, startDate, endDate) {
 function getBaselineEventsBefore(historyData, targetDate) {
   var n = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : BASELINE_EVENTS;
   var targetStr = targetDate.toISOString().split('T')[0];
-  var targetUTC = parseDateUTC(targetStr);
+  var parsedTarget = parseDateString(targetStr);
   var indices = [];
   for (var i = historyData.rawDates.length - 1; i >= 0; i--) {
-    var eventUTC = parseDateUTC(historyData.rawDates[i]);
-    if (eventUTC < targetUTC) {
+    var eventDate = parseDateString(historyData.rawDates[i]);
+    if (eventDate < parsedTarget) {
       indices.push(i);
       if (indices.length >= n) break;
     }
@@ -223,11 +233,11 @@ function getBaselineEventsBefore(historyData, targetDate) {
   };
   var baseline = calculateBaseline(filtered);
   var window = indices.length > 0 ? {
-    start: parseDateUTC(historyData.rawDates[indices[0]]),
-    end: parseDateUTC(historyData.rawDates[indices[indices.length - 1]])
+    start: parseDateString(historyData.rawDates[indices[0]]),
+    end: parseDateString(historyData.rawDates[indices[indices.length - 1]])
   } : {
-    start: new Date(targetUTC),
-    end: new Date(targetUTC)
+    start: new Date(parsedTarget),
+    end: new Date(parsedTarget)
   };
   return {
     filtered: filtered,
@@ -235,33 +245,59 @@ function getBaselineEventsBefore(historyData, targetDate) {
     baseline: baseline
   };
 }
+function dayOfWeekForDateString(dateStr) {
+  var _dateStr$split$map = dateStr.split('-').map(Number),
+    _dateStr$split$map2 = _slicedToArray(_dateStr$split$map, 3),
+    y = _dateStr$split$map2[0],
+    m = _dateStr$split$map2[1],
+    d = _dateStr$split$map2[2];
+  var q = d;
+  var month = m < 3 ? m + 12 : m;
+  var year = m < 3 ? y - 1 : y;
+  var K = year % 100;
+  var J = Math.floor(year / 100);
+  var h = (q + Math.floor(13 * (month + 1) / 5) + K + Math.floor(K / 4) + Math.floor(J / 4) - 2 * J) % 7;
+  return (h + 6) % 7; // 0=Sun, 6=Sat
+}
+function addDaysToDateString(dateStr, days) {
+  var d = parseDateString(dateStr);
+  var msPerDay = 24 * 60 * 60 * 1000;
+  var result = new Date(d.getTime() + days * msPerDay);
+  return result.toISOString().split('T')[0];
+}
 function getCancellationSaturdays(gapStartDate, gapEndDate) {
   var saturdays = [];
   var startStr = gapStartDate.toISOString().split('T')[0];
-  var startDate = parseDateUTC(startStr);
-  var startDayOfWeek = startDate.getUTCDay();
+  var startDayOfWeek = dayOfWeekForDateString(startStr);
   var daysUntilSaturday = (6 - startDayOfWeek) % 7;
   if (daysUntilSaturday === 0) {
     daysUntilSaturday = 7;
   }
-  var current = new Date(startDate);
-  current.setUTCDate(current.getUTCDate() + daysUntilSaturday);
+  var currentStr = addDaysToDateString(startStr, daysUntilSaturday);
+  var current = parseDateString(currentStr);
   while (current < gapEndDate) {
     saturdays.push(new Date(current));
-    current.setUTCDate(current.getUTCDate() + 7);
+    currentStr = addDaysToDateString(currentStr, 7);
+    current = parseDateString(currentStr);
   }
   return saturdays;
 }
-function parseDateUTC(dateStr) {
+function parseDateString(dateStr) {
   return new Date("".concat(dateStr, "T00:00:00Z"));
+}
+function toLocalDateString(date) {
+  var y = date.getFullYear();
+  var m = String(date.getMonth() + 1).padStart(2, '0');
+  var d = String(date.getDate()).padStart(2, '0');
+  return "".concat(y, "-").concat(m, "-").concat(d);
 }
 function getNotHeldLabel(historyData, cancellationDate) {
   var _historyData$rawDates;
   if (!(historyData !== null && historyData !== void 0 && (_historyData$rawDates = historyData.rawDates) !== null && _historyData$rawDates !== void 0 && _historyData$rawDates.length)) return null;
-  var launchUTC = parseDateUTC(historyData.rawDates[0]);
+  var launchDate = parseDateString(historyData.rawDates[0]);
   var cancelStr = cancellationDate.toISOString().split('T')[0];
-  var cancelUTC = parseDateUTC(cancelStr);
-  if (launchUTC <= cancelUTC) return null;
+  var cancelDate = parseDateString(cancelStr);
+  if (launchDate <= cancelDate) return null;
   return "Launched ".concat(historyData.dates[0]);
 }
 function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers) {
@@ -925,11 +961,11 @@ function isInvalidHistoryData(data) {
             cancellationSaturdays.forEach(function (targetDate) {
               var dateKey = targetDate.toISOString().split('T')[0];
               var results = [];
-              nearbyHistories.forEach(function (_ref3) {
-                var parkrun = _ref3.parkrun,
-                  historyData = _ref3.historyData,
-                  shortName = _ref3.shortName,
-                  distance = _ref3.distance;
+              nearbyHistories.forEach(function (_ref5) {
+                var parkrun = _ref5.parkrun,
+                  historyData = _ref5.historyData,
+                  shortName = _ref5.shortName,
+                  distance = _ref5.distance;
                 var base = getBaselineEventsBefore(historyData, targetDate);
 
                 // Find event on this cancellation date
@@ -1280,6 +1316,7 @@ function isInvalidHistoryData(data) {
     return getBaselineEventsBefore(historyData, targetDate);
   }
   function renderImpactResults(resultsContainer, resultsByDate, cancellationDates, currentDateIndex) {
+    var _state$allParkruns;
     // Get results for current date
     var currentDate = cancellationDates[currentDateIndex];
     var dateKey = currentDate.toISOString().split('T')[0];
@@ -1600,6 +1637,125 @@ function isInvalidHistoryData(data) {
     renderTable(sortedResults);
     tableWrap.appendChild(table);
     resultsSection.appendChild(tableWrap);
+
+    // Impact map: cancelled event at centre, nearby events by bearing and scaled distance
+    var resultsHeld = results.filter(function (r) {
+      return r.eventOnDate != null;
+    });
+    var centreParkrun = (_state$allParkruns = state.allParkruns) === null || _state$allParkruns === void 0 ? void 0 : _state$allParkruns.find(function (p) {
+      var _state$currentEvent;
+      return p.properties.eventname === ((_state$currentEvent = state.currentEvent) === null || _state$currentEvent === void 0 ? void 0 : _state$currentEvent.eventName);
+    });
+    if (resultsHeld.length > 0 && centreParkrun) {
+      var _ref, _state$currentEvent$t, _state$currentEvent2, _state$currentEvent3;
+      var _centreParkrun$geomet = _slicedToArray(centreParkrun.geometry.coordinates, 2),
+        centreLon = _centreParkrun$geomet[0],
+        centreLat = _centreParkrun$geomet[1];
+      var mapPoints = resultsHeld.map(function (r) {
+        var parkrun = state.nearbyParkruns.find(function (p) {
+          return p.properties.eventname === r.eventName;
+        });
+        if (!parkrun) return null;
+        var _parkrun$geometry$coo3 = _slicedToArray(parkrun.geometry.coordinates, 2),
+          lon = _parkrun$geometry$coo3[0],
+          lat = _parkrun$geometry$coo3[1];
+        var bearing = calculateBearing(centreLat, centreLon, lat, lon);
+        var distanceKm = parseFloat(r.distance, 10);
+        var pct = r.change ? r.change.finishersPct : 0;
+        var absPct = Math.abs(pct);
+        var isStable = absPct <= 5;
+        return {
+          result: r,
+          bearing: bearing,
+          distanceKm: distanceKm,
+          pct: pct,
+          isStable: isStable
+        };
+      }).filter(Boolean);
+      var maxDistance = Math.max.apply(Math, _toConsumableArray(mapPoints.map(function (p) {
+        return p.distanceKm;
+      })).concat([1]));
+      var svgSize = 400;
+      var centre = svgSize / 2;
+      var padding = 48;
+      var scale = (centre - padding) / maxDistance;
+      var mapSection = document.createElement('div');
+      mapSection.className = 'parkrun-cancellation-impact-map';
+      mapSection.style.marginTop = '16px';
+      mapSection.style.padding = '12px';
+      mapSection.style.backgroundColor = '#3a3250';
+      mapSection.style.borderRadius = '4px';
+      var mapHeading = document.createElement('h3');
+      mapHeading.textContent = 'Impact map';
+      mapHeading.style.color = STYLES.barColor;
+      mapHeading.style.margin = '0 0 10px 0';
+      mapSection.appendChild(mapHeading);
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', "0 0 ".concat(svgSize, " ").concat(svgSize));
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Map of nearby parkruns: cancelled event at centre, size shows change in finishers.');
+      svg.style.width = '100%';
+      svg.style.maxWidth = '400px';
+      svg.style.height = 'auto';
+      svg.style.display = 'block';
+      svg.style.margin = '0 auto';
+
+      // Centre (cancelled event)
+      var centreCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      centreCircle.setAttribute('cx', String(centre));
+      centreCircle.setAttribute('cy', String(centre));
+      centreCircle.setAttribute('r', '12');
+      centreCircle.setAttribute('fill', STYLES.barColor);
+      centreCircle.setAttribute('stroke', STYLES.gridColor);
+      centreCircle.setAttribute('stroke-width', '2');
+      var centreTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      centreTitle.textContent = "Cancelled: ".concat((_ref = (_state$currentEvent$t = (_state$currentEvent2 = state.currentEvent) === null || _state$currentEvent2 === void 0 ? void 0 : _state$currentEvent2.title) !== null && _state$currentEvent$t !== void 0 ? _state$currentEvent$t : (_state$currentEvent3 = state.currentEvent) === null || _state$currentEvent3 === void 0 ? void 0 : _state$currentEvent3.eventName) !== null && _ref !== void 0 ? _ref : 'Event');
+      centreCircle.appendChild(centreTitle);
+      svg.appendChild(centreCircle);
+      var STABLE_RADIUS = 8;
+      var MIN_RADIUS = 10;
+      var MAX_RADIUS = 28;
+      var PCT_FOR_MAX = 50;
+      mapPoints.forEach(function (_ref2) {
+        var result = _ref2.result,
+          bearing = _ref2.bearing,
+          distanceKm = _ref2.distanceKm,
+          pct = _ref2.pct,
+          isStable = _ref2.isStable;
+        var bearingRad = bearing * Math.PI / 180;
+        var x = centre + scale * distanceKm * Math.sin(bearingRad);
+        var y = centre - scale * distanceKm * Math.cos(bearingRad);
+        var radius = isStable ? STABLE_RADIUS : MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * Math.min(1, Math.abs(pct) / PCT_FOR_MAX);
+        var fill = isStable ? STYLES.subtleTextColor : pct > 0 ? STYLES.successColor : STYLES.alertColor;
+        var sign = pct > 0 ? '+' : "\u2212";
+        var pctText = "".concat(sign).concat(Math.abs(pct).toFixed(1), "%");
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', String(x));
+        circle.setAttribute('cy', String(y));
+        circle.setAttribute('r', String(radius));
+        circle.setAttribute('fill', fill);
+        circle.setAttribute('stroke', STYLES.gridColor);
+        circle.setAttribute('stroke-width', '1');
+        var tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        tooltip.textContent = "".concat(result.displayName, ": ").concat(result.distance, "km, ").concat(pctText, " finishers");
+        circle.appendChild(tooltip);
+        g.appendChild(circle);
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', String(x));
+        text.setAttribute('y', String(y));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'central');
+        text.setAttribute('fill', '#1c1b2a');
+        text.setAttribute('font-size', radius > 14 ? '10' : '8');
+        text.setAttribute('font-weight', 'bold');
+        text.textContent = pctText;
+        g.appendChild(text);
+        svg.appendChild(g);
+      });
+      mapSection.appendChild(svg);
+      resultsSection.appendChild(mapSection);
+    }
 
     // Seasonal trend for cancelled event
     var seasonalTrend = buildSeasonalTrend(state.currentEvent, currentDate);
@@ -2325,6 +2481,7 @@ function isInvalidHistoryData(data) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     calculateBaseline: calculateBaseline,
+    calculateBearing: calculateBearing,
     calculateDistance: calculateDistance,
     detectAllEventGaps: detectAllEventGaps,
     detectEventGap: detectEventGap,
@@ -2334,6 +2491,7 @@ if (typeof module !== 'undefined' && module.exports) {
     getNotHeldLabel: getNotHeldLabel,
     isFinishersMaxUpToEvent: isFinishersMaxUpToEvent,
     isInvalidHistoryData: isInvalidHistoryData,
-    parseDateUTC: parseDateUTC
+    parseDateString: parseDateString,
+    toLocalDateString: toLocalDateString
   };
 }

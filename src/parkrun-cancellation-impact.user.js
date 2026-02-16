@@ -85,6 +85,17 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+function calculateBearing(lat1, lon1, lat2, lon2) {
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const lat1r = (lat1 * Math.PI) / 180;
+  const lat2r = (lat2 * Math.PI) / 180;
+  const y = Math.sin(dLon) * Math.cos(lat2r);
+  const x = Math.cos(lat1r) * Math.sin(lat2r) - Math.sin(lat1r) * Math.cos(lat2r) * Math.cos(dLon);
+  let bearing = (Math.atan2(y, x) * 180) / Math.PI;
+  if (bearing < 0) bearing += 360;
+  return bearing;
+}
+
 function detectAllEventGaps(historyData, referenceDate) {
   const dates = historyData.rawDates.map((d) => parseDateString(d));
 
@@ -1703,6 +1714,129 @@ function isInvalidHistoryData(data) {
     tableWrap.appendChild(table);
     resultsSection.appendChild(tableWrap);
 
+    // Impact map: cancelled event at centre, nearby events by bearing and scaled distance
+    const resultsHeld = results.filter((r) => r.eventOnDate != null);
+    const centreParkrun = state.allParkruns?.find(
+      (p) => p.properties.eventname === state.currentEvent?.eventName
+    );
+    if (resultsHeld.length > 0 && centreParkrun) {
+      const [centreLon, centreLat] = centreParkrun.geometry.coordinates;
+      const mapPoints = resultsHeld
+        .map((r) => {
+          const parkrun = state.nearbyParkruns.find((p) => p.properties.eventname === r.eventName);
+          if (!parkrun) return null;
+          const [lon, lat] = parkrun.geometry.coordinates;
+          const bearing = calculateBearing(centreLat, centreLon, lat, lon);
+          const distanceKm = parseFloat(r.distance, 10);
+          const pct = r.change ? r.change.finishersPct : 0;
+          const absPct = Math.abs(pct);
+          const isStable = absPct <= 5;
+          return {
+            result: r,
+            bearing,
+            distanceKm,
+            pct,
+            isStable,
+          };
+        })
+        .filter(Boolean);
+
+      const maxDistance = Math.max(...mapPoints.map((p) => p.distanceKm), 1);
+      const svgSize = 400;
+      const centre = svgSize / 2;
+      const padding = 48;
+      const scale = (centre - padding) / maxDistance;
+
+      const mapSection = document.createElement('div');
+      mapSection.className = 'parkrun-cancellation-impact-map';
+      mapSection.style.marginTop = '16px';
+      mapSection.style.padding = '12px';
+      mapSection.style.backgroundColor = '#3a3250';
+      mapSection.style.borderRadius = '4px';
+
+      const mapHeading = document.createElement('h3');
+      mapHeading.textContent = 'Impact map';
+      mapHeading.style.color = STYLES.barColor;
+      mapHeading.style.margin = '0 0 10px 0';
+      mapSection.appendChild(mapHeading);
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
+      svg.setAttribute('role', 'img');
+      svg.setAttribute(
+        'aria-label',
+        'Map of nearby parkruns: cancelled event at centre, size shows change in finishers.'
+      );
+      svg.style.width = '100%';
+      svg.style.maxWidth = '400px';
+      svg.style.height = 'auto';
+      svg.style.display = 'block';
+      svg.style.margin = '0 auto';
+
+      // Centre (cancelled event)
+      const centreCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      centreCircle.setAttribute('cx', String(centre));
+      centreCircle.setAttribute('cy', String(centre));
+      centreCircle.setAttribute('r', '12');
+      centreCircle.setAttribute('fill', STYLES.barColor);
+      centreCircle.setAttribute('stroke', STYLES.gridColor);
+      centreCircle.setAttribute('stroke-width', '2');
+      const centreTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      centreTitle.textContent = `Cancelled: ${state.currentEvent?.title ?? state.currentEvent?.eventName ?? 'Event'}`;
+      centreCircle.appendChild(centreTitle);
+      svg.appendChild(centreCircle);
+
+      const STABLE_RADIUS = 8;
+      const MIN_RADIUS = 10;
+      const MAX_RADIUS = 28;
+      const PCT_FOR_MAX = 50;
+
+      mapPoints.forEach(({ result, bearing, distanceKm, pct, isStable }) => {
+        const bearingRad = (bearing * Math.PI) / 180;
+        const x = centre + scale * distanceKm * Math.sin(bearingRad);
+        const y = centre - scale * distanceKm * Math.cos(bearingRad);
+        const radius = isStable
+          ? STABLE_RADIUS
+          : MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * Math.min(1, Math.abs(pct) / PCT_FOR_MAX);
+        const fill = isStable
+          ? STYLES.subtleTextColor
+          : pct > 0
+            ? STYLES.successColor
+            : STYLES.alertColor;
+        const sign = pct > 0 ? '+' : '\u2212';
+        const pctText = `${sign}${Math.abs(pct).toFixed(1)}%`;
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', String(x));
+        circle.setAttribute('cy', String(y));
+        circle.setAttribute('r', String(radius));
+        circle.setAttribute('fill', fill);
+        circle.setAttribute('stroke', STYLES.gridColor);
+        circle.setAttribute('stroke-width', '1');
+        const tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        tooltip.textContent = `${result.displayName}: ${result.distance}km, ${pctText} finishers`;
+        circle.appendChild(tooltip);
+        g.appendChild(circle);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', String(x));
+        text.setAttribute('y', String(y));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'central');
+        text.setAttribute('fill', '#1c1b2a');
+        text.setAttribute('font-size', radius > 14 ? '10' : '8');
+        text.setAttribute('font-weight', 'bold');
+        text.textContent = pctText;
+        g.appendChild(text);
+
+        svg.appendChild(g);
+      });
+
+      mapSection.appendChild(svg);
+      resultsSection.appendChild(mapSection);
+    }
+
     // Seasonal trend for cancelled event
     const seasonalTrend = buildSeasonalTrend(state.currentEvent, currentDate);
     const trendSection = document.createElement('div');
@@ -2368,6 +2502,7 @@ function isInvalidHistoryData(data) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     calculateBaseline,
+    calculateBearing,
     calculateDistance,
     detectAllEventGaps,
     detectEventGap,
