@@ -255,6 +255,15 @@ function parseDateUTC(dateStr) {
   return new Date(`${dateStr}T00:00:00Z`);
 }
 
+function getNotHeldLabel(historyData, cancellationDate) {
+  if (!historyData?.rawDates?.length) return null;
+  const launchUTC = parseDateUTC(historyData.rawDates[0]);
+  const cancelStr = cancellationDate.toISOString().split('T')[0];
+  const cancelUTC = parseDateUTC(cancelStr);
+  if (launchUTC <= cancelUTC) return null;
+  return `Launched ${historyData.dates[0]}`;
+}
+
 function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers) {
   if (!historyData || !historyData.eventNumbers || historyData.eventNumbers.length === 0) {
     return false;
@@ -1404,7 +1413,7 @@ function isInvalidHistoryData(data) {
         label: 'Trend',
         key: 'trend',
         align: 'right',
-        info: 'Gain (+5 or more finishers), Loss (-5 or fewer), Stable (within ±5), or No Event.',
+        info: 'Gain (+5 or more finishers), Loss (-5 or fewer), Stable (within ±5), Launched (event had not started), or No Event.',
       },
     ];
 
@@ -1562,7 +1571,8 @@ function isInvalidHistoryData(data) {
         trendCell.style.padding = '10px';
         trendCell.style.textAlign = 'right';
         if (!result.eventOnDate) {
-          trendCell.textContent = 'No Event';
+          const notHeldLabel = getNotHeldLabel(result.historyData, currentDate);
+          trendCell.textContent = notHeldLabel ?? 'No Event';
           trendCell.style.color = STYLES.subtleTextColor;
         } else if (result.change.finishersChange < -5) {
           trendCell.textContent = '↓ Loss';
@@ -2338,6 +2348,7 @@ if (typeof module !== 'undefined' && module.exports) {
     filterEventsByDateRange,
     getBaselineEventsBefore,
     getCancellationSaturdays,
+    getNotHeldLabel,
     isFinishersMaxUpToEvent,
     isInvalidHistoryData,
     parseDateUTC,

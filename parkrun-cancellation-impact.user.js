@@ -34,7 +34,7 @@
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @version      0.1.9
+// @version      0.1.4
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
@@ -255,6 +255,15 @@ function getCancellationSaturdays(gapStartDate, gapEndDate) {
 function parseDateUTC(dateStr) {
   return new Date("".concat(dateStr, "T00:00:00Z"));
 }
+function getNotHeldLabel(historyData, cancellationDate) {
+  var _historyData$rawDates;
+  if (!(historyData !== null && historyData !== void 0 && (_historyData$rawDates = historyData.rawDates) !== null && _historyData$rawDates !== void 0 && _historyData$rawDates.length)) return null;
+  var launchUTC = parseDateUTC(historyData.rawDates[0]);
+  var cancelStr = cancellationDate.toISOString().split('T')[0];
+  var cancelUTC = parseDateUTC(cancelStr);
+  if (launchUTC <= cancelUTC) return null;
+  return "Launched ".concat(historyData.dates[0]);
+}
 function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers) {
   if (!historyData || !historyData.eventNumbers || historyData.eventNumbers.length === 0) {
     return false;
@@ -268,6 +277,10 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
   var eventFinishersUpToTarget = historyData.finishers.slice(0, targetIdx + 1);
   var maxUpToTarget = Math.max.apply(Math, _toConsumableArray(eventFinishersUpToTarget));
   return targetFinishers === maxUpToTarget;
+}
+var WAF_TITLE = 'JavaScript is disabled';
+function isInvalidHistoryData(data) {
+  return !data || data.title === WAF_TITLE;
 }
 (function () {
   'use strict';
@@ -500,38 +513,46 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
           case 0:
             CACHE_KEY = "parkrun_history_".concat(eventName);
             _context4.p = 1;
-            // Check cache first
             cached = localStorage.getItem(CACHE_KEY);
             if (!cached) {
-              _context4.n = 5;
+              _context4.n = 6;
               break;
             }
             _context4.p = 2;
             _JSON$parse2 = JSON.parse(cached), data = _JSON$parse2.data, timestamp = _JSON$parse2.timestamp;
+            if (!isInvalidHistoryData(data)) {
+              _context4.n = 3;
+              break;
+            }
+            localStorage.removeItem(CACHE_KEY);
+            console.log("Discarding invalid cached history for ".concat(eventName, ", re-fetching"));
+            _context4.n = 4;
+            break;
+          case 3:
             age = Date.now() - timestamp;
             if (!(age < CACHE_DURATION_MS)) {
-              _context4.n = 3;
+              _context4.n = 4;
               break;
             }
             console.log("Using cached history for ".concat(eventName, " (").concat(Math.round(age / 1000 / 60), " minutes old)"));
             return _context4.a(2, data);
-          case 3:
-            _context4.n = 5;
-            break;
           case 4:
-            _context4.p = 4;
+            _context4.n = 6;
+            break;
+          case 5:
+            _context4.p = 5;
             _t5 = _context4.v;
             console.log("Cache parse error for ".concat(eventName, ", fetching fresh data"), _t5);
-          case 5:
+          case 6:
             // Fetch from network
             url = "".concat(domain, "/").concat(eventName, "/results/eventhistory/");
-            _context4.n = 6;
-            return fetch(url);
-          case 6:
-            response = _context4.v;
             _context4.n = 7;
-            return response.text();
+            return fetch(url);
           case 7:
+            response = _context4.v;
+            _context4.n = 8;
+            return response.text();
+          case 8:
             html = _context4.v;
             parser = new DOMParser();
             doc = parser.parseFromString(html, 'text/html');
@@ -575,7 +596,14 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
               rawDates: rawDates,
               finishers: finishers,
               volunteers: volunteers
-            }; // Cache the result
+            };
+            if (!isInvalidHistoryData(historyData)) {
+              _context4.n = 9;
+              break;
+            }
+            console.warn("Event history for ".concat(eventName, " looks invalid (e.g. WAF block), not caching. Retry later."));
+            return _context4.a(2, null);
+          case 9:
             try {
               localStorage.setItem(CACHE_KEY, JSON.stringify({
                 data: historyData,
@@ -585,13 +613,13 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
               console.warn("Failed to cache history for ".concat(eventName, ":"), cacheError);
             }
             return _context4.a(2, historyData);
-          case 8:
-            _context4.p = 8;
+          case 10:
+            _context4.p = 10;
             _t6 = _context4.v;
             console.error("Failed to fetch event history for ".concat(eventName, ":"), _t6);
             return _context4.a(2, null);
         }
-      }, _callee4, null, [[2, 4], [1, 8]]);
+      }, _callee4, null, [[2, 5], [1, 10]]);
     }));
     return _fetchEventHistory.apply(this, arguments);
   }
@@ -1342,7 +1370,7 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
       label: 'Trend',
       key: 'trend',
       align: 'right',
-      info: 'Gain (+5 or more finishers), Loss (-5 or fewer), Stable (within ±5), or No Event.'
+      info: 'Gain (+5 or more finishers), Loss (-5 or fewer), Stable (within ±5), Launched (event had not started), or No Event.'
     }];
     var renderTable = function renderTable(sortedResults) {
       // Clear existing tbody if present
@@ -1478,7 +1506,8 @@ function isFinishersMaxUpToEvent(historyData, targetEventNumber, targetFinishers
         trendCell.style.padding = '10px';
         trendCell.style.textAlign = 'right';
         if (!result.eventOnDate) {
-          trendCell.textContent = 'No Event';
+          var notHeldLabel = getNotHeldLabel(result.historyData, currentDate);
+          trendCell.textContent = notHeldLabel !== null && notHeldLabel !== void 0 ? notHeldLabel : 'No Event';
           trendCell.style.color = STYLES.subtleTextColor;
         } else if (result.change.finishersChange < -5) {
           trendCell.textContent = '↓ Loss';
@@ -2302,7 +2331,9 @@ if (typeof module !== 'undefined' && module.exports) {
     filterEventsByDateRange: filterEventsByDateRange,
     getBaselineEventsBefore: getBaselineEventsBefore,
     getCancellationSaturdays: getCancellationSaturdays,
+    getNotHeldLabel: getNotHeldLabel,
     isFinishersMaxUpToEvent: isFinishersMaxUpToEvent,
+    isInvalidHistoryData: isInvalidHistoryData,
     parseDateUTC: parseDateUTC
   };
 }

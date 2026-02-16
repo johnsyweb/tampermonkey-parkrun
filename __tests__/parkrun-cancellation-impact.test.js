@@ -6,6 +6,7 @@ const {
   filterEventsByDateRange,
   getBaselineEventsBefore,
   getCancellationSaturdays,
+  getNotHeldLabel,
   isFinishersMaxUpToEvent,
   isInvalidHistoryData,
   parseDateUTC,
@@ -783,5 +784,30 @@ describe('isInvalidHistoryData', () => {
         volunteers: [],
       })
     ).toBe(false);
+  });
+});
+
+describe('getNotHeldLabel', () => {
+  test('returns "Launched …" when first event is after cancellation date', () => {
+    const historyData = {
+      rawDates: ['2026-02-07', '2026-02-14'],
+      dates: ['7 Feb 2026', '14 Feb 2026'],
+    };
+    const cancellationDate = new Date('2026-01-31T12:00:00Z');
+    expect(getNotHeldLabel(historyData, cancellationDate)).toBe('Launched 7 Feb 2026');
+  });
+
+  test('returns null when first event is on or before cancellation date', () => {
+    const historyData = {
+      rawDates: ['2026-01-25', '2026-02-01'],
+      dates: ['25 Jan 2026', '1 Feb 2026'],
+    };
+    const cancellationDate = new Date('2026-01-31T12:00:00Z');
+    expect(getNotHeldLabel(historyData, cancellationDate)).toBe(null);
+  });
+
+  test('returns null when history has no dates', () => {
+    expect(getNotHeldLabel({ rawDates: [], dates: [] }, new Date())).toBe(null);
+    expect(getNotHeldLabel(null, new Date())).toBe(null);
   });
 });
