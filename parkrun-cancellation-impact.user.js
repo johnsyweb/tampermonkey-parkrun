@@ -34,7 +34,8 @@
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
-// @version      0.2.7
+// @require      https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js
+// @version      0.1.5
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
@@ -139,6 +140,7 @@ function detectAllEventGaps(historyData, referenceDate) {
       gaps.push({
         gapStartDate: lastDate,
         gapEndDate: refDate,
+        gapEndDateStr: refStr,
         daysDiff: _daysDiff,
         eventsBefore: dates.length,
         eventsAfter: 0
@@ -154,16 +156,34 @@ function detectEventGap(historyData, referenceDate) {
   if (dates.length < 1) {
     return null;
   }
+  var lastDate = dates[dates.length - 1];
+
+  // Prefer ongoing cancellation (last event to reference date) when it exists
+  if (referenceDate) {
+    var refStr = toLocalDateString(referenceDate);
+    var refDate = parseDateString(refStr);
+    var daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
+    if (daysDiff > GAP_THRESHOLD_DAYS) {
+      return {
+        gapStartDate: lastDate,
+        gapEndDate: refDate,
+        gapEndDateStr: refStr,
+        daysDiff: daysDiff,
+        eventsBefore: dates.length,
+        eventsAfter: 0
+      };
+    }
+  }
   var gaps = [];
   for (var i = 1; i < dates.length; i++) {
     var prevDate = dates[i - 1];
     var currDate = dates[i];
-    var daysDiff = (currDate - prevDate) / (1000 * 60 * 60 * 24);
-    if (daysDiff > GAP_THRESHOLD_DAYS) {
+    var _daysDiff2 = (currDate - prevDate) / (1000 * 60 * 60 * 24);
+    if (_daysDiff2 > GAP_THRESHOLD_DAYS) {
       gaps.push({
         gapStartDate: prevDate,
         gapEndDate: currDate,
-        daysDiff: daysDiff,
+        daysDiff: _daysDiff2,
         eventsBefore: i,
         eventsAfter: dates.length - i
       });
@@ -171,23 +191,6 @@ function detectEventGap(historyData, referenceDate) {
   }
   if (gaps.length > 0) {
     return gaps[gaps.length - 1];
-  }
-
-  // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
-  if (referenceDate && dates.length >= 1) {
-    var lastDate = dates[dates.length - 1];
-    var refStr = toLocalDateString(referenceDate);
-    var refDate = parseDateString(refStr);
-    var _daysDiff2 = (refDate - lastDate) / (1000 * 60 * 60 * 24);
-    if (_daysDiff2 > GAP_THRESHOLD_DAYS) {
-      return {
-        gapStartDate: lastDate,
-        gapEndDate: refDate,
-        daysDiff: _daysDiff2,
-        eventsBefore: dates.length,
-        eventsAfter: 0
-      };
-    }
   }
   return null;
 }
@@ -281,6 +284,20 @@ function getCancellationSaturdays(gapStartDate, gapEndDate) {
     current = parseDateString(currentStr);
   }
   return saturdays;
+}
+function getMostRecentCancellationDate(gapInfo) {
+  if (!gapInfo) return null;
+  var refDateStr = gapInfo.gapEndDateStr;
+  if (refDateStr && dayOfWeekForDateString(refDateStr) === 6) {
+    var _refDateStr$split$map = refDateStr.split('-').map(Number),
+      _refDateStr$split$map2 = _slicedToArray(_refDateStr$split$map, 3),
+      y = _refDateStr$split$map2[0],
+      m = _refDateStr$split$map2[1],
+      d = _refDateStr$split$map2[2];
+    return new Date(y, m - 1, d);
+  }
+  var sats = getCancellationSaturdays(gapInfo.gapStartDate, gapInfo.gapEndDate);
+  return sats.length > 0 ? sats[sats.length - 1] : null;
 }
 function parseDateString(dateStr) {
   return new Date("".concat(dateStr, "T00:00:00Z"));
@@ -586,9 +603,15 @@ function isInvalidHistoryData(data) {
             return fetch(url);
           case 7:
             response = _context4.v;
-            _context4.n = 8;
-            return response.text();
+            if (response.ok) {
+              _context4.n = 8;
+              break;
+            }
+            throw new Error("HTTP ".concat(response.status));
           case 8:
+            _context4.n = 9;
+            return response.text();
+          case 9:
             html = _context4.v;
             parser = new DOMParser();
             doc = parser.parseFromString(html, 'text/html');
@@ -634,12 +657,12 @@ function isInvalidHistoryData(data) {
               volunteers: volunteers
             };
             if (!isInvalidHistoryData(historyData)) {
-              _context4.n = 9;
+              _context4.n = 10;
               break;
             }
             console.warn("Event history for ".concat(eventName, " looks invalid (e.g. WAF block), not caching. Retry later."));
             return _context4.a(2, null);
-          case 9:
+          case 10:
             try {
               localStorage.setItem(CACHE_KEY, JSON.stringify({
                 data: historyData,
@@ -649,13 +672,13 @@ function isInvalidHistoryData(data) {
               console.warn("Failed to cache history for ".concat(eventName, ":"), cacheError);
             }
             return _context4.a(2, historyData);
-          case 10:
-            _context4.p = 10;
+          case 11:
+            _context4.p = 11;
             _t6 = _context4.v;
             console.error("Failed to fetch event history for ".concat(eventName, ":"), _t6);
             return _context4.a(2, null);
         }
-      }, _callee4, null, [[2, 5], [1, 10]]);
+      }, _callee4, null, [[2, 5], [1, 11]]);
     }));
     return _fetchEventHistory.apply(this, arguments);
   }
@@ -740,9 +763,25 @@ function isInvalidHistoryData(data) {
     var eventNameDiv = document.createElement('div');
     eventNameDiv.style.fontSize = '16px';
     eventNameDiv.style.color = STYLES.textColor;
-    eventNameDiv.style.marginBottom = '15px';
+    eventNameDiv.style.marginBottom = '4px';
     eventNameDiv.innerHTML = "<strong style=\"color: ".concat(STYLES.lineColor, ";\">").concat(eventShortName, "</strong>");
     section.appendChild(eventNameDiv);
+    if (state.gapInfo) {
+      var mostRecent = getMostRecentCancellationDate(state.gapInfo);
+      if (mostRecent) {
+        var cancellationDateLine = document.createElement('div');
+        cancellationDateLine.style.fontSize = '14px';
+        cancellationDateLine.style.color = STYLES.subtleTextColor;
+        cancellationDateLine.style.marginBottom = '15px';
+        cancellationDateLine.textContent = "Most recent cancellation date: ".concat(mostRecent.toLocaleDateString('en-AU', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }));
+        section.appendChild(cancellationDateLine);
+      }
+    }
     var details = document.createElement('div');
     details.style.fontSize = '14px';
     details.style.lineHeight = '1.8';
@@ -885,7 +924,7 @@ function isInvalidHistoryData(data) {
   }
   function _startBackgroundAnalysis() {
     _startBackgroundAnalysis = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(progressUI, container, summarySection) {
-      var eventInfo, nearbyParkruns, allGaps, cancellationSaturdays, nearbyHistories, i, parkrun, eventName, shortName, distance, historyData, resultsByDate, validCancellationDates, finalCancellationDates, noDataMsg, startBtn, navSection, _t7;
+      var eventInfo, nearbyParkruns, allGaps, cancellationSaturdays, nearbyHistories, fetchFailures, i, parkrun, eventName, shortName, distance, historyData, histByEvent, failByEvent, resultsByDate, validCancellationDates, finalCancellationDates, noDataMsg, startBtn, navSection, _t7;
       return _regenerator().w(function (_context6) {
         while (1) switch (_context6.p = _context6.n) {
           case 0:
@@ -896,6 +935,9 @@ function isInvalidHistoryData(data) {
             allGaps.forEach(function (gap) {
               var saturdays = getCancellationSaturdays(gap.gapStartDate, gap.gapEndDate);
               cancellationSaturdays.push.apply(cancellationSaturdays, _toConsumableArray(saturdays));
+              if (gap.gapEndDateStr && dayOfWeekForDateString(gap.gapEndDateStr) === 6) {
+                cancellationSaturdays.push(parseDateString(gap.gapEndDateStr));
+              }
             });
 
             // Sort by date descending (newest first)
@@ -907,6 +949,7 @@ function isInvalidHistoryData(data) {
 
             // Fetch all nearby parkrun histories once
             nearbyHistories = [];
+            fetchFailures = [];
             i = 0;
           case 1:
             if (!(i < nearbyParkruns.length)) {
@@ -938,6 +981,12 @@ function isInvalidHistoryData(data) {
                 shortName: shortName,
                 distance: distance
               });
+            } else {
+              fetchFailures.push({
+                parkrun: parkrun,
+                shortName: shortName,
+                distance: distance
+              });
             }
             _context6.n = 6;
             break;
@@ -945,6 +994,11 @@ function isInvalidHistoryData(data) {
             _context6.p = 5;
             _t7 = _context6.v;
             console.error("Failed to fetch ".concat(eventName, ":"), _t7);
+            fetchFailures.push({
+              parkrun: parkrun,
+              shortName: shortName,
+              distance: distance
+            });
           case 6:
             _context6.n = 7;
             return new Promise(function (resolve) {
@@ -955,37 +1009,64 @@ function isInvalidHistoryData(data) {
             _context6.n = 1;
             break;
           case 8:
-            // Compute results for all cancellation dates
+            histByEvent = new Map();
+            nearbyHistories.forEach(function (h) {
+              return histByEvent.set(h.parkrun.properties.eventname, h);
+            });
+            failByEvent = new Map();
+            fetchFailures.forEach(function (f) {
+              return failByEvent.set(f.parkrun.properties.eventname, f);
+            });
+
+            // Compute results for all cancellation dates (one result per nearby parkrun, order preserved)
             resultsByDate = {};
             validCancellationDates = [];
             cancellationSaturdays.forEach(function (targetDate) {
               var dateKey = targetDate.toISOString().split('T')[0];
               var results = [];
-              nearbyHistories.forEach(function (_ref5) {
-                var parkrun = _ref5.parkrun,
-                  historyData = _ref5.historyData,
-                  shortName = _ref5.shortName,
-                  distance = _ref5.distance;
-                var base = getBaselineEventsBefore(historyData, targetDate);
-
-                // Find event on this cancellation date
-                var eventOnDate = findEventOnDate(historyData, targetDate);
-                results.push({
-                  eventName: parkrun.properties.eventname,
-                  title: historyData.title,
-                  displayName: shortName,
-                  distance: distance,
-                  baseline: base.baseline,
-                  eventOnDate: eventOnDate,
-                  historyData: historyData,
-                  seasonalTrend: base,
-                  change: eventOnDate ? {
-                    finishersChange: eventOnDate.finishers - base.baseline.avgFinishers,
-                    volunteersChange: eventOnDate.volunteers - base.baseline.avgVolunteers,
-                    finishersPct: base.baseline.avgFinishers > 0 ? (eventOnDate.finishers - base.baseline.avgFinishers) / base.baseline.avgFinishers * 100 : 0,
-                    volunteersPct: base.baseline.avgVolunteers > 0 ? (eventOnDate.volunteers - base.baseline.avgVolunteers) / base.baseline.avgVolunteers * 100 : 0
-                  } : null
-                });
+              nearbyParkruns.forEach(function (parkrun) {
+                var eventName = parkrun.properties.eventname;
+                var hist = histByEvent.get(eventName);
+                var fail = failByEvent.get(eventName);
+                if (hist) {
+                  var _historyData = hist.historyData,
+                    _shortName = hist.shortName,
+                    _distance = hist.distance;
+                  var base = getBaselineEventsBefore(_historyData, targetDate);
+                  var eventOnDate = findEventOnDate(_historyData, targetDate);
+                  results.push({
+                    eventName: parkrun.properties.eventname,
+                    title: _historyData.title,
+                    displayName: _shortName,
+                    distance: _distance,
+                    baseline: base.baseline,
+                    eventOnDate: eventOnDate,
+                    historyData: _historyData,
+                    seasonalTrend: base,
+                    change: eventOnDate ? {
+                      finishersChange: eventOnDate.finishers - base.baseline.avgFinishers,
+                      volunteersChange: eventOnDate.volunteers - base.baseline.avgVolunteers,
+                      finishersPct: base.baseline.avgFinishers > 0 ? (eventOnDate.finishers - base.baseline.avgFinishers) / base.baseline.avgFinishers * 100 : 0,
+                      volunteersPct: base.baseline.avgVolunteers > 0 ? (eventOnDate.volunteers - base.baseline.avgVolunteers) / base.baseline.avgVolunteers * 100 : 0
+                    } : null
+                  });
+                } else if (fail) {
+                  results.push({
+                    eventName: eventName,
+                    title: eventName,
+                    displayName: fail.shortName,
+                    distance: fail.distance,
+                    baseline: {
+                      avgFinishers: 0,
+                      avgVolunteers: 0
+                    },
+                    eventOnDate: null,
+                    historyData: null,
+                    seasonalTrend: null,
+                    change: null,
+                    fetchFailed: true
+                  });
+                }
               });
 
               // Check if this was a global cancellation (no parkruns ran)
@@ -1407,7 +1488,7 @@ function isInvalidHistoryData(data) {
       label: 'Trend',
       key: 'trend',
       align: 'right',
-      info: 'Gain (+5 or more finishers), Loss (-5 or fewer), Stable (within ±5), Launched (event had not started), or No Event.'
+      info: 'Gain (+5 or more finishers), Loss (-5 or fewer), Stable (within ±5), Launched (event had not started), No Event, or Fetch failed (refresh page to retry).'
     }];
     var renderTable = function renderTable(sortedResults) {
       // Clear existing tbody if present
@@ -1420,22 +1501,17 @@ function isInvalidHistoryData(data) {
         var row = document.createElement('tr');
         row.style.borderBottom = "1px solid ".concat(STYLES.gridColor);
         row.style.transition = 'background-color 0.15s ease';
-
-        // Special styling for No Event rows
         var hasEvent = result.eventOnDate !== null;
-        if (!hasEvent) {
+        var fetchFailed = result.fetchFailed === true;
+        if (!hasEvent && !fetchFailed) {
           row.style.opacity = '0.6';
         }
-
-        // Add hover effect
         row.addEventListener('mouseenter', function () {
           row.style.backgroundColor = hasEvent ? 'rgba(34, 211, 238, 0.08)' : 'rgba(243, 244, 246, 0.03)';
         });
         row.addEventListener('mouseleave', function () {
           row.style.backgroundColor = 'transparent';
         });
-
-        // parkrun name with link
         var nameCell = document.createElement('td');
         nameCell.style.padding = '10px';
         nameCell.style.textAlign = 'left';
@@ -1474,12 +1550,22 @@ function isInvalidHistoryData(data) {
         var baselineFinishersCell = document.createElement('td');
         baselineFinishersCell.style.padding = '10px';
         baselineFinishersCell.style.textAlign = 'right';
-        baselineFinishersCell.innerHTML = "<strong>".concat(result.baseline.avgFinishers, "</strong>");
+        if (fetchFailed) {
+          baselineFinishersCell.textContent = '—';
+          baselineFinishersCell.style.color = STYLES.subtleTextColor;
+        } else {
+          baselineFinishersCell.innerHTML = "<strong>".concat(result.baseline.avgFinishers, "</strong>");
+        }
         row.appendChild(baselineFinishersCell);
         var baselineVolunteersCell = document.createElement('td');
         baselineVolunteersCell.style.padding = '10px';
         baselineVolunteersCell.style.textAlign = 'right';
-        baselineVolunteersCell.textContent = "".concat(result.baseline.avgVolunteers);
+        if (fetchFailed) {
+          baselineVolunteersCell.textContent = '—';
+          baselineVolunteersCell.style.color = STYLES.subtleTextColor;
+        } else {
+          baselineVolunteersCell.textContent = "".concat(result.baseline.avgVolunteers);
+        }
         row.appendChild(baselineVolunteersCell);
         var onDateFinishersCell = document.createElement('td');
         onDateFinishersCell.style.padding = '10px';
@@ -1542,7 +1628,11 @@ function isInvalidHistoryData(data) {
         var trendCell = document.createElement('td');
         trendCell.style.padding = '10px';
         trendCell.style.textAlign = 'right';
-        if (!result.eventOnDate) {
+        if (fetchFailed) {
+          trendCell.textContent = 'Fetch failed';
+          trendCell.style.color = STYLES.alertColor;
+          trendCell.title = 'Refresh page to retry';
+        } else if (!result.eventOnDate) {
           var notHeldLabel = getNotHeldLabel(result.historyData, currentDate);
           trendCell.textContent = notHeldLabel !== null && notHeldLabel !== void 0 ? notHeldLabel : 'No Event';
           trendCell.style.color = STYLES.subtleTextColor;
@@ -1638,7 +1728,7 @@ function isInvalidHistoryData(data) {
     tableWrap.appendChild(table);
     resultsSection.appendChild(tableWrap);
 
-    // Impact map: cancelled event at centre, nearby events by bearing and scaled distance
+    // Impact map: Leaflet map with cancelled event at centre, nearby events as markers (data on mouseover)
     var resultsHeld = results.filter(function (r) {
       return r.eventOnDate != null;
     });
@@ -1646,8 +1736,9 @@ function isInvalidHistoryData(data) {
       var _state$currentEvent;
       return p.properties.eventname === ((_state$currentEvent = state.currentEvent) === null || _state$currentEvent === void 0 ? void 0 : _state$currentEvent.eventName);
     });
-    if (resultsHeld.length > 0 && centreParkrun) {
+    if (resultsHeld.length > 0 && centreParkrun && typeof L !== 'undefined') {
       var _ref, _state$currentEvent$t, _state$currentEvent2, _state$currentEvent3;
+      /* eslint-disable no-undef */
       var _centreParkrun$geomet = _slicedToArray(centreParkrun.geometry.coordinates, 2),
         centreLon = _centreParkrun$geomet[0],
         centreLat = _centreParkrun$geomet[1];
@@ -1666,19 +1757,28 @@ function isInvalidHistoryData(data) {
         var isStable = absPct <= 5;
         return {
           result: r,
+          lat: lat,
+          lon: lon,
           bearing: bearing,
           distanceKm: distanceKm,
           pct: pct,
           isStable: isStable
         };
       }).filter(Boolean);
-      var maxDistance = Math.max.apply(Math, _toConsumableArray(mapPoints.map(function (p) {
-        return p.distanceKm;
-      })).concat([1]));
-      var svgSize = 400;
-      var centre = svgSize / 2;
-      var padding = 48;
-      var scale = (centre - padding) / maxDistance;
+      if (!document.querySelector('link[href*="leaflet.css"]')) {
+        var leafletCss = document.createElement('link');
+        leafletCss.rel = 'stylesheet';
+        leafletCss.href = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';
+        leafletCss.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+        leafletCss.crossOrigin = 'anonymous';
+        document.head.appendChild(leafletCss);
+      }
+      if (!document.getElementById('parkrun-impact-map-styles')) {
+        var styleEl = document.createElement('style');
+        styleEl.id = 'parkrun-impact-map-styles';
+        styleEl.textContent = '.impact-map-centre-marker{background:transparent!important;border:none!important}' + '.leaflet-tooltip.impact-map-tooltip{background:#2b223d;color:#f3f4f6;border:1px solid rgba(243,244,246,0.18);padding:8px 10px}' + '.leaflet-tooltip.impact-map-tooltip::before{border-top-color:#2b223d}';
+        document.head.appendChild(styleEl);
+      }
       var mapSection = document.createElement('div');
       mapSection.className = 'parkrun-cancellation-impact-map';
       mapSection.style.marginTop = '16px';
@@ -1690,71 +1790,121 @@ function isInvalidHistoryData(data) {
       mapHeading.style.color = STYLES.barColor;
       mapHeading.style.margin = '0 0 10px 0';
       mapSection.appendChild(mapHeading);
-      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', "0 0 ".concat(svgSize, " ").concat(svgSize));
-      svg.setAttribute('role', 'img');
-      svg.setAttribute('aria-label', 'Map of nearby parkruns: cancelled event at centre, size shows change in finishers.');
-      svg.style.width = '100%';
-      svg.style.maxWidth = '400px';
-      svg.style.height = 'auto';
-      svg.style.display = 'block';
-      svg.style.margin = '0 auto';
-
-      // Centre (cancelled event)
-      var centreCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      centreCircle.setAttribute('cx', String(centre));
-      centreCircle.setAttribute('cy', String(centre));
-      centreCircle.setAttribute('r', '12');
-      centreCircle.setAttribute('fill', STYLES.barColor);
-      centreCircle.setAttribute('stroke', STYLES.gridColor);
-      centreCircle.setAttribute('stroke-width', '2');
-      var centreTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-      centreTitle.textContent = "Cancelled: ".concat((_ref = (_state$currentEvent$t = (_state$currentEvent2 = state.currentEvent) === null || _state$currentEvent2 === void 0 ? void 0 : _state$currentEvent2.title) !== null && _state$currentEvent$t !== void 0 ? _state$currentEvent$t : (_state$currentEvent3 = state.currentEvent) === null || _state$currentEvent3 === void 0 ? void 0 : _state$currentEvent3.eventName) !== null && _ref !== void 0 ? _ref : 'Event');
-      centreCircle.appendChild(centreTitle);
-      svg.appendChild(centreCircle);
+      var mapDiv = document.createElement('div');
+      mapDiv.id = 'parkrun-impact-map-' + Date.now();
+      mapDiv.style.height = '400px';
+      mapDiv.style.width = '100%';
+      mapDiv.style.borderRadius = '4px';
+      mapDiv.setAttribute('aria-label', 'Map of nearby parkruns: cancelled event at centre.');
+      mapSection.appendChild(mapDiv);
+      resultsSection.appendChild(mapSection);
+      var map = L.map(mapDiv, {
+        preferCanvas: true
+      }).setView([centreLat, centreLon], 10);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+      var centreTitle = (_ref = (_state$currentEvent$t = (_state$currentEvent2 = state.currentEvent) === null || _state$currentEvent2 === void 0 ? void 0 : _state$currentEvent2.title) !== null && _state$currentEvent$t !== void 0 ? _state$currentEvent$t : (_state$currentEvent3 = state.currentEvent) === null || _state$currentEvent3 === void 0 ? void 0 : _state$currentEvent3.eventName) !== null && _ref !== void 0 ? _ref : 'Cancelled event';
+      L.marker([centreLat, centreLon], {
+        icon: L.divIcon({
+          className: 'impact-map-centre-marker',
+          html: '<span style="background:' + STYLES.barColor + ';width:24px;height:24px;border-radius:50%;border:2px solid ' + STYLES.gridColor + ';display:block;"></span>',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        })
+      }).addTo(map).bindTooltip('Cancelled: ' + centreTitle, {
+        permanent: false,
+        direction: 'top',
+        className: 'impact-map-tooltip',
+        opacity: 1,
+        openDelay: 0,
+        closeDelay: 0
+      });
       var STABLE_RADIUS = 8;
       var MIN_RADIUS = 10;
       var MAX_RADIUS = 28;
       var PCT_FOR_MAX = 50;
+      function buildEventTooltip(result) {
+        var _result$baseline$avgF, _result$baseline, _result$baseline$avgV, _result$baseline2;
+        var name = escapeHtml(result.displayName || result.eventName);
+        var rows = [];
+        rows.push('Distance: ' + result.distance + 'km');
+        if (result.eventOnDate && result.eventOnDate.eventNumber) {
+          rows.push('Event #: ' + result.eventOnDate.eventNumber);
+        }
+        rows.push('Baseline (avg) finishers: ' + ((_result$baseline$avgF = (_result$baseline = result.baseline) === null || _result$baseline === void 0 ? void 0 : _result$baseline.avgFinishers) !== null && _result$baseline$avgF !== void 0 ? _result$baseline$avgF : '—'));
+        rows.push('Baseline (avg) volunteers: ' + ((_result$baseline$avgV = (_result$baseline2 = result.baseline) === null || _result$baseline2 === void 0 ? void 0 : _result$baseline2.avgVolunteers) !== null && _result$baseline$avgV !== void 0 ? _result$baseline$avgV : '—'));
+        if (result.eventOnDate) {
+          rows.push('On date finishers: ' + result.eventOnDate.finishers);
+          rows.push('On date volunteers: ' + result.eventOnDate.volunteers);
+        }
+        if (result.change) {
+          var fSign = result.change.finishersChange > 0 ? '+' : '';
+          var vSign = result.change.volunteersChange > 0 ? '+' : '';
+          rows.push('Change finishers: ' + fSign + result.change.finishersChange);
+          rows.push('Change volunteers: ' + vSign + result.change.volunteersChange);
+          var pctSign = result.change.finishersPct > 0 ? '+' : '';
+          rows.push('Change % (finishers): ' + pctSign + result.change.finishersPct.toFixed(1) + '%');
+        }
+        var trendText = result.change ? result.change.finishersChange > 5 ? '↑ Gain' : result.change.finishersChange < -5 ? '↓ Loss' : '→ Stable' : '—';
+        rows.push('Trend: ' + trendText);
+        return '<div class="impact-map-tooltip-content" style="min-width:200px;">' + '<div class="impact-map-tooltip-name" style="font-size:14px;font-weight:bold;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid rgba(243,244,246,0.2);color:#f3f4f6;">' + name + '</div>' + '<div style="font-size:12px;line-height:1.5;color:#d1d5db;">' + rows.join('<br>') + '</div></div>';
+      }
+      function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+      var bounds = [[centreLat, centreLon], [centreLat, centreLon]];
       mapPoints.forEach(function (_ref2) {
         var result = _ref2.result,
-          bearing = _ref2.bearing,
-          distanceKm = _ref2.distanceKm,
+          lat = _ref2.lat,
+          lon = _ref2.lon,
           pct = _ref2.pct,
           isStable = _ref2.isStable;
-        var bearingRad = bearing * Math.PI / 180;
-        var x = centre + scale * distanceKm * Math.sin(bearingRad);
-        var y = centre - scale * distanceKm * Math.cos(bearingRad);
         var radius = isStable ? STABLE_RADIUS : MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * Math.min(1, Math.abs(pct) / PCT_FOR_MAX);
         var fill = isStable ? STYLES.subtleTextColor : pct > 0 ? STYLES.successColor : STYLES.alertColor;
-        var sign = pct > 0 ? '+' : "\u2212";
-        var pctText = "".concat(sign).concat(Math.abs(pct).toFixed(1), "%");
-        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', String(x));
-        circle.setAttribute('cy', String(y));
-        circle.setAttribute('r', String(radius));
-        circle.setAttribute('fill', fill);
-        circle.setAttribute('stroke', STYLES.gridColor);
-        circle.setAttribute('stroke-width', '1');
-        var tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-        tooltip.textContent = "".concat(result.displayName, ": ").concat(result.distance, "km, ").concat(pctText, " finishers");
-        circle.appendChild(tooltip);
-        g.appendChild(circle);
-        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', String(x));
-        text.setAttribute('y', String(y));
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('dominant-baseline', 'central');
-        text.setAttribute('fill', '#1c1b2a');
-        text.setAttribute('font-size', radius > 14 ? '10' : '8');
-        text.setAttribute('font-weight', 'bold');
-        text.textContent = pctText;
-        g.appendChild(text);
-        svg.appendChild(g);
+        bounds[0][0] = Math.min(bounds[0][0], lat);
+        bounds[0][1] = Math.min(bounds[0][1], lon);
+        bounds[1][0] = Math.max(bounds[1][0], lat);
+        bounds[1][1] = Math.max(bounds[1][1], lon);
+        L.circleMarker([lat, lon], {
+          radius: radius,
+          fillColor: fill,
+          color: STYLES.gridColor,
+          weight: 1,
+          fillOpacity: 1
+        }).addTo(map).bindTooltip(buildEventTooltip(result), {
+          permanent: false,
+          direction: 'top',
+          className: 'impact-map-tooltip',
+          offset: [0, -radius],
+          opacity: 1,
+          openDelay: 0,
+          closeDelay: 0
+        });
       });
-      mapSection.appendChild(svg);
-      resultsSection.appendChild(mapSection);
+      var southWest = [bounds[0][0], bounds[0][1]];
+      var northEast = [bounds[1][0], bounds[1][1]];
+      var latLngBounds = L.latLngBounds(southWest, northEast);
+      if (latLngBounds.getNorthEast().equals(latLngBounds.getSouthWest())) {
+        latLngBounds = latLngBounds.pad(0.02);
+      }
+      map.fitBounds(latLngBounds, {
+        padding: [40, 40],
+        maxZoom: 12
+      });
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          map.invalidateSize();
+          map.fitBounds(latLngBounds, {
+            padding: [40, 40],
+            maxZoom: 12
+          });
+        });
+      });
+
+      /* eslint-enable no-undef */
     }
 
     // Seasonal trend for cancelled event
@@ -2488,6 +2638,7 @@ if (typeof module !== 'undefined' && module.exports) {
     filterEventsByDateRange: filterEventsByDateRange,
     getBaselineEventsBefore: getBaselineEventsBefore,
     getCancellationSaturdays: getCancellationSaturdays,
+    getMostRecentCancellationDate: getMostRecentCancellationDate,
     getNotHeldLabel: getNotHeldLabel,
     isFinishersMaxUpToEvent: isFinishersMaxUpToEvent,
     isInvalidHistoryData: isInvalidHistoryData,

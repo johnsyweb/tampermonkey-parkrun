@@ -33,7 +33,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/launch-returnees.user.js
-// @version      1.1.7
+// @version      1.0.66
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
@@ -52,7 +52,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
   'use strict';
 
-  var STYLES, CACHE_TTL_MS, extractCurrentPageParticipants, fetchEventParticipants, _fetchEventParticipants, insertAfterTitle, createHeader, createNoReturneesMessage, createReturneeListItem, createReturneesList, createContainer, displayReturnees, init, _init;
+  var STYLES, CACHE_TTL_MS, extractCurrentPageParticipants, fetchEventParticipants, _fetchEventParticipants, insertAfterTitle, createHeader, createNoReturneesMessage, createReturneeListItem, createReturneesList, createContainer, displayReturnees, isLaunchEvent, init, _init;
   return _regenerator().w(function (_context3) {
     while (1) switch (_context3.n) {
       case 0:
@@ -62,21 +62,27 @@ _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
             return _regenerator().w(function (_context2) {
               while (1) switch (_context2.n) {
                 case 0:
+                  if (!isLaunchEvent(document)) {
+                    _context2.n = 1;
+                    break;
+                  }
+                  return _context2.a(2);
+                case 1:
                   pathname = window.location.pathname;
                   locationMatch = pathname.match(/\/([^/]+)\/results\/latestresults/);
                   location = locationMatch[1];
                   origin = window.location.origin;
                   launchEventUrl = "".concat(origin, "/").concat(location, "/results/1/");
                   currentParticipants = extractCurrentPageParticipants();
-                  _context2.n = 1;
+                  _context2.n = 2;
                   return fetchEventParticipants(launchEventUrl);
-                case 1:
+                case 2:
                   launchParticipants = _context2.v;
                   returnees = _toConsumableArray(currentParticipants.keys()).filter(function (id) {
                     return launchParticipants.has(id);
                   });
                   displayReturnees(returnees, currentParticipants, launchParticipants, origin);
-                case 2:
+                case 3:
                   return _context2.a(2);
               }
             }, _callee2);
@@ -85,6 +91,16 @@ _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
         };
         init = function _init2() {
           return _init.apply(this, arguments);
+        };
+        isLaunchEvent = function _isLaunchEvent(doc) {
+          var dateSpan = doc.querySelector('h3 span.format-date');
+          var heading = dateSpan === null || dateSpan === void 0 ? void 0 : dateSpan.closest('h3');
+          if (!heading) {
+            return false;
+          }
+          var spans = heading.querySelectorAll('span');
+          var lastSpan = spans[spans.length - 1];
+          return (lastSpan === null || lastSpan === void 0 ? void 0 : lastSpan.textContent.trim()) === '#1';
         };
         displayReturnees = function _displayReturnees(returnees, currentParticipants, launchParticipants, origin) {
           var container = createContainer();
@@ -156,7 +172,7 @@ _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
           return heading;
         };
         insertAfterTitle = function _insertAfterTitle(element) {
-          var pageTitle = document.querySelector('h1');
+          var pageTitle = document.querySelector('h3');
           if (pageTitle && pageTitle.parentNode) {
             if (pageTitle.nextSibling) {
               pageTitle.parentNode.insertBefore(element, pageTitle.nextSibling);
@@ -304,9 +320,24 @@ _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
          * @param {string} origin - The site origin URL
          */
         /**
+         * Determines if the latest results page is the launch event (#1)
+         * @param {Document} doc - The document to inspect
+         * @returns {boolean} True if the page indicates event #1
+         */
+        /**
          * Main function to initialize the userscript
          */
-        init();
+        if (typeof module !== 'undefined' && module.exports) {
+          module.exports = {
+            extractCurrentPageParticipants: extractCurrentPageParticipants,
+            fetchEventParticipants: fetchEventParticipants,
+            displayReturnees: displayReturnees,
+            isLaunchEvent: isLaunchEvent,
+            init: init
+          };
+        } else {
+          init();
+        }
       case 2:
         return _context3.a(2);
     }
