@@ -63,6 +63,16 @@ pnpm screenshots
 
 This will create screenshots of all userscripts in `docs/images/`. Scripts are included if their UserScript header contains `@screenshot-url`; you can optionally add `@screenshot-selector`, `@screenshot-timeout`, and `@screenshot-viewport` (e.g. `1200x800`) in the script header to control how the screenshot is taken.
 
+### Verifying a userscript in the browser
+
+To build the userscripts, open the script’s `@screenshot-url` in a new browser window with the built script injected (so you can verify changes without installing Tampermonkey):
+
+```bash
+pnpm run preview
+```
+
+This builds from `src/`, then launches a browser, navigates to the default script’s screenshot URL (e.g. parkrun Cancellation Impact → Aurora event history), injects the built script, and leaves the window open. To preview a different script, pass its name: `pnpm run preview -- parkrun-charts`.
+
 ### Building the Microsite
 
 The microsite is automatically deployed to GitHub Pages on every push to `main`. 
