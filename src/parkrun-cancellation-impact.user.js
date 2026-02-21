@@ -1362,6 +1362,51 @@ function isInvalidHistoryData(data) {
       }
     });
 
+    const mapSection = clone.querySelector('.parkrun-cancellation-impact-map');
+    let leafletHead = '';
+    let mapScript = '';
+    if (mapSection && mapSection.getAttribute('data-map-state')) {
+      const mapDiv = mapSection.querySelector('[id^="parkrun-impact-map-"]');
+      if (mapDiv) {
+        const newMapDiv = document.createElement('div');
+        newMapDiv.id = 'parkrun-standalone-map';
+        newMapDiv.style.height = '400px';
+        newMapDiv.style.width = '100%';
+        newMapDiv.style.borderRadius = '4px';
+        newMapDiv.setAttribute('aria-label', 'Map of nearby parkruns: cancelled event at centre.');
+        mapDiv.replaceWith(newMapDiv);
+      }
+      leafletHead =
+        '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">';
+      const gridColor = STYLES.gridColor;
+      mapScript =
+        '<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></' +
+        'script>' +
+        '<script>(function(){' +
+        'var s=document.querySelector(".parkrun-cancellation-impact-map");' +
+        'if(!s)return;' +
+        'var j=s.getAttribute("data-map-state");' +
+        'if(!j)return;' +
+        'var d=JSON.parse(j);' +
+        'var m=L.map("parkrun-standalone-map",{preferCanvas:true}).setView([d.centreLat,d.centreLon],10);' +
+        'L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"&copy; <a href=\\"https://www.openstreetmap.org/copyright\\">OpenStreetMap</a>"}).addTo(m);' +
+        'L.marker([d.centreLat,d.centreLon],{icon:L.divIcon({className:"impact-map-centre-marker",html:"<span style=\\"background:' +
+        STYLES.barColor +
+        ';width:24px;height:24px;border-radius:50%;border:2px solid ' +
+        gridColor +
+        ';display:block;\\"></span>",iconSize:[24,24],iconAnchor:[12,12]})}).addTo(m).bindTooltip("Cancelled: "+d.centreTitle,{permanent:false,direction:"top",className:"impact-map-tooltip",opacity:1});' +
+        'd.points.forEach(function(p){' +
+        'L.circleMarker([p.lat,p.lon],{radius:p.radius,fillColor:p.fillColor,color:"' +
+        gridColor +
+        '",weight:1,fillOpacity:1}).addTo(m).bindTooltip(p.tooltipHtml,{permanent:false,direction:"top",className:"impact-map-tooltip",offset:[0,-p.radius],opacity:1});' +
+        '});' +
+        'var b=L.latLngBounds([d.bounds[0][0],d.bounds[0][1]],[d.bounds[1][0],d.bounds[1][1]]);' +
+        'if(b.getNorthEast().equals(b.getSouthWest()))b=b.pad(0.02);' +
+        'm.fitBounds(b,{padding:[40,40],maxZoom:12});' +
+        '})();</' +
+        'script>';
+    }
+
     const stylesheet = `
       :root { color-scheme: dark; }
       body { margin: 0; padding: 20px; background: ${STYLES.backgroundColor}; color: ${STYLES.textColor}; font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; line-height: 1.5; }
@@ -1376,6 +1421,9 @@ function isInvalidHistoryData(data) {
       .chart-img { max-width: 100%; display: block; }
       .meta { margin-bottom: 16px; color: ${STYLES.subtleTextColor}; font-size: 13px; }
       .meta strong { color: ${STYLES.textColor}; }
+      .impact-map-centre-marker{background:transparent!important;border:none!important}
+      .leaflet-tooltip.impact-map-tooltip{background:#2b223d;color:#f3f4f6;border:1px solid rgba(243,244,246,0.18);padding:8px 10px}
+      .leaflet-tooltip.impact-map-tooltip::before{border-top-color:#2b223d}
     `;
 
     const header = `
@@ -1389,7 +1437,7 @@ function isInvalidHistoryData(data) {
       </header>
     `;
 
-    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>parkrun Cancellation Impact - ${meta.eventShortName} - ${meta.cancellationDateStr}</title><style>${stylesheet}</style></head><body>${header}${clone.outerHTML}</body></html>`;
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>parkrun Cancellation Impact - ${meta.eventShortName} - ${meta.cancellationDateStr}</title><style>${stylesheet}</style>${leafletHead}</head><body>${header}${clone.outerHTML}${mapScript}</body></html>`;
   }
 
   async function generateReportBlob(resultsSection, meta) {
@@ -1951,6 +1999,8 @@ function isInvalidHistoryData(data) {
         [centreLat, centreLon],
       ];
 
+      const mapStatePoints = [];
+
       mapPoints.forEach(({ result, lat, lon, pct, isStable }) => {
         const radius = isStable
           ? STABLE_RADIUS
@@ -1964,6 +2014,14 @@ function isInvalidHistoryData(data) {
         bounds[0][1] = Math.min(bounds[0][1], lon);
         bounds[1][0] = Math.max(bounds[1][0], lat);
         bounds[1][1] = Math.max(bounds[1][1], lon);
+
+        mapStatePoints.push({
+          lat,
+          lon,
+          tooltipHtml: buildEventTooltip(result),
+          radius,
+          fillColor: fill,
+        });
 
         L.circleMarker([lat, lon], {
           radius,
@@ -1997,6 +2055,18 @@ function isInvalidHistoryData(data) {
           map.fitBounds(latLngBounds, { padding: [40, 40], maxZoom: 12 });
         });
       });
+
+      const mapState = {
+        centreLat,
+        centreLon,
+        centreTitle,
+        bounds: [
+          [latLngBounds.getSouthWest().lat, latLngBounds.getSouthWest().lng],
+          [latLngBounds.getNorthEast().lat, latLngBounds.getNorthEast().lng],
+        ],
+        points: mapStatePoints,
+      };
+      mapSection.setAttribute('data-map-state', JSON.stringify(mapState));
 
       /* eslint-enable no-undef */
     }
