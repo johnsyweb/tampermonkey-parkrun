@@ -1854,16 +1854,16 @@ function isInvalidHistoryData(data) {
       mapHeading.style.margin = '0 0 10px 0';
       mapSection.appendChild(mapHeading);
 
-      const mapId = 'parkrun-impact-map-' + Date.now();
       const mapDiv = document.createElement('div');
-      mapDiv.id = mapId;
+      mapDiv.id = 'parkrun-impact-map-' + Date.now();
       mapDiv.style.height = '400px';
       mapDiv.style.width = '100%';
       mapDiv.style.borderRadius = '4px';
       mapDiv.setAttribute('aria-label', 'Map of nearby parkruns: cancelled event at centre.');
       mapSection.appendChild(mapDiv);
+      resultsSection.appendChild(mapSection);
 
-      const map = L.map(mapId, { preferCanvas: true }).setView([centreLat, centreLon], 10);
+      const map = L.map(mapDiv, { preferCanvas: true }).setView([centreLat, centreLon], 10);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
@@ -1888,6 +1888,9 @@ function isInvalidHistoryData(data) {
           permanent: false,
           direction: 'top',
           className: 'impact-map-tooltip',
+          opacity: 1,
+          openDelay: 0,
+          closeDelay: 0,
         });
 
       const STABLE_RADIUS = 8;
@@ -1896,8 +1899,8 @@ function isInvalidHistoryData(data) {
       const PCT_FOR_MAX = 50;
 
       function buildEventTooltip(result) {
+        const name = escapeHtml(result.displayName || result.eventName);
         const rows = [];
-        rows.push('<strong>' + escapeHtml(result.displayName || result.eventName) + '</strong>');
         rows.push('Distance: ' + result.distance + 'km');
         if (result.eventOnDate && result.eventOnDate.eventNumber) {
           rows.push('Event #: ' + result.eventOnDate.eventNumber);
@@ -1927,9 +1930,13 @@ function isInvalidHistoryData(data) {
           : '—';
         rows.push('Trend: ' + trendText);
         return (
-          '<div class="impact-map-tooltip-content" style="font-size:12px;line-height:1.5;min-width:180px;">' +
+          '<div class="impact-map-tooltip-content" style="min-width:200px;">' +
+          '<div class="impact-map-tooltip-name" style="font-size:14px;font-weight:bold;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid rgba(243,244,246,0.2);color:#f3f4f6;">' +
+          name +
+          '</div>' +
+          '<div style="font-size:12px;line-height:1.5;color:#d1d5db;">' +
           rows.join('<br>') +
-          '</div>'
+          '</div></div>'
         );
       }
 
@@ -1971,15 +1978,27 @@ function isInvalidHistoryData(data) {
             direction: 'top',
             className: 'impact-map-tooltip',
             offset: [0, -radius],
+            opacity: 1,
+            openDelay: 0,
+            closeDelay: 0,
           });
       });
 
-      if (mapPoints.length > 0) {
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+      const southWest = [bounds[0][0], bounds[0][1]];
+      const northEast = [bounds[1][0], bounds[1][1]];
+      let latLngBounds = L.latLngBounds(southWest, northEast);
+      if (latLngBounds.getNorthEast().equals(latLngBounds.getSouthWest())) {
+        latLngBounds = latLngBounds.pad(0.02);
       }
+      map.fitBounds(latLngBounds, { padding: [40, 40], maxZoom: 12 });
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          map.invalidateSize();
+          map.fitBounds(latLngBounds, { padding: [40, 40], maxZoom: 12 });
+        });
+      });
 
       /* eslint-enable no-undef */
-      resultsSection.appendChild(mapSection);
     }
 
     // Seasonal trend for cancelled event
