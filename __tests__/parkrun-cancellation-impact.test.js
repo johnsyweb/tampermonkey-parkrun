@@ -6,6 +6,7 @@ const {
   filterEventsByDateRange,
   getBaselineEventsBefore,
   getCancellationSaturdays,
+  getMostRecentCancellationDate,
   getNotHeldLabel,
   isFinishersMaxUpToEvent,
   isInvalidHistoryData,
@@ -173,6 +174,32 @@ describe('parkrun-cancellation-impact', () => {
       expect(gaps[0].gapStartDate.toISOString().split('T')[0]).toBe('2025-01-18');
       expect(gaps[0].gapEndDate.toISOString().split('T')[0]).toBe('2025-01-30');
       expect(gaps[0].eventsAfter).toBe(0);
+    });
+
+    test('prefers ongoing gap over inter-event gap when both exist (e.g. Warringal Parklands)', () => {
+      const historyData = {
+        rawDates: [
+          '2022-10-01',
+          '2022-10-22',
+          '2022-11-05',
+          '2026-01-03',
+          '2026-01-10',
+          '2026-01-17',
+          '2026-01-24',
+        ],
+        dates: [],
+        finishers: [],
+        volunteers: [],
+      };
+      const referenceDate = parseDateString('2026-02-21');
+
+      const gap = detectEventGap(historyData, referenceDate);
+
+      expect(gap).not.toBeNull();
+      expect(gap.eventsAfter).toBe(0);
+      expect(gap.gapEndDateStr).toBe('2026-02-21');
+      expect(gap.gapStartDate.toISOString().split('T')[0]).toBe('2026-01-24');
+      expect(gap.gapEndDate.toISOString().split('T')[0]).toBe('2026-02-21');
     });
   });
 
@@ -605,6 +632,58 @@ describe('parkrun-cancellation-impact', () => {
       expect(saturdays.length).toBe(2);
       expect(saturdays[0].toISOString().split('T')[0]).toBe('2025-01-11');
       expect(saturdays[1].toISOString().split('T')[0]).toBe('2025-01-18');
+    });
+
+    test('getCancellationSaturdays excludes end date (so ongoing gap reference Saturday must be added separately)', () => {
+      const gapStart = parseDateString('2026-01-24');
+      const gapEnd = parseDateString('2026-02-21');
+      const saturdays = getCancellationSaturdays(gapStart, gapEnd);
+      expect(saturdays.length).toBe(3);
+      expect(saturdays[0].toISOString().split('T')[0]).toBe('2026-01-31');
+      expect(saturdays[1].toISOString().split('T')[0]).toBe('2026-02-07');
+      expect(saturdays[2].toISOString().split('T')[0]).toBe('2026-02-14');
+      expect(saturdays.map((d) => d.toISOString().split('T')[0])).not.toContain('2026-02-21');
+    });
+  });
+
+  describe('getMostRecentCancellationDate', () => {
+    test('returns reference date when gapEndDateStr is a Saturday (ongoing gap)', () => {
+      const gapInfo = {
+        gapStartDate: parseDateString('2026-01-24'),
+        gapEndDate: parseDateString('2026-02-21'),
+        gapEndDateStr: '2026-02-21',
+      };
+      const result = getMostRecentCancellationDate(gapInfo);
+      expect(result).not.toBeNull();
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(1);
+      expect(result.getDate()).toBe(21);
+      expect(result.getDay()).toBe(6);
+    });
+
+    test('returns last Saturday from gap when gap has no gapEndDateStr (inter-event gap)', () => {
+      const gapInfo = {
+        gapStartDate: parseDateString('2022-10-22'),
+        gapEndDate: parseDateString('2022-11-05'),
+      };
+      const result = getMostRecentCancellationDate(gapInfo);
+      expect(result).not.toBeNull();
+      expect(result.toISOString().split('T')[0]).toBe('2022-10-29');
+    });
+
+    test('returns last Saturday when gapEndDateStr is not a Saturday', () => {
+      const gapInfo = {
+        gapStartDate: parseDateString('2026-01-24'),
+        gapEndDate: parseDateString('2026-02-20'),
+        gapEndDateStr: '2026-02-20',
+      };
+      const result = getMostRecentCancellationDate(gapInfo);
+      expect(result).not.toBeNull();
+      expect(result.toISOString().split('T')[0]).toBe('2026-02-14');
+    });
+
+    test('returns null when gapInfo is null', () => {
+      expect(getMostRecentCancellationDate(null)).toBeNull();
     });
   });
 

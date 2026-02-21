@@ -32,7 +32,7 @@
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.com.au/aurora/results/eventhistory/
+// @screenshot-url       https://www.parkrun.com.au/warringalparklands/results/eventhistory/
 // @screenshot-selector  .parkrun-cancellation-impact
 // @screenshot-timeout   25000
 // @screenshot-viewport  1400x2000
@@ -130,6 +130,7 @@ function detectAllEventGaps(historyData, referenceDate) {
       gaps.push({
         gapStartDate: lastDate,
         gapEndDate: refDate,
+        gapEndDateStr: refStr,
         daysDiff,
         eventsBefore: dates.length,
         eventsAfter: 0,
@@ -147,8 +148,26 @@ function detectEventGap(historyData, referenceDate) {
     return null;
   }
 
-  const gaps = [];
+  const lastDate = dates[dates.length - 1];
 
+  // Prefer ongoing cancellation (last event to reference date) when it exists
+  if (referenceDate) {
+    const refStr = toLocalDateString(referenceDate);
+    const refDate = parseDateString(refStr);
+    const daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
+    if (daysDiff > GAP_THRESHOLD_DAYS) {
+      return {
+        gapStartDate: lastDate,
+        gapEndDate: refDate,
+        gapEndDateStr: refStr,
+        daysDiff,
+        eventsBefore: dates.length,
+        eventsAfter: 0,
+      };
+    }
+  }
+
+  const gaps = [];
   for (let i = 1; i < dates.length; i++) {
     const prevDate = dates[i - 1];
     const currDate = dates[i];
@@ -167,23 +186,6 @@ function detectEventGap(historyData, referenceDate) {
 
   if (gaps.length > 0) {
     return gaps[gaps.length - 1];
-  }
-
-  // No inter-event gap > 7 days: check ongoing cancellation (last event to reference/today)
-  if (referenceDate && dates.length >= 1) {
-    const lastDate = dates[dates.length - 1];
-    const refStr = toLocalDateString(referenceDate);
-    const refDate = parseDateString(refStr);
-    const daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
-    if (daysDiff > GAP_THRESHOLD_DAYS) {
-      return {
-        gapStartDate: lastDate,
-        gapEndDate: refDate,
-        daysDiff,
-        eventsBefore: dates.length,
-        eventsAfter: 0,
-      };
-    }
   }
 
   return null;
@@ -279,6 +281,17 @@ function getCancellationSaturdays(gapStartDate, gapEndDate) {
   }
 
   return saturdays;
+}
+
+function getMostRecentCancellationDate(gapInfo) {
+  if (!gapInfo) return null;
+  const refDateStr = gapInfo.gapEndDateStr;
+  if (refDateStr && dayOfWeekForDateString(refDateStr) === 6) {
+    const [y, m, d] = refDateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  const sats = getCancellationSaturdays(gapInfo.gapStartDate, gapInfo.gapEndDate);
+  return sats.length > 0 ? sats[sats.length - 1] : null;
 }
 
 function parseDateString(dateStr) {
@@ -735,9 +748,29 @@ function isInvalidHistoryData(data) {
     const eventNameDiv = document.createElement('div');
     eventNameDiv.style.fontSize = '16px';
     eventNameDiv.style.color = STYLES.textColor;
-    eventNameDiv.style.marginBottom = '15px';
+    eventNameDiv.style.marginBottom = '4px';
     eventNameDiv.innerHTML = `<strong style="color: ${STYLES.lineColor};">${eventShortName}</strong>`;
     section.appendChild(eventNameDiv);
+
+    if (state.gapInfo) {
+      const mostRecent = getMostRecentCancellationDate(state.gapInfo);
+      if (mostRecent) {
+        const cancellationDateLine = document.createElement('div');
+        cancellationDateLine.style.fontSize = '14px';
+        cancellationDateLine.style.color = STYLES.subtleTextColor;
+        cancellationDateLine.style.marginBottom = '15px';
+        cancellationDateLine.textContent = `Most recent cancellation date: ${mostRecent.toLocaleDateString(
+          'en-AU',
+          {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }
+        )}`;
+        section.appendChild(cancellationDateLine);
+      }
+    }
 
     const details = document.createElement('div');
     details.style.fontSize = '14px';
@@ -872,6 +905,9 @@ function isInvalidHistoryData(data) {
     allGaps.forEach((gap) => {
       const saturdays = getCancellationSaturdays(gap.gapStartDate, gap.gapEndDate);
       cancellationSaturdays.push(...saturdays);
+      if (gap.gapEndDateStr && dayOfWeekForDateString(gap.gapEndDateStr) === 6) {
+        cancellationSaturdays.push(parseDateString(gap.gapEndDateStr));
+      }
     });
 
     // Sort by date descending (newest first)
@@ -2509,6 +2545,7 @@ if (typeof module !== 'undefined' && module.exports) {
     filterEventsByDateRange,
     getBaselineEventsBefore,
     getCancellationSaturdays,
+    getMostRecentCancellationDate,
     getNotHeldLabel,
     isFinishersMaxUpToEvent,
     isInvalidHistoryData,
