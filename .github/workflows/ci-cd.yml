@@ -87,6 +87,8 @@ jobs:
         with:
           name: dist
           path: dist
+      - name: Build userscripts
+        run: pnpm build:scripts
       - name: Update version string
         run: pnpm update-version
       - name: Commit changes
