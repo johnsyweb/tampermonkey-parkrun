@@ -38,6 +38,7 @@
 // @screenshot-viewport  1400x2000
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
+// @require      https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js
 // @version      0.1.4
 // ==/UserScript==
 
@@ -1792,12 +1793,13 @@ function isInvalidHistoryData(data) {
     tableWrap.appendChild(table);
     resultsSection.appendChild(tableWrap);
 
-    // Impact map: cancelled event at centre, nearby events by bearing and scaled distance
+    // Impact map: Leaflet map with cancelled event at centre, nearby events as markers (data on mouseover)
     const resultsHeld = results.filter((r) => r.eventOnDate != null);
     const centreParkrun = state.allParkruns?.find(
       (p) => p.properties.eventname === state.currentEvent?.eventName
     );
-    if (resultsHeld.length > 0 && centreParkrun) {
+    if (resultsHeld.length > 0 && centreParkrun && typeof L !== 'undefined') {
+      /* eslint-disable no-undef */
       const [centreLon, centreLat] = centreParkrun.geometry.coordinates;
       const mapPoints = resultsHeld
         .map((r) => {
@@ -1811,6 +1813,8 @@ function isInvalidHistoryData(data) {
           const isStable = absPct <= 5;
           return {
             result: r,
+            lat,
+            lon,
             bearing,
             distanceKm,
             pct,
@@ -1819,11 +1823,23 @@ function isInvalidHistoryData(data) {
         })
         .filter(Boolean);
 
-      const maxDistance = Math.max(...mapPoints.map((p) => p.distanceKm), 1);
-      const svgSize = 400;
-      const centre = svgSize / 2;
-      const padding = 48;
-      const scale = (centre - padding) / maxDistance;
+      if (!document.querySelector('link[href*="leaflet.css"]')) {
+        const leafletCss = document.createElement('link');
+        leafletCss.rel = 'stylesheet';
+        leafletCss.href = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';
+        leafletCss.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+        leafletCss.crossOrigin = 'anonymous';
+        document.head.appendChild(leafletCss);
+      }
+      if (!document.getElementById('parkrun-impact-map-styles')) {
+        const styleEl = document.createElement('style');
+        styleEl.id = 'parkrun-impact-map-styles';
+        styleEl.textContent =
+          '.impact-map-centre-marker{background:transparent!important;border:none!important}' +
+          '.leaflet-tooltip.impact-map-tooltip{background:#2b223d;color:#f3f4f6;border:1px solid rgba(243,244,246,0.18);padding:8px 10px}' +
+          '.leaflet-tooltip.impact-map-tooltip::before{border-top-color:#2b223d}';
+        document.head.appendChild(styleEl);
+      }
 
       const mapSection = document.createElement('div');
       mapSection.className = 'parkrun-cancellation-impact-map';
@@ -1838,41 +1854,97 @@ function isInvalidHistoryData(data) {
       mapHeading.style.margin = '0 0 10px 0';
       mapSection.appendChild(mapHeading);
 
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
-      svg.setAttribute('role', 'img');
-      svg.setAttribute(
-        'aria-label',
-        'Map of nearby parkruns: cancelled event at centre, size shows change in finishers.'
-      );
-      svg.style.width = '100%';
-      svg.style.maxWidth = '400px';
-      svg.style.height = 'auto';
-      svg.style.display = 'block';
-      svg.style.margin = '0 auto';
+      const mapId = 'parkrun-impact-map-' + Date.now();
+      const mapDiv = document.createElement('div');
+      mapDiv.id = mapId;
+      mapDiv.style.height = '400px';
+      mapDiv.style.width = '100%';
+      mapDiv.style.borderRadius = '4px';
+      mapDiv.setAttribute('aria-label', 'Map of nearby parkruns: cancelled event at centre.');
+      mapSection.appendChild(mapDiv);
 
-      // Centre (cancelled event)
-      const centreCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      centreCircle.setAttribute('cx', String(centre));
-      centreCircle.setAttribute('cy', String(centre));
-      centreCircle.setAttribute('r', '12');
-      centreCircle.setAttribute('fill', STYLES.barColor);
-      centreCircle.setAttribute('stroke', STYLES.gridColor);
-      centreCircle.setAttribute('stroke-width', '2');
-      const centreTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-      centreTitle.textContent = `Cancelled: ${state.currentEvent?.title ?? state.currentEvent?.eventName ?? 'Event'}`;
-      centreCircle.appendChild(centreTitle);
-      svg.appendChild(centreCircle);
+      const map = L.map(mapId, { preferCanvas: true }).setView([centreLat, centreLon], 10);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+
+      const centreTitle =
+        state.currentEvent?.title ?? state.currentEvent?.eventName ?? 'Cancelled event';
+      L.marker([centreLat, centreLon], {
+        icon: L.divIcon({
+          className: 'impact-map-centre-marker',
+          html:
+            '<span style="background:' +
+            STYLES.barColor +
+            ';width:24px;height:24px;border-radius:50%;border:2px solid ' +
+            STYLES.gridColor +
+            ';display:block;"></span>',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        }),
+      })
+        .addTo(map)
+        .bindTooltip('Cancelled: ' + centreTitle, {
+          permanent: false,
+          direction: 'top',
+          className: 'impact-map-tooltip',
+        });
 
       const STABLE_RADIUS = 8;
       const MIN_RADIUS = 10;
       const MAX_RADIUS = 28;
       const PCT_FOR_MAX = 50;
 
-      mapPoints.forEach(({ result, bearing, distanceKm, pct, isStable }) => {
-        const bearingRad = (bearing * Math.PI) / 180;
-        const x = centre + scale * distanceKm * Math.sin(bearingRad);
-        const y = centre - scale * distanceKm * Math.cos(bearingRad);
+      function buildEventTooltip(result) {
+        const rows = [];
+        rows.push('<strong>' + escapeHtml(result.displayName || result.eventName) + '</strong>');
+        rows.push('Distance: ' + result.distance + 'km');
+        if (result.eventOnDate && result.eventOnDate.eventNumber) {
+          rows.push('Event #: ' + result.eventOnDate.eventNumber);
+        }
+        rows.push('Baseline (avg) finishers: ' + (result.baseline?.avgFinishers ?? '—'));
+        rows.push('Baseline (avg) volunteers: ' + (result.baseline?.avgVolunteers ?? '—'));
+        if (result.eventOnDate) {
+          rows.push('On date finishers: ' + result.eventOnDate.finishers);
+          rows.push('On date volunteers: ' + result.eventOnDate.volunteers);
+        }
+        if (result.change) {
+          const fSign = result.change.finishersChange > 0 ? '+' : '';
+          const vSign = result.change.volunteersChange > 0 ? '+' : '';
+          rows.push('Change finishers: ' + fSign + result.change.finishersChange);
+          rows.push('Change volunteers: ' + vSign + result.change.volunteersChange);
+          const pctSign = result.change.finishersPct > 0 ? '+' : '';
+          rows.push(
+            'Change % (finishers): ' + pctSign + result.change.finishersPct.toFixed(1) + '%'
+          );
+        }
+        const trendText = result.change
+          ? result.change.finishersChange > 5
+            ? '↑ Gain'
+            : result.change.finishersChange < -5
+              ? '↓ Loss'
+              : '→ Stable'
+          : '—';
+        rows.push('Trend: ' + trendText);
+        return (
+          '<div class="impact-map-tooltip-content" style="font-size:12px;line-height:1.5;min-width:180px;">' +
+          rows.join('<br>') +
+          '</div>'
+        );
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      const bounds = [
+        [centreLat, centreLon],
+        [centreLat, centreLon],
+      ];
+
+      mapPoints.forEach(({ result, lat, lon, pct, isStable }) => {
         const radius = isStable
           ? STABLE_RADIUS
           : MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * Math.min(1, Math.abs(pct) / PCT_FOR_MAX);
@@ -1881,37 +1953,32 @@ function isInvalidHistoryData(data) {
           : pct > 0
             ? STYLES.successColor
             : STYLES.alertColor;
-        const sign = pct > 0 ? '+' : '\u2212';
-        const pctText = `${sign}${Math.abs(pct).toFixed(1)}%`;
+        bounds[0][0] = Math.min(bounds[0][0], lat);
+        bounds[0][1] = Math.min(bounds[0][1], lon);
+        bounds[1][0] = Math.max(bounds[1][0], lat);
+        bounds[1][1] = Math.max(bounds[1][1], lon);
 
-        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', String(x));
-        circle.setAttribute('cy', String(y));
-        circle.setAttribute('r', String(radius));
-        circle.setAttribute('fill', fill);
-        circle.setAttribute('stroke', STYLES.gridColor);
-        circle.setAttribute('stroke-width', '1');
-        const tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-        tooltip.textContent = `${result.displayName}: ${result.distance}km, ${pctText} finishers`;
-        circle.appendChild(tooltip);
-        g.appendChild(circle);
-
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', String(x));
-        text.setAttribute('y', String(y));
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('dominant-baseline', 'central');
-        text.setAttribute('fill', '#1c1b2a');
-        text.setAttribute('font-size', radius > 14 ? '10' : '8');
-        text.setAttribute('font-weight', 'bold');
-        text.textContent = pctText;
-        g.appendChild(text);
-
-        svg.appendChild(g);
+        L.circleMarker([lat, lon], {
+          radius,
+          fillColor: fill,
+          color: STYLES.gridColor,
+          weight: 1,
+          fillOpacity: 1,
+        })
+          .addTo(map)
+          .bindTooltip(buildEventTooltip(result), {
+            permanent: false,
+            direction: 'top',
+            className: 'impact-map-tooltip',
+            offset: [0, -radius],
+          });
       });
 
-      mapSection.appendChild(svg);
+      if (mapPoints.length > 0) {
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+      }
+
+      /* eslint-enable no-undef */
       resultsSection.appendChild(mapSection);
     }
 
