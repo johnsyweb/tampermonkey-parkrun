@@ -201,9 +201,13 @@ Contributions are welcome! Here's how to get started:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.<!-- Links -->[husky]: https://typicode.github.io/husky/
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+<!-- Links -->
+
+[husky]: https://typicode.github.io/husky/
 [microsite]: https://www.johnsy.com/tampermonkey-parkrun/
 [mise]: https://mise.jdx.dev/
-[tampermonkey]: https://www.tampermonkey.net
+[tampermonkey]: https://www.tampermonkey.net/
 [userscripts]: https://apps.apple.com/app/userscripts/id1463298887
 [violentmonkey]: https://violentmonkey.github.io/
