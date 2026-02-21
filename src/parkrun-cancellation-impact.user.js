@@ -576,6 +576,9 @@ function isInvalidHistoryData(data) {
       // Fetch from network
       const url = `${domain}/${eventName}/results/eventhistory/`;
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const html = await response.text();
 
       const parser = new DOMParser();
@@ -919,6 +922,7 @@ function isInvalidHistoryData(data) {
 
     // Fetch all nearby parkrun histories once
     const nearbyHistories = [];
+    const fetchFailures = [];
 
     for (let i = 0; i < nearbyParkruns.length; i++) {
       if (state.fetchController.signal.aborted) {
@@ -943,15 +947,23 @@ function isInvalidHistoryData(data) {
             shortName,
             distance,
           });
+        } else {
+          fetchFailures.push({ parkrun, shortName, distance });
         }
       } catch (error) {
         console.error(`Failed to fetch ${eventName}:`, error);
+        fetchFailures.push({ parkrun, shortName, distance });
       }
 
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    // Compute results for all cancellation dates
+    const histByEvent = new Map();
+    nearbyHistories.forEach((h) => histByEvent.set(h.parkrun.properties.eventname, h));
+    const failByEvent = new Map();
+    fetchFailures.forEach((f) => failByEvent.set(f.parkrun.properties.eventname, f));
+
+    // Compute results for all cancellation dates (one result per nearby parkrun, order preserved)
     const resultsByDate = {};
     const validCancellationDates = [];
 
@@ -959,40 +971,58 @@ function isInvalidHistoryData(data) {
       const dateKey = targetDate.toISOString().split('T')[0];
       const results = [];
 
-      nearbyHistories.forEach(({ parkrun, historyData, shortName, distance }) => {
-        const base = getBaselineEventsBefore(historyData, targetDate);
+      nearbyParkruns.forEach((parkrun) => {
+        const eventName = parkrun.properties.eventname;
+        const hist = histByEvent.get(eventName);
+        const fail = failByEvent.get(eventName);
 
-        // Find event on this cancellation date
-        const eventOnDate = findEventOnDate(historyData, targetDate);
+        if (hist) {
+          const { historyData, shortName, distance } = hist;
+          const base = getBaselineEventsBefore(historyData, targetDate);
+          const eventOnDate = findEventOnDate(historyData, targetDate);
 
-        results.push({
-          eventName: parkrun.properties.eventname,
-          title: historyData.title,
-          displayName: shortName,
-          distance,
-          baseline: base.baseline,
-          eventOnDate,
-          historyData,
-          seasonalTrend: base,
-          change: eventOnDate
-            ? {
-                finishersChange: eventOnDate.finishers - base.baseline.avgFinishers,
-                volunteersChange: eventOnDate.volunteers - base.baseline.avgVolunteers,
-                finishersPct:
-                  base.baseline.avgFinishers > 0
-                    ? ((eventOnDate.finishers - base.baseline.avgFinishers) /
-                        base.baseline.avgFinishers) *
-                      100
-                    : 0,
-                volunteersPct:
-                  base.baseline.avgVolunteers > 0
-                    ? ((eventOnDate.volunteers - base.baseline.avgVolunteers) /
-                        base.baseline.avgVolunteers) *
-                      100
-                    : 0,
-              }
-            : null,
-        });
+          results.push({
+            eventName: parkrun.properties.eventname,
+            title: historyData.title,
+            displayName: shortName,
+            distance,
+            baseline: base.baseline,
+            eventOnDate,
+            historyData,
+            seasonalTrend: base,
+            change: eventOnDate
+              ? {
+                  finishersChange: eventOnDate.finishers - base.baseline.avgFinishers,
+                  volunteersChange: eventOnDate.volunteers - base.baseline.avgVolunteers,
+                  finishersPct:
+                    base.baseline.avgFinishers > 0
+                      ? ((eventOnDate.finishers - base.baseline.avgFinishers) /
+                          base.baseline.avgFinishers) *
+                        100
+                      : 0,
+                  volunteersPct:
+                    base.baseline.avgVolunteers > 0
+                      ? ((eventOnDate.volunteers - base.baseline.avgVolunteers) /
+                          base.baseline.avgVolunteers) *
+                        100
+                      : 0,
+                }
+              : null,
+          });
+        } else if (fail) {
+          results.push({
+            eventName,
+            title: eventName,
+            displayName: fail.shortName,
+            distance: fail.distance,
+            baseline: { avgFinishers: 0, avgVolunteers: 0 },
+            eventOnDate: null,
+            historyData: null,
+            seasonalTrend: null,
+            change: null,
+            fetchFailed: true,
+          });
+        }
       });
 
       // Check if this was a global cancellation (no parkruns ran)
@@ -1486,7 +1516,7 @@ function isInvalidHistoryData(data) {
         label: 'Trend',
         key: 'trend',
         align: 'right',
-        info: 'Gain (+5 or more finishers), Loss (-5 or fewer), Stable (within ±5), Launched (event had not started), or No Event.',
+        info: 'Gain (+5 or more finishers), Loss (-5 or fewer), Stable (within ±5), Launched (event had not started), No Event, or Fetch failed (refresh page to retry).',
       },
     ];
 
@@ -1504,13 +1534,12 @@ function isInvalidHistoryData(data) {
         row.style.borderBottom = `1px solid ${STYLES.gridColor}`;
         row.style.transition = 'background-color 0.15s ease';
 
-        // Special styling for No Event rows
         const hasEvent = result.eventOnDate !== null;
-        if (!hasEvent) {
+        const fetchFailed = result.fetchFailed === true;
+        if (!hasEvent && !fetchFailed) {
           row.style.opacity = '0.6';
         }
 
-        // Add hover effect
         row.addEventListener('mouseenter', () => {
           row.style.backgroundColor = hasEvent
             ? 'rgba(34, 211, 238, 0.08)'
@@ -1520,7 +1549,6 @@ function isInvalidHistoryData(data) {
           row.style.backgroundColor = 'transparent';
         });
 
-        // parkrun name with link
         const nameCell = document.createElement('td');
         nameCell.style.padding = '10px';
         nameCell.style.textAlign = 'left';
@@ -1562,13 +1590,23 @@ function isInvalidHistoryData(data) {
         const baselineFinishersCell = document.createElement('td');
         baselineFinishersCell.style.padding = '10px';
         baselineFinishersCell.style.textAlign = 'right';
-        baselineFinishersCell.innerHTML = `<strong>${result.baseline.avgFinishers}</strong>`;
+        if (fetchFailed) {
+          baselineFinishersCell.textContent = '—';
+          baselineFinishersCell.style.color = STYLES.subtleTextColor;
+        } else {
+          baselineFinishersCell.innerHTML = `<strong>${result.baseline.avgFinishers}</strong>`;
+        }
         row.appendChild(baselineFinishersCell);
 
         const baselineVolunteersCell = document.createElement('td');
         baselineVolunteersCell.style.padding = '10px';
         baselineVolunteersCell.style.textAlign = 'right';
-        baselineVolunteersCell.textContent = `${result.baseline.avgVolunteers}`;
+        if (fetchFailed) {
+          baselineVolunteersCell.textContent = '—';
+          baselineVolunteersCell.style.color = STYLES.subtleTextColor;
+        } else {
+          baselineVolunteersCell.textContent = `${result.baseline.avgVolunteers}`;
+        }
         row.appendChild(baselineVolunteersCell);
 
         const onDateFinishersCell = document.createElement('td');
@@ -1643,7 +1681,11 @@ function isInvalidHistoryData(data) {
         const trendCell = document.createElement('td');
         trendCell.style.padding = '10px';
         trendCell.style.textAlign = 'right';
-        if (!result.eventOnDate) {
+        if (fetchFailed) {
+          trendCell.textContent = 'Fetch failed';
+          trendCell.style.color = STYLES.alertColor;
+          trendCell.title = 'Refresh page to retry';
+        } else if (!result.eventOnDate) {
           const notHeldLabel = getNotHeldLabel(result.historyData, currentDate);
           trendCell.textContent = notHeldLabel ?? 'No Event';
           trendCell.style.color = STYLES.subtleTextColor;
