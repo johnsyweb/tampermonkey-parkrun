@@ -208,12 +208,12 @@ describe('next-milestone', () => {
   });
 
   describe('appendVolunteerDaysSummary', () => {
-    it('adds volunteer days summary under heading once', () => {
+    it('adds volunteer credits summary under heading once', () => {
       document.body.innerHTML = '<h3>77 parkruns total</h3>';
       const heading = document.querySelector('h3');
       appendVolunteerDaysSummary(heading, 317);
       appendVolunteerDaysSummary(heading, 317);
-      expect(heading.nextElementSibling?.textContent).toBe('317 volunteer days total');
+      expect(heading.nextElementSibling?.textContent).toBe('317 volunteer credits total');
     });
   });
 
@@ -238,7 +238,7 @@ describe('next-milestone', () => {
   });
 
   describe('findVolunteerDaysTotal', () => {
-    it('extracts total volunteer days from summary table', () => {
+    it('extracts total volunteer credits from summary table', () => {
       document.body.innerHTML = `
         <h3 id="volunteer-summary">Volunteer Summary</h3>
         <table id="results">
@@ -395,24 +395,24 @@ describe('next-milestone', () => {
   });
 
   describe('appendVolunteerDaysSummary', () => {
-    it('appends volunteer days summary with milestone estimate', () => {
+    it('appends volunteer credits summary with milestone estimate', () => {
       document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
       const heading = document.querySelector('h3');
       appendVolunteerDaysSummary(heading, 317, 500, 'Saturday 2 May 2026');
       const summary = document.querySelector('#volunteer-days-summary');
       expect(summary).not.toBeNull();
       expect(summary.textContent).toBe(
-        '317 volunteer days total (expected to reach 500 around Saturday 2 May 2026)'
+        '317 volunteer credits total (expected to reach 500 around Saturday 2 May 2026)'
       );
     });
 
-    it('appends volunteer days summary without milestone estimate', () => {
+    it('appends volunteer credits summary without milestone estimate', () => {
       document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
       const heading = document.querySelector('h3');
       appendVolunteerDaysSummary(heading, 317, null, null);
       const summary = document.querySelector('#volunteer-days-summary');
       expect(summary).not.toBeNull();
-      expect(summary.textContent).toBe('317 volunteer days total');
+      expect(summary.textContent).toBe('317 volunteer credits total');
     });
 
     it('appends preferences toggles', () => {

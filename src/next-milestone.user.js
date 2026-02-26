@@ -452,7 +452,7 @@
     if (!heading || heading.dataset.volunteerDaysApplied === 'true') return;
     const summary = document.createElement('p');
     summary.id = 'volunteer-days-summary';
-    let text = `${totalDays} volunteer days total`;
+    let text = `${totalDays} volunteer credits total`;
     if (nextMilestone && targetDate) {
       text += ` (expected to reach ${nextMilestone} around ${targetDate})`;
     }

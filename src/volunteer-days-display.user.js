@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun Volunteer Days Display
-// @description  Displays the number of volunteer days for parkrun finishers on results pages, for celebration purposes (and let's not make assumptions about ratios)
+// @description  Displays the number of volunteer credits for parkrun finishers on results pages, for celebration purposes (and let's not make assumptions about ratios)
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/volunteer-days-display.user.js
 // @grant        none
@@ -44,7 +44,7 @@
   'use strict';
 
   /**
-   * Adds volunteer day information to each finisher who has volunteered
+   * Adds volunteer credit information to each finisher who has volunteered
    */
   function showVolunteerDays() {
     document
@@ -58,7 +58,7 @@
           spacer.textContent = ' | ';
 
           const volSpan = document.createElement('span');
-          volSpan.textContent = `${volDays} volunteer day${volDays === '1' ? '' : 's'}`;
+          volSpan.textContent = `${volDays} volunteer credit${volDays === '1' ? '' : 's'}`;
           volSpan.classList.add('volunteer-days');
 
           const firstElement = div.firstElementChild;
@@ -86,7 +86,7 @@
   }
 
   /**
-   * Adds sort options for volunteer days and wires up sorting behaviour
+   * Adds sort options for volunteer credits and wires up sorting behaviour
    */
   function addVolunteerDaysSort() {
     const firstRow = document.querySelector('tr[data-vols]');
@@ -121,8 +121,8 @@
     if (sortSelect) {
       // Add options if not already present
       if (!sortSelect.querySelector('option[value="vols-asc"]')) {
-        const optAsc = new Option('Sort by Volunteer days ▲', 'vols-asc');
-        const optDesc = new Option('Sort by Volunteer days ▼', 'vols-desc');
+        const optAsc = new Option('Sort by volunteer credits ▲', 'vols-asc');
+        const optDesc = new Option('Sort by volunteer credits ▼', 'vols-desc');
         sortSelect.appendChild(optAsc);
         sortSelect.appendChild(optDesc);
       }
