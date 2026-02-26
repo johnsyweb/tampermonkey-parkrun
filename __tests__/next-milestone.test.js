@@ -4,7 +4,7 @@ const {
   findParkrunTotalHeading,
   findJuniorParkrunTotalHeading,
   findAgeCategory,
-  findVolunteerDaysTotal,
+  findVolunteerCreditsTotal,
   findMostRecentFinishDate,
   getNextMilestone,
   getNextMilestoneDefinition,
@@ -14,9 +14,9 @@ const {
   calculateJuniorMilestoneDate,
   appendMilestoneEstimate,
   appendJuniorMilestoneEstimate,
-  appendVolunteerDaysSummary,
-  getVolunteerDayPreferences,
-  setVolunteerDayPreferences,
+  appendVolunteerCreditsSummary,
+  getVolunteerCreditPreferences,
+  setVolunteerCreditPreferences,
   getNextVolunteerMilestoneDate,
   isDateInNextWeek,
   highlightDateIfNeeded,
@@ -207,12 +207,12 @@ describe('next-milestone', () => {
     });
   });
 
-  describe('appendVolunteerDaysSummary', () => {
+  describe('appendVolunteerCreditsSummary', () => {
     it('adds volunteer credits summary under heading once', () => {
       document.body.innerHTML = '<h3>77 parkruns total</h3>';
       const heading = document.querySelector('h3');
-      appendVolunteerDaysSummary(heading, 317);
-      appendVolunteerDaysSummary(heading, 317);
+      appendVolunteerCreditsSummary(heading, 317);
+      appendVolunteerCreditsSummary(heading, 317);
       expect(heading.nextElementSibling?.textContent).toBe('317 volunteer credits total');
     });
   });
@@ -237,7 +237,7 @@ describe('next-milestone', () => {
     });
   });
 
-  describe('findVolunteerDaysTotal', () => {
+  describe('findVolunteerCreditsTotal', () => {
     it('extracts total volunteer credits from summary table', () => {
       document.body.innerHTML = `
         <h3 id="volunteer-summary">Volunteer Summary</h3>
@@ -250,12 +250,12 @@ describe('next-milestone', () => {
           </tfoot>
         </table>
       `;
-      expect(findVolunteerDaysTotal(document)).toBe(317);
+      expect(findVolunteerCreditsTotal(document)).toBe(317);
     });
 
     it('returns null when volunteer summary is missing', () => {
       document.body.innerHTML = '<div></div>';
-      expect(findVolunteerDaysTotal(document)).toBeNull();
+      expect(findVolunteerCreditsTotal(document)).toBeNull();
     });
   });
 
@@ -288,25 +288,25 @@ describe('next-milestone', () => {
     });
   });
 
-  describe('getVolunteerDayPreferences', () => {
+  describe('getVolunteerCreditPreferences', () => {
     beforeEach(() => {
       localStorage.clear();
     });
 
     it('returns default preferences when none are stored', () => {
-      const prefs = getVolunteerDayPreferences();
+      const prefs = getVolunteerCreditPreferences();
       expect(prefs).toEqual({ saturday: true, sunday: true });
     });
 
     it('retrieves stored preferences', () => {
-      setVolunteerDayPreferences({ saturday: true, sunday: false });
-      const prefs = getVolunteerDayPreferences();
+      setVolunteerCreditPreferences({ saturday: true, sunday: false });
+      const prefs = getVolunteerCreditPreferences();
       expect(prefs).toEqual({ saturday: true, sunday: false });
     });
 
     it('returns default preferences if stored data is invalid', () => {
-      localStorage.setItem('parkrun-volunteer-days', 'invalid json');
-      const prefs = getVolunteerDayPreferences();
+      localStorage.setItem('parkrun-volunteer-credits', 'invalid json');
+      const prefs = getVolunteerCreditPreferences();
       expect(prefs).toEqual({ saturday: true, sunday: true });
     });
   });
@@ -394,12 +394,12 @@ describe('next-milestone', () => {
     });
   });
 
-  describe('appendVolunteerDaysSummary', () => {
+  describe('appendVolunteerCreditsSummary', () => {
     it('appends volunteer credits summary with milestone estimate', () => {
       document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
       const heading = document.querySelector('h3');
-      appendVolunteerDaysSummary(heading, 317, 500, 'Saturday 2 May 2026');
-      const summary = document.querySelector('#volunteer-days-summary');
+      appendVolunteerCreditsSummary(heading, 317, 500, 'Saturday 2 May 2026');
+      const summary = document.querySelector('#volunteer-credits-summary');
       expect(summary).not.toBeNull();
       expect(summary.textContent).toBe(
         '317 volunteer credits total (expected to reach 500 around Saturday 2 May 2026)'
@@ -409,8 +409,8 @@ describe('next-milestone', () => {
     it('appends volunteer credits summary without milestone estimate', () => {
       document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
       const heading = document.querySelector('h3');
-      appendVolunteerDaysSummary(heading, 317, null, null);
-      const summary = document.querySelector('#volunteer-days-summary');
+      appendVolunteerCreditsSummary(heading, 317, null, null);
+      const summary = document.querySelector('#volunteer-credits-summary');
       expect(summary).not.toBeNull();
       expect(summary.textContent).toBe('317 volunteer credits total');
     });
@@ -418,8 +418,8 @@ describe('next-milestone', () => {
     it('appends preferences toggles', () => {
       document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
       const heading = document.querySelector('h3');
-      appendVolunteerDaysSummary(heading, 317, 500, 'Saturday 2 May 2026');
-      const prefsContainer = document.querySelector('#volunteer-days-preferences');
+      appendVolunteerCreditsSummary(heading, 317, 500, 'Saturday 2 May 2026');
+      const prefsContainer = document.querySelector('#volunteer-credits-preferences');
       const saturdayCheckbox = document.querySelector('#volunteer-saturday');
       const sundayCheckbox = document.querySelector('#volunteer-sunday');
       expect(prefsContainer).not.toBeNull();
@@ -432,9 +432,9 @@ describe('next-milestone', () => {
     it('does not append if already applied', () => {
       document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
       const heading = document.querySelector('h3');
-      heading.dataset.volunteerDaysApplied = 'true';
-      appendVolunteerDaysSummary(heading, 317, 500, 'Saturday 2 May 2026');
-      const summary = document.querySelector('#volunteer-days-summary');
+      heading.dataset.volunteerCreditsApplied = 'true';
+      appendVolunteerCreditsSummary(heading, 317, 500, 'Saturday 2 May 2026');
+      const summary = document.querySelector('#volunteer-credits-summary');
       expect(summary).toBeNull();
     });
   });

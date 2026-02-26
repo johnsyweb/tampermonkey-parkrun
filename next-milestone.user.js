@@ -33,7 +33,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/next-milestone.user.js
-// @version      1.0.1
+// @version      1.0.0
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
@@ -163,7 +163,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     return null;
   }
-  function findVolunteerDaysTotal() {
+  function findVolunteerCreditsTotal() {
     var _totalCell$textConten, _totalCell$textConten2;
     var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
     var heading = doc.querySelector('#volunteer-summary');
@@ -345,8 +345,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }
     });
   }
-  function getVolunteerDayPreferences() {
-    var storageKey = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'parkrun-volunteer-days';
+  var VOLUNTEER_CREDITS_STORAGE_KEY = 'parkrun-volunteer-credits';
+  var LEGACY_VOLUNTEER_DAYS_STORAGE_KEY = 'parkrun-volunteer-days';
+  function getVolunteerCreditPreferences() {
+    var storageKey = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : VOLUNTEER_CREDITS_STORAGE_KEY;
     if (typeof localStorage === 'undefined') {
       return {
         saturday: true,
@@ -354,33 +356,49 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       };
     }
     var stored = localStorage.getItem(storageKey);
-    if (!stored) {
-      return {
-        saturday: true,
-        sunday: true
-      };
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (_unused) {
+        return {
+          saturday: true,
+          sunday: true
+        };
+      }
     }
-    try {
-      return JSON.parse(stored);
-    } catch (_unused) {
-      return {
-        saturday: true,
-        sunday: true
-      };
+
+    // Backwards compatibility: migrate legacy volunteer-days key if present
+    var legacyStored = localStorage.getItem(LEGACY_VOLUNTEER_DAYS_STORAGE_KEY);
+    if (legacyStored) {
+      try {
+        var parsed = JSON.parse(legacyStored);
+        localStorage.setItem(storageKey, JSON.stringify(parsed));
+        localStorage.removeItem(LEGACY_VOLUNTEER_DAYS_STORAGE_KEY);
+        return parsed;
+      } catch (_unused2) {
+        return {
+          saturday: true,
+          sunday: true
+        };
+      }
     }
+    return {
+      saturday: true,
+      sunday: true
+    };
   }
-  function setVolunteerDayPreferences(preferences) {
-    var storageKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'parkrun-volunteer-days';
+  function setVolunteerCreditPreferences(preferences) {
+    var storageKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : VOLUNTEER_CREDITS_STORAGE_KEY;
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(storageKey, JSON.stringify(preferences));
     }
   }
-  function getNextVolunteerMilestoneDate(currentVolunteerDays, nextMilestone) {
+  function getNextVolunteerMilestoneDate(currentVolunteerCredits, nextMilestone) {
     var startDate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
     var preferences = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-    if (!nextMilestone || nextMilestone <= currentVolunteerDays) return null;
-    var prefs = preferences || getVolunteerDayPreferences();
-    var daysNeeded = nextMilestone - currentVolunteerDays;
+    if (!nextMilestone || nextMilestone <= currentVolunteerCredits) return null;
+    var prefs = preferences || getVolunteerCreditPreferences();
+    var daysNeeded = nextMilestone - currentVolunteerCredits;
     if (!prefs.saturday && !prefs.sunday) return null;
 
     // If volunteering on both days, they volunteer twice per week
@@ -464,22 +482,22 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       highlightDateIfNeeded(heading, targetDate);
     }
   }
-  function appendVolunteerDaysSummary(heading, totalDays) {
+  function appendVolunteerCreditsSummary(heading, totalCredits) {
     var nextMilestone = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
     var targetDate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-    if (!heading || heading.dataset.volunteerDaysApplied === 'true') return;
+    if (!heading || heading.dataset.volunteerCreditsApplied === 'true') return;
     var summary = document.createElement('p');
-    summary.id = 'volunteer-days-summary';
-    var text = "".concat(totalDays, " volunteer days total");
+    summary.id = 'volunteer-credits-summary';
+    var text = "".concat(totalCredits, " volunteer credits total");
     if (nextMilestone && targetDate) {
       text += " (expected to reach ".concat(nextMilestone, " around ").concat(targetDate, ")");
     }
     summary.textContent = text;
     var prefsContainer = document.createElement('div');
-    prefsContainer.id = 'volunteer-days-preferences';
+    prefsContainer.id = 'volunteer-credits-preferences';
     prefsContainer.style.marginTop = '0.5em';
     prefsContainer.style.fontSize = '0.9em';
-    var preferences = getVolunteerDayPreferences();
+    var preferences = getVolunteerCreditPreferences();
     var saturdayLabel = document.createElement('label');
     saturdayLabel.style.marginRight = '1em';
     saturdayLabel.style.cursor = 'pointer';
@@ -488,9 +506,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     saturdayCheckbox.checked = preferences.saturday;
     saturdayCheckbox.id = 'volunteer-saturday';
     saturdayCheckbox.addEventListener('change', function () {
-      var updated = getVolunteerDayPreferences();
+      var updated = getVolunteerCreditPreferences();
       updated.saturday = saturdayCheckbox.checked;
-      setVolunteerDayPreferences(updated);
+      setVolunteerCreditPreferences(updated);
       window.location.reload();
     });
     saturdayLabel.appendChild(saturdayCheckbox);
@@ -502,9 +520,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     sundayCheckbox.checked = preferences.sunday;
     sundayCheckbox.id = 'volunteer-sunday';
     sundayCheckbox.addEventListener('change', function () {
-      var updated = getVolunteerDayPreferences();
+      var updated = getVolunteerCreditPreferences();
       updated.sunday = sundayCheckbox.checked;
-      setVolunteerDayPreferences(updated);
+      setVolunteerCreditPreferences(updated);
       window.location.reload();
     });
     sundayLabel.appendChild(sundayCheckbox);
@@ -513,7 +531,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     prefsContainer.appendChild(sundayLabel);
     heading.insertAdjacentElement('afterend', summary);
     summary.insertAdjacentElement('afterend', prefsContainer);
-    heading.dataset.volunteerDaysApplied = 'true';
+    heading.dataset.volunteerCreditsApplied = 'true';
 
     // Extract date from targetDate string and highlight if in next week
     if (targetDate) {
@@ -565,7 +583,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     infoBox.appendChild(assumptions);
 
     // Insert after volunteer preferences if they exist, otherwise after heading
-    var prefsContainer = (_heading$parentElemen2 = heading.parentElement) === null || _heading$parentElemen2 === void 0 ? void 0 : _heading$parentElemen2.querySelector('#volunteer-days-preferences');
+    var prefsContainer = (_heading$parentElemen2 = heading.parentElement) === null || _heading$parentElemen2 === void 0 ? void 0 : _heading$parentElemen2.querySelector('#volunteer-credits-preferences');
     if (prefsContainer) {
       prefsContainer.insertAdjacentElement('afterend', infoBox);
     } else {
@@ -594,18 +612,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return;
     }
     appendMilestoneEstimate(result.heading, nextMilestone, formatDate(targetDate), targetDate);
-    var volunteerDaysTotal = findVolunteerDaysTotal(doc);
-    if (volunteerDaysTotal !== null) {
-      var nextVolunteerMilestone = getNextMilestone(volunteerDaysTotal, null, volunteerMilestones);
+    var volunteerCreditsTotal = findVolunteerCreditsTotal(doc);
+    if (volunteerCreditsTotal !== null) {
+      var nextVolunteerMilestone = getNextMilestone(volunteerCreditsTotal, null, volunteerMilestones);
       var volunteerTargetDate = null;
       var volunteerTargetDateFormatted = null;
       if (nextVolunteerMilestone) {
-        volunteerTargetDate = getNextVolunteerMilestoneDate(volunteerDaysTotal, nextVolunteerMilestone, now);
+        volunteerTargetDate = getNextVolunteerMilestoneDate(volunteerCreditsTotal, nextVolunteerMilestone, now);
         if (volunteerTargetDate) {
           volunteerTargetDateFormatted = formatDate(volunteerTargetDate);
         }
       }
-      appendVolunteerDaysSummary(result.heading, volunteerDaysTotal, nextVolunteerMilestone, volunteerTargetDateFormatted);
+      appendVolunteerCreditsSummary(result.heading, volunteerCreditsTotal, nextVolunteerMilestone, volunteerTargetDateFormatted);
     }
     var juniorResult = findJuniorParkrunTotalHeading(doc);
     if (juniorResult && ageCategory !== null && ageCategory !== void 0 && ageCategory.startsWith('J')) {
@@ -628,7 +646,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       findParkrunTotalHeading: findParkrunTotalHeading,
       findJuniorParkrunTotalHeading: findJuniorParkrunTotalHeading,
       findAgeCategory: findAgeCategory,
-      findVolunteerDaysTotal: findVolunteerDaysTotal,
+      findVolunteerCreditsTotal: findVolunteerCreditsTotal,
       findMostRecentFinishDate: findMostRecentFinishDate,
       getNextMilestone: getNextMilestone,
       getNextMilestoneDefinition: getNextMilestoneDefinition,
@@ -639,12 +657,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       formatDate: formatDate,
       isDateInNextWeek: isDateInNextWeek,
       highlightDateIfNeeded: highlightDateIfNeeded,
-      getVolunteerDayPreferences: getVolunteerDayPreferences,
-      setVolunteerDayPreferences: setVolunteerDayPreferences,
+      getVolunteerCreditPreferences: getVolunteerCreditPreferences,
+      setVolunteerCreditPreferences: setVolunteerCreditPreferences,
       getNextVolunteerMilestoneDate: getNextVolunteerMilestoneDate,
       appendMilestoneEstimate: appendMilestoneEstimate,
       appendJuniorMilestoneEstimate: appendJuniorMilestoneEstimate,
-      appendVolunteerDaysSummary: appendVolunteerDaysSummary,
+      appendVolunteerCreditsSummary: appendVolunteerCreditsSummary,
       appendAssumptionsInfo: appendAssumptionsInfo,
       applyMilestoneEstimate: applyMilestoneEstimate
     };

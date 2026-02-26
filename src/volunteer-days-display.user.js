@@ -46,7 +46,7 @@
   /**
    * Adds volunteer credit information to each finisher who has volunteered
    */
-  function showVolunteerDays() {
+  function showVolunteerCredits() {
     document
       .querySelectorAll('tr[data-vols] > td.Results-table-td.Results-table-td--name > div.detailed')
       .forEach((div) => {
@@ -61,12 +61,20 @@
           volSpan.textContent = `${volDays} volunteer credit${volDays === '1' ? '' : 's'}`;
           volSpan.classList.add('volunteer-days');
 
-          const firstElement = div.firstElementChild;
-          if (firstElement) {
-            firstElement.insertAdjacentElement('afterend', spacer);
+          // In responsive detailed view, gender position is wrapped in a Results-tablet span.
+          // Insert volunteer credits immediately after the finish count (before gender block) when present.
+          const genderTablet = div.querySelector('.Results-tablet');
+          if (genderTablet) {
+            div.insertBefore(spacer, genderTablet);
             spacer.insertAdjacentElement('afterend', volSpan);
           } else {
-            div.appendChild(volSpan);
+            const firstElement = div.firstElementChild;
+            if (firstElement) {
+              firstElement.insertAdjacentElement('afterend', spacer);
+              spacer.insertAdjacentElement('afterend', volSpan);
+            } else {
+              div.appendChild(volSpan);
+            }
           }
         }
       });
@@ -78,8 +86,8 @@
   function init() {
     const firstRow = document.querySelector('tr[data-vols]');
     if (firstRow) {
-      showVolunteerDays();
-      addVolunteerDaysSort();
+      showVolunteerCredits();
+      addVolunteerCreditsSort();
     } else {
       setTimeout(init, 500);
     }
@@ -88,7 +96,7 @@
   /**
    * Adds sort options for volunteer credits and wires up sorting behaviour
    */
-  function addVolunteerDaysSort() {
+  function addVolunteerCreditsSort() {
     const firstRow = document.querySelector('tr[data-vols]');
     if (!firstRow) return;
     const tbody = firstRow.closest('tbody');
@@ -98,7 +106,7 @@
     );
 
     // Sorting function using data-vols
-    function sortByVolunteerDays(direction) {
+    function sortByVolunteerCredits(direction) {
       if (!tbody) return;
       // Include all rows in tbody; treat missing data-vols as 0
       const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -138,7 +146,7 @@
               if (e.cancelable) e.preventDefault();
               if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
               if (typeof e.stopPropagation === 'function') e.stopPropagation();
-              sortByVolunteerDays(value.endsWith('asc') ? 'asc' : 'desc');
+              sortByVolunteerCredits(value.endsWith('asc') ? 'asc' : 'desc');
             }
           },
           true
@@ -147,13 +155,80 @@
         sortSelect.addEventListener('change', (e) => {
           const value = e.target.value || '';
           if (value === 'vols-asc') {
-            sortByVolunteerDays('asc');
+            sortByVolunteerCredits('asc');
           } else if (value === 'vols-desc') {
-            sortByVolunteerDays('desc');
+            sortByVolunteerCredits('desc');
           }
         });
         sortSelect.dataset.volsSortWired = 'true';
       }
+    }
+
+    // Also augment the responsive "View Settings" sort dialog when present
+    const dialogSortOptions = document.querySelector('.Results-dialog-options[data-name="sort"]');
+    if (dialogSortOptions && !dialogSortOptions.querySelector('[data-vols-sort="true"]')) {
+      const option = document.createElement('div');
+      option.className = 'Results-dialog-option Results-dialog-option--block js-ResultsOption';
+      option.dataset.volsSort = 'true';
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'Results-dialog-button';
+      const label = document.createElement('span');
+      label.textContent = 'Sort by volunteer credits';
+      button.appendChild(label);
+
+      const arrows = document.createElement('div');
+      arrows.className = 'Results-dialog-arrows';
+
+      const ascButton = document.createElement('button');
+      ascButton.type = 'button';
+      ascButton.className = 'Results-dialog-arrow js-ResultsDirection';
+      ascButton.dataset.value = 'vols-asc';
+      ascButton.textContent = '▲';
+
+      const descButton = document.createElement('button');
+      descButton.type = 'button';
+      descButton.className = 'Results-dialog-arrow js-ResultsDirection';
+      descButton.dataset.value = 'vols-desc';
+      descButton.textContent = '▼';
+
+      function applyDialogSort(direction) {
+        sortByVolunteerCredits(direction);
+
+        // Update selection styling to match core behaviour
+        dialogSortOptions
+          .querySelectorAll('.Results-dialog-option.js-ResultsOption')
+          .forEach((opt) => opt.classList.remove('isSelected'));
+        dialogSortOptions
+          .querySelectorAll('.Results-dialog-arrow.js-ResultsDirection')
+          .forEach((arrow) => arrow.classList.remove('isSelected'));
+
+        option.classList.add('isSelected');
+        if (direction === 'asc') {
+          ascButton.classList.add('isSelected');
+        } else {
+          descButton.classList.add('isSelected');
+        }
+      }
+
+      ascButton.addEventListener('click', (event) => {
+        if (event.cancelable) event.preventDefault();
+        event.stopPropagation();
+        applyDialogSort('asc');
+      });
+
+      descButton.addEventListener('click', (event) => {
+        if (event.cancelable) event.preventDefault();
+        event.stopPropagation();
+        applyDialogSort('desc');
+      });
+
+      arrows.appendChild(ascButton);
+      arrows.appendChild(descButton);
+      option.appendChild(button);
+      option.appendChild(arrows);
+      dialogSortOptions.appendChild(option);
     }
   }
 
