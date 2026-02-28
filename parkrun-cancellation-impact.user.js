@@ -117,9 +117,12 @@ function detectAllEventGaps(historyData, referenceDate) {
     return [];
   }
   var gaps = [];
-  for (var i = 1; i < dates.length; i++) {
-    var prevDate = dates[i - 1];
-    var currDate = dates[i];
+  var sortedDates = _toConsumableArray(dates).sort(function (a, b) {
+    return a.getTime() - b.getTime();
+  });
+  for (var i = 1; i < sortedDates.length; i++) {
+    var prevDate = sortedDates[i - 1];
+    var currDate = sortedDates[i];
     var daysDiff = (currDate - prevDate) / (1000 * 60 * 60 * 24);
     if (daysDiff > GAP_THRESHOLD_DAYS) {
       gaps.push({
@@ -127,12 +130,12 @@ function detectAllEventGaps(historyData, referenceDate) {
         gapEndDate: currDate,
         daysDiff: daysDiff,
         eventsBefore: i,
-        eventsAfter: dates.length - i
+        eventsAfter: sortedDates.length - i
       });
     }
   }
-  if (referenceDate && dates.length >= 1) {
-    var lastDate = dates[dates.length - 1];
+  if (referenceDate && sortedDates.length >= 1) {
+    var lastDate = sortedDates[sortedDates.length - 1];
     var refStr = toLocalDateString(referenceDate);
     var refDate = parseDateString(refStr);
     var _daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
@@ -156,7 +159,9 @@ function detectEventGap(historyData, referenceDate) {
   if (dates.length < 1) {
     return null;
   }
-  var lastDate = dates[dates.length - 1];
+  var lastDate = new Date(Math.max.apply(Math, _toConsumableArray(dates.map(function (d) {
+    return d.getTime();
+  }))));
 
   // Prefer ongoing cancellation (last event to reference date) when it exists
   if (referenceDate) {
@@ -286,8 +291,9 @@ function getCancellationSaturdays(gapStartDate, gapEndDate) {
   return saturdays;
 }
 function getMostRecentCancellationDate(gapInfo) {
+  var referenceDate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   if (!gapInfo) return null;
-  var refDateStr = gapInfo.gapEndDateStr;
+  var refDateStr = referenceDate && gapInfo.gapEndDateStr ? toLocalDateString(referenceDate) : gapInfo.gapEndDateStr;
   if (refDateStr && dayOfWeekForDateString(refDateStr) === 6) {
     var _refDateStr$split$map = refDateStr.split('-').map(Number),
       _refDateStr$split$map2 = _slicedToArray(_refDateStr$split$map, 3),
@@ -296,7 +302,8 @@ function getMostRecentCancellationDate(gapInfo) {
       d = _refDateStr$split$map2[2];
     return new Date(y, m - 1, d);
   }
-  var sats = getCancellationSaturdays(gapInfo.gapStartDate, gapInfo.gapEndDate);
+  var endDate = refDateStr ? parseDateString(refDateStr) : gapInfo.gapEndDate;
+  var sats = getCancellationSaturdays(gapInfo.gapStartDate, endDate);
   return sats.length > 0 ? sats[sats.length - 1] : null;
 }
 function parseDateString(dateStr) {
@@ -767,7 +774,7 @@ function isInvalidHistoryData(data) {
     eventNameDiv.innerHTML = "<strong style=\"color: ".concat(STYLES.lineColor, ";\">").concat(eventShortName, "</strong>");
     section.appendChild(eventNameDiv);
     if (state.gapInfo) {
-      var mostRecent = getMostRecentCancellationDate(state.gapInfo);
+      var mostRecent = getMostRecentCancellationDate(state.gapInfo, new Date());
       if (mostRecent) {
         var cancellationDateLine = document.createElement('div');
         cancellationDateLine.style.fontSize = '14px';

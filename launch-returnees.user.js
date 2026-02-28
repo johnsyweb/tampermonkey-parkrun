@@ -7,27 +7,27 @@
 // @homepage     https://www.johnsy.com/tampermonkey-parkrun/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
 // @license      MIT
-// @match        *://www.parkrun.ca/*/results/latestresults/
-// @match        *://www.parkrun.co.at/*/results/latestresults/
-// @match        *://www.parkrun.co.nl/*/results/latestresults/
-// @match        *://www.parkrun.co.nz/*/results/latestresults/
-// @match        *://www.parkrun.co.za/*/results/latestresults/
-// @match        *://www.parkrun.com.au/*/results/latestresults/
-// @match        *://www.parkrun.com.de/*/results/latestresults/
-// @match        *://www.parkrun.dk/*/results/latestresults/
-// @match        *://www.parkrun.fi/*/results/latestresults/
-// @match        *://www.parkrun.fr/*/results/latestresults/
-// @match        *://www.parkrun.ie/*/results/latestresults/
-// @match        *://www.parkrun.it/*/results/latestresults/
-// @match        *://www.parkrun.jp/*/results/latestresults/
-// @match        *://www.parkrun.lt/*/results/latestresults/
-// @match        *://www.parkrun.my/*/results/latestresults/
-// @match        *://www.parkrun.no/*/results/latestresults/
-// @match        *://www.parkrun.org.uk/*/results/latestresults/
-// @match        *://www.parkrun.pl/*/results/latestresults/
-// @match        *://www.parkrun.se/*/results/latestresults/
-// @match        *://www.parkrun.sg/*/results/latestresults/
-// @match        *://www.parkrun.us/*/results/latestresults/
+// @match        *://www.parkrun.ca/*/results/*/
+// @match        *://www.parkrun.co.at/*/results/*/
+// @match        *://www.parkrun.co.nl/*/results/*/
+// @match        *://www.parkrun.co.nz/*/results/*/
+// @match        *://www.parkrun.co.za/*/results/*/
+// @match        *://www.parkrun.com.au/*/results/*/
+// @match        *://www.parkrun.com.de/*/results/*/
+// @match        *://www.parkrun.dk/*/results/*/
+// @match        *://www.parkrun.fi/*/results/*/
+// @match        *://www.parkrun.fr/*/results/*/
+// @match        *://www.parkrun.ie/*/results/*/
+// @match        *://www.parkrun.it/*/results/*/
+// @match        *://www.parkrun.jp/*/results/*/
+// @match        *://www.parkrun.lt/*/results/*/
+// @match        *://www.parkrun.my/*/results/*/
+// @match        *://www.parkrun.no/*/results/*/
+// @match        *://www.parkrun.org.uk/*/results/*/
+// @match        *://www.parkrun.pl/*/results/*/
+// @match        *://www.parkrun.se/*/results/*/
+// @match        *://www.parkrun.sg/*/results/*/
+// @match        *://www.parkrun.us/*/results/*/
 // @namespace    http://tampermonkey.net/
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
@@ -58,31 +58,48 @@ _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
       case 0:
         _init = function _init3() {
           _init = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-            var pathname, locationMatch, location, origin, launchEventUrl, currentParticipants, launchParticipants, returnees;
+            var _overrides$pathname, _overrides$origin;
+            var overrides,
+              pathname,
+              origin,
+              locationMatch,
+              location,
+              launchEventUrl,
+              currentParticipants,
+              launchParticipants,
+              returnees,
+              _args2 = arguments;
             return _regenerator().w(function (_context2) {
               while (1) switch (_context2.n) {
                 case 0:
-                  if (!isLaunchEvent(document)) {
+                  overrides = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : {};
+                  pathname = (_overrides$pathname = overrides.pathname) !== null && _overrides$pathname !== void 0 ? _overrides$pathname : window.location.pathname;
+                  if (/\/results\/\d{4}-\d{2}-\d{2}\/?$/.test(pathname)) {
                     _context2.n = 1;
                     break;
                   }
                   return _context2.a(2);
                 case 1:
-                  pathname = window.location.pathname;
-                  locationMatch = pathname.match(/\/([^/]+)\/results\/latestresults/);
+                  if (!isLaunchEvent(document)) {
+                    _context2.n = 2;
+                    break;
+                  }
+                  return _context2.a(2);
+                case 2:
+                  origin = (_overrides$origin = overrides.origin) !== null && _overrides$origin !== void 0 ? _overrides$origin : window.location.origin;
+                  locationMatch = pathname.match(/\/([^/]+)\/results\/\d{4}-\d{2}-\d{2}/);
                   location = locationMatch[1];
-                  origin = window.location.origin;
                   launchEventUrl = "".concat(origin, "/").concat(location, "/results/1/");
                   currentParticipants = extractCurrentPageParticipants();
-                  _context2.n = 2;
+                  _context2.n = 3;
                   return fetchEventParticipants(launchEventUrl);
-                case 2:
+                case 3:
                   launchParticipants = _context2.v;
                   returnees = _toConsumableArray(currentParticipants.keys()).filter(function (id) {
                     return launchParticipants.has(id);
                   });
                   displayReturnees(returnees, currentParticipants, launchParticipants, origin);
-                case 3:
+                case 4:
                   return _context2.a(2);
               }
             }, _callee2);
