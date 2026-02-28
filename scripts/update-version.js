@@ -6,6 +6,8 @@ const path = require('path');
 const execSync = require('child_process').execSync;
 const process = require('process');
 
+const ROOT_DIR = process.cwd();
+
 // Safety guard: only allow this to run in CI environments.
 // This script mutates version headers across all .user.js files
 // and should not be invoked manually in local development.
@@ -67,26 +69,45 @@ function bumpVersion({ major, minor, patch }, bumpType) {
   return { major, minor, patch: patch + 1 };
 }
 
-function updateVersion(filePath) {
+function applyVersionToFile(filePath, newVersion, label) {
+  if (!fs.existsSync(filePath)) {
+    return;
+  }
+
   const fileContent = fs.readFileSync(filePath, 'utf8');
+  const current = getCurrentVersion(fileContent);
+  const versionRegex = /(@version\s+)(\d+\.\d+\.\d+|\d{4}-\d{2}-\d{2}(?: [0-9: ]+)*)/;
+  const updatedContent = fileContent.replace(versionRegex, `$1${newVersion}`);
+  if (current.str !== newVersion) {
+    const targetLabel = label || filePath;
+    console.log(`Updating ${targetLabel} from '${current.str}' to '${newVersion}'`);
+    fs.writeFileSync(filePath, updatedContent, 'utf8');
+  } else {
+    const targetLabel = label || filePath;
+    console.log(`${targetLabel} already at version ${newVersion}`);
+  }
+}
+
+function updateVersionForPair(rootUserScriptPath) {
+  const fileContent = fs.readFileSync(rootUserScriptPath, 'utf8');
   const current = getCurrentVersion(fileContent);
   const commits = getCommitsSinceVersion(current.str);
   const bumpType = determineBump(commits);
   const next = bumpVersion(current, bumpType);
   const newVersion = `${next.major}.${next.minor}.${next.patch}`;
-  const versionRegex = /(@version\s+)(\d+\.\d+\.\d+|\d{4}-\d{2}-\d{2}(?: [0-9: ]+)*)/;
-  const updatedContent = fileContent.replace(versionRegex, `$1${newVersion}`);
-  if (current.str !== newVersion) {
-    console.log(`Updating ${filePath} from '${current.str}' to '${newVersion}'`);
-    fs.writeFileSync(filePath, updatedContent, 'utf8');
-  } else {
-    console.log(`${filePath} already at version ${newVersion}`);
-  }
+
+  // Update the generated root userscript (what browsers actually install)
+  applyVersionToFile(rootUserScriptPath, newVersion);
+
+  // Keep the corresponding source file in sync so future builds don't revert
+  // the bumped version back to an older value.
+  const srcUserScriptPath = path.join(ROOT_DIR, 'src', path.basename(rootUserScriptPath));
+  applyVersionToFile(srcUserScriptPath, newVersion, `src/${path.basename(rootUserScriptPath)}`);
 }
 
-const userScriptFiles = fs.readdirSync(process.cwd()).filter((file) => file.endsWith('.user.js'));
+const userScriptFiles = fs.readdirSync(ROOT_DIR).filter((file) => file.endsWith('.user.js'));
 
 userScriptFiles.forEach((file) => {
-  const filePath = path.join(process.cwd(), file);
-  updateVersion(filePath);
+  const filePath = path.join(ROOT_DIR, file);
+  updateVersionForPair(filePath);
 });
