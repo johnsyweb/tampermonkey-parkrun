@@ -139,7 +139,7 @@ function detectAllEventGaps(historyData, referenceDate) {
     var refStr = toLocalDateString(referenceDate);
     var refDate = parseDateString(refStr);
     var _daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
-    if (_daysDiff > GAP_THRESHOLD_DAYS) {
+    if (_daysDiff >= GAP_THRESHOLD_DAYS) {
       gaps.push({
         gapStartDate: lastDate,
         gapEndDate: refDate,
@@ -168,7 +168,7 @@ function detectEventGap(historyData, referenceDate) {
     var refStr = toLocalDateString(referenceDate);
     var refDate = parseDateString(refStr);
     var daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
-    if (daysDiff > GAP_THRESHOLD_DAYS) {
+    if (daysDiff >= GAP_THRESHOLD_DAYS) {
       return {
         gapStartDate: lastDate,
         gapEndDate: refDate,
