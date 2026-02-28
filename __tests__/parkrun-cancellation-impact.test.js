@@ -112,7 +112,7 @@ describe('parkrun-cancellation-impact', () => {
       expect(gap.eventsAfter).toBe(0);
     });
 
-    test('does not treat as gap when reference is exactly 7 days after last event', () => {
+    test('treats as ongoing gap when reference is exactly 7 days after last event', () => {
       const historyData = {
         rawDates: ['2025-01-04', '2025-01-11', '2025-01-18'],
         dates: ['4 Jan 2025', '11 Jan 2025', '18 Jan 2025'],
@@ -123,7 +123,10 @@ describe('parkrun-cancellation-impact', () => {
 
       const gap = detectEventGap(historyData, referenceDate);
 
-      expect(gap).toBeNull();
+      expect(gap).not.toBeNull();
+      expect(gap.gapEndDateStr).toBe('2025-01-25');
+      expect(gap.daysDiff).toBeCloseTo(7, 0);
+      expect(gap.eventsAfter).toBe(0);
     });
 
     test('does not treat as gap when reference is ≤7 days after last event', () => {
@@ -722,8 +725,8 @@ describe('parkrun-cancellation-impact', () => {
     });
   });
 
-  test('should detect cancellation for Warringal Parklands on 2026-01-31', () => {
-    // Last event was 2026-01-24 (Saturday)
+  test('detects ongoing cancellation when reference is exactly 7 days after last event (e.g. Warringal 2026-01-31)', () => {
+    // Last event was 2026-01-24 (Saturday); reference 2026-01-31 is 7 days later
     const historyData = {
       rawDates: ['2026-01-03', '2026-01-10', '2026-01-17', '2026-01-24'],
       dates: ['3 Jan 2026', '10 Jan 2026', '17 Jan 2026', '24 Jan 2026'],
@@ -732,7 +735,10 @@ describe('parkrun-cancellation-impact', () => {
     };
     const referenceDate = parseDateString('2026-01-31');
     const gap = detectEventGap(historyData, referenceDate);
-    expect(gap).toBeNull();
+    expect(gap).not.toBeNull();
+    expect(gap.gapEndDateStr).toBe('2026-01-31');
+    expect(gap.gapStartDate.toISOString().split('T')[0]).toBe('2026-01-24');
+    expect(gap.daysDiff).toBeCloseTo(7, 0);
   });
 
   test('should NOT detect a gap if only 6 days since last event', () => {
