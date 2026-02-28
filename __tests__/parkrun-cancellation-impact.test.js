@@ -201,6 +201,24 @@ describe('parkrun-cancellation-impact', () => {
       expect(gap.gapStartDate.toISOString().split('T')[0]).toBe('2026-01-24');
       expect(gap.gapEndDate.toISOString().split('T')[0]).toBe('2026-02-21');
     });
+
+    test('uses chronologically most recent event when rawDates are newest-first (e.g. Albert Melbourne)', () => {
+      const historyData = {
+        rawDates: ['2026-02-21', '2026-02-14', '2026-02-07'],
+        dates: ['21 Feb 2026', '14 Feb 2026', '7 Feb 2026'],
+        finishers: [959, 900, 910],
+        volunteers: [50, 48, 49],
+      };
+      const referenceDate = parseDateString('2026-03-01');
+
+      const gap = detectEventGap(historyData, referenceDate);
+
+      expect(gap).not.toBeNull();
+      expect(gap.gapStartDate.toISOString().split('T')[0]).toBe('2026-02-21');
+      expect(gap.gapEndDate.toISOString().split('T')[0]).toBe('2026-03-01');
+      expect(gap.gapEndDateStr).toBe('2026-03-01');
+      expect(gap.eventsAfter).toBe(0);
+    });
   });
 
   describe('12-event baseline (getBaselineEventsBefore)', () => {
@@ -684,6 +702,23 @@ describe('parkrun-cancellation-impact', () => {
 
     test('returns null when gapInfo is null', () => {
       expect(getMostRecentCancellationDate(null)).toBeNull();
+    });
+
+    test('uses reference date for display when provided (ongoing gap, so summary shows today)', () => {
+      const gapInfo = {
+        gapStartDate: parseDateString('2026-02-21'),
+        gapEndDate: parseDateString('2025-03-22'),
+        gapEndDateStr: '2025-03-22',
+      };
+      const referenceDate = new Date(2026, 1, 28);
+
+      const result = getMostRecentCancellationDate(gapInfo, referenceDate);
+
+      expect(result).not.toBeNull();
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(1);
+      expect(result.getDate()).toBe(28);
+      expect(result.getDay()).toBe(6);
     });
   });
 

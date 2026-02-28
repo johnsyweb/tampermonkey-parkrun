@@ -105,10 +105,11 @@ function detectAllEventGaps(historyData, referenceDate) {
   }
 
   const gaps = [];
+  const sortedDates = [...dates].sort((a, b) => a.getTime() - b.getTime());
 
-  for (let i = 1; i < dates.length; i++) {
-    const prevDate = dates[i - 1];
-    const currDate = dates[i];
+  for (let i = 1; i < sortedDates.length; i++) {
+    const prevDate = sortedDates[i - 1];
+    const currDate = sortedDates[i];
     const daysDiff = (currDate - prevDate) / (1000 * 60 * 60 * 24);
 
     if (daysDiff > GAP_THRESHOLD_DAYS) {
@@ -117,13 +118,13 @@ function detectAllEventGaps(historyData, referenceDate) {
         gapEndDate: currDate,
         daysDiff,
         eventsBefore: i,
-        eventsAfter: dates.length - i,
+        eventsAfter: sortedDates.length - i,
       });
     }
   }
 
-  if (referenceDate && dates.length >= 1) {
-    const lastDate = dates[dates.length - 1];
+  if (referenceDate && sortedDates.length >= 1) {
+    const lastDate = sortedDates[sortedDates.length - 1];
     const refStr = toLocalDateString(referenceDate);
     const refDate = parseDateString(refStr);
     const daysDiff = (refDate - lastDate) / (1000 * 60 * 60 * 24);
@@ -149,7 +150,7 @@ function detectEventGap(historyData, referenceDate) {
     return null;
   }
 
-  const lastDate = dates[dates.length - 1];
+  const lastDate = new Date(Math.max(...dates.map((d) => d.getTime())));
 
   // Prefer ongoing cancellation (last event to reference date) when it exists
   if (referenceDate) {
@@ -284,14 +285,18 @@ function getCancellationSaturdays(gapStartDate, gapEndDate) {
   return saturdays;
 }
 
-function getMostRecentCancellationDate(gapInfo) {
+function getMostRecentCancellationDate(gapInfo, referenceDate = null) {
   if (!gapInfo) return null;
-  const refDateStr = gapInfo.gapEndDateStr;
+  const refDateStr =
+    referenceDate && gapInfo.gapEndDateStr
+      ? toLocalDateString(referenceDate)
+      : gapInfo.gapEndDateStr;
   if (refDateStr && dayOfWeekForDateString(refDateStr) === 6) {
     const [y, m, d] = refDateStr.split('-').map(Number);
     return new Date(y, m - 1, d);
   }
-  const sats = getCancellationSaturdays(gapInfo.gapStartDate, gapInfo.gapEndDate);
+  const endDate = refDateStr ? parseDateString(refDateStr) : gapInfo.gapEndDate;
+  const sats = getCancellationSaturdays(gapInfo.gapStartDate, endDate);
   return sats.length > 0 ? sats[sats.length - 1] : null;
 }
 
@@ -757,7 +762,7 @@ function isInvalidHistoryData(data) {
     section.appendChild(eventNameDiv);
 
     if (state.gapInfo) {
-      const mostRecent = getMostRecentCancellationDate(state.gapInfo);
+      const mostRecent = getMostRecentCancellationDate(state.gapInfo, new Date());
       if (mostRecent) {
         const cancellationDateLine = document.createElement('div');
         cancellationDateLine.style.fontSize = '14px';
