@@ -629,10 +629,9 @@
         null,
         volunteerMilestones
       );
-      let volunteerTargetDate = null;
       let volunteerTargetDateFormatted = null;
       if (nextVolunteerMilestone) {
-        volunteerTargetDate = getNextVolunteerMilestoneDate(
+        const volunteerTargetDate = getNextVolunteerMilestoneDate(
           volunteerCreditsTotal,
           nextVolunteerMilestone,
           now

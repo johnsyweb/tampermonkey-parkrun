@@ -44,7 +44,7 @@ for (const rel of builtFiles) {
   // Extract userscript metadata block if present
   const metaRegex = /\/\/\s*==UserScript==[\s\S]*?\/\/\s*==\/UserScript==/;
   const metaMatch = content.match(metaRegex);
-  let destContent = '';
+  let destContent;
   if (metaMatch) {
     let metaBlock = metaMatch[0].trim();
     // Strip @screenshot-* keys so userscript managers only see standard metadata
@@ -95,7 +95,7 @@ for (const rel of builtFiles) {
   body = body.replace(/\/\/# sourceMappingURL=.*$/gm, '');
 
   // Minify
-  let minified = null;
+  let minified;
   try {
     const result = UglifyJS.minify(body, { compress: true, mangle: true });
     if (result.error) {
