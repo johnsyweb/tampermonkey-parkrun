@@ -615,10 +615,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var volunteerCreditsTotal = findVolunteerCreditsTotal(doc);
     if (volunteerCreditsTotal !== null) {
       var nextVolunteerMilestone = getNextMilestone(volunteerCreditsTotal, null, volunteerMilestones);
-      var volunteerTargetDate = null;
       var volunteerTargetDateFormatted = null;
       if (nextVolunteerMilestone) {
-        volunteerTargetDate = getNextVolunteerMilestoneDate(volunteerCreditsTotal, nextVolunteerMilestone, now);
+        var volunteerTargetDate = getNextVolunteerMilestoneDate(volunteerCreditsTotal, nextVolunteerMilestone, now);
         if (volunteerTargetDate) {
           volunteerTargetDateFormatted = formatDate(volunteerTargetDate);
         }
