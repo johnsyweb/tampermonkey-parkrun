@@ -7,27 +7,27 @@
 // @homepage     https://www.johnsy.com/tampermonkey-parkrun/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
 // @license      MIT
-// @match        *://www.parkrun.ca/*/results/latestresults/
-// @match        *://www.parkrun.co.at/*/results/latestresults/
-// @match        *://www.parkrun.co.nl/*/results/latestresults/
-// @match        *://www.parkrun.co.nz/*/results/latestresults/
-// @match        *://www.parkrun.co.za/*/results/latestresults/
-// @match        *://www.parkrun.com.au/*/results/latestresults/
-// @match        *://www.parkrun.com.de/*/results/latestresults/
-// @match        *://www.parkrun.dk/*/results/latestresults/
-// @match        *://www.parkrun.fi/*/results/latestresults/
-// @match        *://www.parkrun.fr/*/results/latestresults/
-// @match        *://www.parkrun.ie/*/results/latestresults/
-// @match        *://www.parkrun.it/*/results/latestresults/
-// @match        *://www.parkrun.jp/*/results/latestresults/
-// @match        *://www.parkrun.lt/*/results/latestresults/
-// @match        *://www.parkrun.my/*/results/latestresults/
-// @match        *://www.parkrun.no/*/results/latestresults/
-// @match        *://www.parkrun.org.uk/*/results/latestresults/
-// @match        *://www.parkrun.pl/*/results/latestresults/
-// @match        *://www.parkrun.se/*/results/latestresults/
-// @match        *://www.parkrun.sg/*/results/latestresults/
-// @match        *://www.parkrun.us/*/results/latestresults/
+// @match        *://www.parkrun.ca/*/results/*/
+// @match        *://www.parkrun.co.at/*/results/*/
+// @match        *://www.parkrun.co.nl/*/results/*/
+// @match        *://www.parkrun.co.nz/*/results/*/
+// @match        *://www.parkrun.co.za/*/results/*/
+// @match        *://www.parkrun.com.au/*/results/*/
+// @match        *://www.parkrun.com.de/*/results/*/
+// @match        *://www.parkrun.dk/*/results/*/
+// @match        *://www.parkrun.fi/*/results/*/
+// @match        *://www.parkrun.fr/*/results/*/
+// @match        *://www.parkrun.ie/*/results/*/
+// @match        *://www.parkrun.it/*/results/*/
+// @match        *://www.parkrun.jp/*/results/*/
+// @match        *://www.parkrun.lt/*/results/*/
+// @match        *://www.parkrun.my/*/results/*/
+// @match        *://www.parkrun.no/*/results/*/
+// @match        *://www.parkrun.org.uk/*/results/*/
+// @match        *://www.parkrun.pl/*/results/*/
+// @match        *://www.parkrun.se/*/results/*/
+// @match        *://www.parkrun.sg/*/results/*/
+// @match        *://www.parkrun.us/*/results/*/
 // @namespace    http://tampermonkey.net/
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
@@ -283,15 +283,19 @@
   /**
    * Main function to initialize the userscript
    */
-  async function init() {
+  async function init(overrides = {}) {
+    const pathname = overrides.pathname ?? window.location.pathname;
+    if (!/\/results\/\d{4}-\d{2}-\d{2}\/?$/.test(pathname)) {
+      return;
+    }
+
     if (isLaunchEvent(document)) {
       return;
     }
 
-    const pathname = window.location.pathname;
-    const locationMatch = pathname.match(/\/([^/]+)\/results\/latestresults/);
+    const origin = overrides.origin ?? window.location.origin;
+    const locationMatch = pathname.match(/\/([^/]+)\/results\/\d{4}-\d{2}-\d{2}/);
     const location = locationMatch[1];
-    const origin = window.location.origin;
     const launchEventUrl = `${origin}/${location}/results/1/`;
 
     const currentParticipants = extractCurrentPageParticipants();
