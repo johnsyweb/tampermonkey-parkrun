@@ -39,7 +39,7 @@
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-cancellation-impact.user.js
 // @require      https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js
 // @require      https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js
-// @version      0.1.5
+// @version      0.1.6
 // ==/UserScript==
 
 const BASELINE_EVENTS = 12;
