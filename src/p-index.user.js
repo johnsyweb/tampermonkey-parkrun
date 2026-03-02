@@ -38,7 +38,7 @@
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
-// @version      1.1.1
+// @version      1.1.2
 // ==/UserScript==
 
 (function () {
