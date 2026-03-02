@@ -47,7 +47,7 @@ jobs:
             ${{ runner.os }}-dist-
       - name: Upload build artifacts
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
@@ -83,7 +83,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dist-
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
@@ -136,7 +136,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dist-
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
