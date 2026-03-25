@@ -12,7 +12,9 @@ export default defineConfig([
     languageOptions: {
       globals: {
         ...globals.browser,
+        GM_download: 'readonly',
         GM_info: 'readonly',
+        html2canvas: 'readonly',
       },
     },
   },
