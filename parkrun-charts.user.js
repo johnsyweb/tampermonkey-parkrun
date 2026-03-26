@@ -396,6 +396,12 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       volunteers: volunteers
     };
   }
+  function eventHistoryHasEnoughEventsForRollingAverage(eventCount, windowSize) {
+    return eventCount >= windowSize;
+  }
+  function isRecordFinisherOrVolunteerCount(count, minMax) {
+    return count === minMax.min.value || count === minMax.max.value;
+  }
   function calculateRollingAverage(data, windowSize) {
     var result = [];
     for (var i = 0; i < data.length; i++) {
@@ -715,6 +721,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports.sameOrderOfMagnitude = sameOrderOfMagnitude;
+    module.exports.eventHistoryHasEnoughEventsForRollingAverage = eventHistoryHasEnoughEventsForRollingAverage;
+    module.exports.isRecordFinisherOrVolunteerCount = isRecordFinisherOrVolunteerCount;
   } else {
     initCharts();
   }
