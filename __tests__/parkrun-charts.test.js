@@ -1,4 +1,5 @@
 const {
+  buildEventHistoryDatasets,
   eventHistoryHasEnoughEventsForRollingAverage,
   formatLatestEventSummaryHtml,
   isRecordFinisherOrVolunteerCount,
@@ -75,6 +76,58 @@ describe('parkrun-charts', () => {
 
       expect(summary).toContain('Finishers: 260 (12-Event avg: 243.7)');
       expect(summary).toContain('Volunteers: 35 (12-Event avg: 31.2)');
+    });
+  });
+
+  describe('buildEventHistoryDatasets', () => {
+    const baseArgs = {
+      historyData: {
+        eventNumbers: [],
+        finishers: [],
+        volunteers: [],
+      },
+      finishersAxisId: 'y-finishers',
+      volunteersAxisId: 'y-volunteers',
+      finishersRollingAvg: [],
+      volunteersRollingAvg: [],
+      rollingAvgWindowSize: 12,
+    };
+
+    it('includes only finishers and volunteers datasets before rolling averages are available', () => {
+      const datasets = buildEventHistoryDatasets({
+        ...baseArgs,
+        historyData: {
+          eventNumbers: Array.from({ length: 11 }, (_, i) => `${i + 1}`),
+          finishers: Array.from({ length: 11 }, (_, i) => 100 + i),
+          volunteers: Array.from({ length: 11 }, (_, i) => 20 + i),
+        },
+        finishersRollingAvg: Array.from({ length: 11 }, () => null),
+        volunteersRollingAvg: Array.from({ length: 11 }, () => null),
+      });
+
+      expect(datasets).toHaveLength(2);
+      expect(datasets.map((d) => d.label)).toEqual(['Finishers', 'Volunteers']);
+    });
+
+    it('includes rolling-average datasets once enough events exist', () => {
+      const datasets = buildEventHistoryDatasets({
+        ...baseArgs,
+        historyData: {
+          eventNumbers: Array.from({ length: 12 }, (_, i) => `${i + 1}`),
+          finishers: Array.from({ length: 12 }, (_, i) => 100 + i),
+          volunteers: Array.from({ length: 12 }, (_, i) => 20 + i),
+        },
+        finishersRollingAvg: Array.from({ length: 12 }, (_, i) => (i < 11 ? null : 105.5)),
+        volunteersRollingAvg: Array.from({ length: 12 }, (_, i) => (i < 11 ? null : 25.2)),
+      });
+
+      expect(datasets).toHaveLength(4);
+      expect(datasets.map((d) => d.label)).toEqual([
+        'Finishers',
+        'Volunteers',
+        '12-Event Avg (Finishers)',
+        '12-Event Avg (Volunteers)',
+      ]);
     });
   });
 });

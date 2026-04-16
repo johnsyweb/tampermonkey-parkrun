@@ -495,6 +495,79 @@
     return Math.floor(Math.log10(a)) === Math.floor(Math.log10(b));
   }
 
+  function buildEventHistoryDatasets({
+    historyData,
+    finishersAxisId,
+    volunteersAxisId,
+    finishersRollingAvg,
+    volunteersRollingAvg,
+    rollingAvgWindowSize,
+  }) {
+    const datasets = [
+      {
+        label: 'Finishers',
+        data: historyData.finishers,
+        backgroundColor: STYLES.barColor,
+        borderColor: STYLES.barColor,
+        borderWidth: 1,
+        yAxisID: finishersAxisId,
+        order: 1,
+      },
+      {
+        label: 'Volunteers',
+        data: historyData.volunteers,
+        type: 'line',
+        borderColor: STYLES.lineColor,
+        backgroundColor: 'rgba(83, 186, 157, 0.2)',
+        borderWidth: 1,
+        pointBackgroundColor: STYLES.lineColor,
+        pointRadius: 2,
+        fill: false,
+        tension: 0.2,
+        yAxisID: volunteersAxisId,
+        order: 2,
+      },
+    ];
+
+    if (
+      eventHistoryHasEnoughEventsForRollingAverage(
+        historyData.eventNumbers.length,
+        rollingAvgWindowSize
+      )
+    ) {
+      datasets.push(
+        {
+          label: `${rollingAvgWindowSize}-Event Avg (Finishers)`,
+          data: finishersRollingAvg,
+          type: 'line',
+          borderColor: STYLES.barColor,
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false,
+          yAxisID: finishersAxisId,
+          order: 0,
+        },
+        {
+          label: `${rollingAvgWindowSize}-Event Avg (Volunteers)`,
+          data: volunteersRollingAvg,
+          type: 'line',
+          borderColor: STYLES.lineColor,
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false,
+          yAxisID: volunteersAxisId,
+          order: 3,
+        }
+      );
+    }
+
+    return datasets;
+  }
+
   function formatLatestEventSummaryHtml({
     latestDate,
     latestEventNumber,
@@ -664,57 +737,14 @@
       },
     };
 
-    const datasets = [
-      {
-        label: 'Finishers',
-        data: historyData.finishers,
-        backgroundColor: STYLES.barColor,
-        borderColor: STYLES.barColor,
-        borderWidth: 1,
-        yAxisID: finishersAxisId,
-        order: 1,
-      },
-      {
-        label: `${rollingAvgWindowSize}-Event Avg (Finishers)`,
-        data: finishersRollingAvg,
-        type: 'line',
-        borderColor: STYLES.barColor,
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        borderDash: [5, 5],
-        pointRadius: 0,
-        fill: false,
-        yAxisID: finishersAxisId,
-        order: 0,
-      },
-      {
-        label: 'Volunteers',
-        data: historyData.volunteers,
-        type: 'line',
-        borderColor: STYLES.lineColor,
-        backgroundColor: 'rgba(83, 186, 157, 0.2)',
-        borderWidth: 1,
-        pointBackgroundColor: STYLES.lineColor,
-        pointRadius: 2,
-        fill: false,
-        tension: 0.2,
-        yAxisID: volunteersAxisId,
-        order: 2,
-      },
-      {
-        label: `${rollingAvgWindowSize}-Event Avg (Volunteers)`,
-        data: volunteersRollingAvg,
-        type: 'line',
-        borderColor: STYLES.lineColor,
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        borderDash: [5, 5],
-        pointRadius: 0,
-        fill: false,
-        yAxisID: volunteersAxisId,
-        order: 3,
-      },
-    ];
+    const datasets = buildEventHistoryDatasets({
+      historyData,
+      finishersAxisId,
+      volunteersAxisId,
+      finishersRollingAvg,
+      volunteersRollingAvg,
+      rollingAvgWindowSize,
+    });
 
     const scales = { x: xAxis };
     scales[finishersAxisId] = axisDefs[finishersAxisId];
@@ -812,6 +842,7 @@
     module.exports.eventHistoryHasEnoughEventsForRollingAverage =
       eventHistoryHasEnoughEventsForRollingAverage;
     module.exports.isRecordFinisherOrVolunteerCount = isRecordFinisherOrVolunteerCount;
+    module.exports.buildEventHistoryDatasets = buildEventHistoryDatasets;
     module.exports.formatLatestEventSummaryHtml = formatLatestEventSummaryHtml;
   } else {
     initCharts();

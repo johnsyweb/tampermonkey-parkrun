@@ -457,14 +457,72 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     if (a === 0 || b === 0) return false;
     return Math.floor(Math.log10(a)) === Math.floor(Math.log10(b));
   }
-  function formatLatestEventSummaryHtml(_ref2) {
-    var latestDate = _ref2.latestDate,
-      latestEventNumber = _ref2.latestEventNumber,
-      latestFinishers = _ref2.latestFinishers,
-      latestVolunteers = _ref2.latestVolunteers,
-      latestFinishersAvg = _ref2.latestFinishersAvg,
-      latestVolunteersAvg = _ref2.latestVolunteersAvg,
+  function buildEventHistoryDatasets(_ref2) {
+    var historyData = _ref2.historyData,
+      finishersAxisId = _ref2.finishersAxisId,
+      volunteersAxisId = _ref2.volunteersAxisId,
+      finishersRollingAvg = _ref2.finishersRollingAvg,
+      volunteersRollingAvg = _ref2.volunteersRollingAvg,
       rollingAvgWindowSize = _ref2.rollingAvgWindowSize;
+    var datasets = [{
+      label: 'Finishers',
+      data: historyData.finishers,
+      backgroundColor: STYLES.barColor,
+      borderColor: STYLES.barColor,
+      borderWidth: 1,
+      yAxisID: finishersAxisId,
+      order: 1
+    }, {
+      label: 'Volunteers',
+      data: historyData.volunteers,
+      type: 'line',
+      borderColor: STYLES.lineColor,
+      backgroundColor: 'rgba(83, 186, 157, 0.2)',
+      borderWidth: 1,
+      pointBackgroundColor: STYLES.lineColor,
+      pointRadius: 2,
+      fill: false,
+      tension: 0.2,
+      yAxisID: volunteersAxisId,
+      order: 2
+    }];
+    if (eventHistoryHasEnoughEventsForRollingAverage(historyData.eventNumbers.length, rollingAvgWindowSize)) {
+      datasets.push({
+        label: "".concat(rollingAvgWindowSize, "-Event Avg (Finishers)"),
+        data: finishersRollingAvg,
+        type: 'line',
+        borderColor: STYLES.barColor,
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        pointRadius: 0,
+        fill: false,
+        yAxisID: finishersAxisId,
+        order: 0
+      }, {
+        label: "".concat(rollingAvgWindowSize, "-Event Avg (Volunteers)"),
+        data: volunteersRollingAvg,
+        type: 'line',
+        borderColor: STYLES.lineColor,
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        pointRadius: 0,
+        fill: false,
+        yAxisID: volunteersAxisId,
+        order: 3
+      });
+    }
+    return datasets;
+  }
+  function formatLatestEventSummaryHtml(_ref3) {
+    var latestDate = _ref3.latestDate,
+      latestEventNumber = _ref3.latestEventNumber,
+      latestFinishers = _ref3.latestFinishers,
+      latestVolunteers = _ref3.latestVolunteers,
+      latestFinishersAvg = _ref3.latestFinishersAvg,
+      latestVolunteersAvg = _ref3.latestVolunteersAvg,
+      rollingAvgWindowSize = _ref3.rollingAvgWindowSize;
     var finishersAvgSuffix = latestFinishersAvg !== null && latestFinishersAvg !== undefined ? " (".concat(rollingAvgWindowSize, "-Event avg: ").concat(latestFinishersAvg.toFixed(1), ")") : '';
     var volunteersAvgSuffix = latestVolunteersAvg !== null && latestVolunteersAvg !== undefined ? " (".concat(rollingAvgWindowSize, "-Event avg: ").concat(latestVolunteersAvg.toFixed(1), ")") : '';
     return "\n      <strong>Latest event:</strong> ".concat(latestDate, " (Event #").concat(latestEventNumber, ") |\n      <span style=\"color: ").concat(STYLES.barColor, "\">Finishers: ").concat(latestFinishers).concat(finishersAvgSuffix, "</span> |\n      <span style=\"color: ").concat(STYLES.lineColor, "\">Volunteers: ").concat(latestVolunteers).concat(volunteersAvgSuffix, "</span>\n    ");
@@ -609,52 +667,14 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         color: STYLES.gridColor
       }
     };
-    var datasets = [{
-      label: 'Finishers',
-      data: historyData.finishers,
-      backgroundColor: STYLES.barColor,
-      borderColor: STYLES.barColor,
-      borderWidth: 1,
-      yAxisID: finishersAxisId,
-      order: 1
-    }, {
-      label: "".concat(rollingAvgWindowSize, "-Event Avg (Finishers)"),
-      data: finishersRollingAvg,
-      type: 'line',
-      borderColor: STYLES.barColor,
-      backgroundColor: 'transparent',
-      borderWidth: 2,
-      borderDash: [5, 5],
-      pointRadius: 0,
-      fill: false,
-      yAxisID: finishersAxisId,
-      order: 0
-    }, {
-      label: 'Volunteers',
-      data: historyData.volunteers,
-      type: 'line',
-      borderColor: STYLES.lineColor,
-      backgroundColor: 'rgba(83, 186, 157, 0.2)',
-      borderWidth: 1,
-      pointBackgroundColor: STYLES.lineColor,
-      pointRadius: 2,
-      fill: false,
-      tension: 0.2,
-      yAxisID: volunteersAxisId,
-      order: 2
-    }, {
-      label: "".concat(rollingAvgWindowSize, "-Event Avg (Volunteers)"),
-      data: volunteersRollingAvg,
-      type: 'line',
-      borderColor: STYLES.lineColor,
-      backgroundColor: 'transparent',
-      borderWidth: 2,
-      borderDash: [5, 5],
-      pointRadius: 0,
-      fill: false,
-      yAxisID: volunteersAxisId,
-      order: 3
-    }];
+    var datasets = buildEventHistoryDatasets({
+      historyData: historyData,
+      finishersAxisId: finishersAxisId,
+      volunteersAxisId: volunteersAxisId,
+      finishersRollingAvg: finishersRollingAvg,
+      volunteersRollingAvg: volunteersRollingAvg,
+      rollingAvgWindowSize: rollingAvgWindowSize
+    });
     var scales = {
       x: xAxis
     };
@@ -753,6 +773,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     module.exports.sameOrderOfMagnitude = sameOrderOfMagnitude;
     module.exports.eventHistoryHasEnoughEventsForRollingAverage = eventHistoryHasEnoughEventsForRollingAverage;
     module.exports.isRecordFinisherOrVolunteerCount = isRecordFinisherOrVolunteerCount;
+    module.exports.buildEventHistoryDatasets = buildEventHistoryDatasets;
     module.exports.formatLatestEventSummaryHtml = formatLatestEventSummaryHtml;
   } else {
     initCharts();
