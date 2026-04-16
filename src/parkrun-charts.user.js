@@ -495,6 +495,31 @@
     return Math.floor(Math.log10(a)) === Math.floor(Math.log10(b));
   }
 
+  function formatLatestEventSummaryHtml({
+    latestDate,
+    latestEventNumber,
+    latestFinishers,
+    latestVolunteers,
+    latestFinishersAvg,
+    latestVolunteersAvg,
+    rollingAvgWindowSize,
+  }) {
+    const finishersAvgSuffix =
+      latestFinishersAvg !== null && latestFinishersAvg !== undefined
+        ? ` (${rollingAvgWindowSize}-Event avg: ${latestFinishersAvg.toFixed(1)})`
+        : '';
+    const volunteersAvgSuffix =
+      latestVolunteersAvg !== null && latestVolunteersAvg !== undefined
+        ? ` (${rollingAvgWindowSize}-Event avg: ${latestVolunteersAvg.toFixed(1)})`
+        : '';
+
+    return `
+      <strong>Latest event:</strong> ${latestDate} (Event #${latestEventNumber}) |
+      <span style="color: ${STYLES.barColor}">Finishers: ${latestFinishers}${finishersAvgSuffix}</span> |
+      <span style="color: ${STYLES.lineColor}">Volunteers: ${latestVolunteers}${volunteersAvgSuffix}</span>
+    `;
+  }
+
   function createEventHistoryChart() {
     if (document.getElementById('eventHistoryChart')) {
       console.log('Event history chart already exists, skipping render');
@@ -571,6 +596,25 @@
     canvas.style.maxHeight = '400px';
     insertAfterFirst('h1', container);
     const ctx = canvas.getContext('2d');
+
+    const latestIndex = historyData.dates.length - 1;
+    const latestSummary = document.createElement('div');
+    latestSummary.className = 'chart-latest-summary';
+    latestSummary.style.marginTop = '10px';
+    latestSummary.style.color = STYLES.textColor;
+    latestSummary.style.fontSize = '14px';
+    latestSummary.style.textAlign = 'center';
+    latestSummary.style.wordBreak = 'break-word';
+    latestSummary.innerHTML = formatLatestEventSummaryHtml({
+      latestDate: historyData.dates[latestIndex],
+      latestEventNumber: historyData.eventNumbers[latestIndex],
+      latestFinishers: historyData.finishers[latestIndex],
+      latestVolunteers: historyData.volunteers[latestIndex],
+      latestFinishersAvg: finishersRollingAvg[latestIndex],
+      latestVolunteersAvg: volunteersRollingAvg[latestIndex],
+      rollingAvgWindowSize,
+    });
+    container.appendChild(latestSummary);
 
     const statsFooter = document.createElement('div');
     statsFooter.className = 'chart-stats-footer';
@@ -768,6 +812,7 @@
     module.exports.eventHistoryHasEnoughEventsForRollingAverage =
       eventHistoryHasEnoughEventsForRollingAverage;
     module.exports.isRecordFinisherOrVolunteerCount = isRecordFinisherOrVolunteerCount;
+    module.exports.formatLatestEventSummaryHtml = formatLatestEventSummaryHtml;
   } else {
     initCharts();
   }

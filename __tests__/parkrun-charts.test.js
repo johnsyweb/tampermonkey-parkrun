@@ -1,5 +1,6 @@
 const {
   eventHistoryHasEnoughEventsForRollingAverage,
+  formatLatestEventSummaryHtml,
   isRecordFinisherOrVolunteerCount,
 } = require('../src/parkrun-charts.user.js');
 
@@ -40,6 +41,40 @@ describe('parkrun-charts', () => {
         max: { value: 100, date: '1 Jan 2020', eventNumber: '1' },
       };
       expect(isRecordFinisherOrVolunteerCount(100, single)).toBe(true);
+    });
+  });
+
+  describe('formatLatestEventSummaryHtml', () => {
+    it('omits average text when there are fewer than 12 events', () => {
+      const summary = formatLatestEventSummaryHtml({
+        latestDate: '13 Apr 2026',
+        latestEventNumber: '11',
+        latestFinishers: 245,
+        latestVolunteers: 31,
+        latestFinishersAvg: null,
+        latestVolunteersAvg: null,
+        rollingAvgWindowSize: 12,
+      });
+
+      expect(summary).toContain('<strong>Latest event:</strong> 13 Apr 2026 (Event #11)');
+      expect(summary).toContain('Finishers: 245');
+      expect(summary).toContain('Volunteers: 31');
+      expect(summary).not.toContain('12-Event avg');
+    });
+
+    it('includes 12-event average text at one decimal place once available', () => {
+      const summary = formatLatestEventSummaryHtml({
+        latestDate: '20 Apr 2026',
+        latestEventNumber: '12',
+        latestFinishers: 260,
+        latestVolunteers: 35,
+        latestFinishersAvg: 243.666,
+        latestVolunteersAvg: 31.222,
+        rollingAvgWindowSize: 12,
+      });
+
+      expect(summary).toContain('Finishers: 260 (12-Event avg: 243.7)');
+      expect(summary).toContain('Volunteers: 35 (12-Event avg: 31.2)');
     });
   });
 });

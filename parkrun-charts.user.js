@@ -457,6 +457,18 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     if (a === 0 || b === 0) return false;
     return Math.floor(Math.log10(a)) === Math.floor(Math.log10(b));
   }
+  function formatLatestEventSummaryHtml(_ref2) {
+    var latestDate = _ref2.latestDate,
+      latestEventNumber = _ref2.latestEventNumber,
+      latestFinishers = _ref2.latestFinishers,
+      latestVolunteers = _ref2.latestVolunteers,
+      latestFinishersAvg = _ref2.latestFinishersAvg,
+      latestVolunteersAvg = _ref2.latestVolunteersAvg,
+      rollingAvgWindowSize = _ref2.rollingAvgWindowSize;
+    var finishersAvgSuffix = latestFinishersAvg !== null && latestFinishersAvg !== undefined ? " (".concat(rollingAvgWindowSize, "-Event avg: ").concat(latestFinishersAvg.toFixed(1), ")") : '';
+    var volunteersAvgSuffix = latestVolunteersAvg !== null && latestVolunteersAvg !== undefined ? " (".concat(rollingAvgWindowSize, "-Event avg: ").concat(latestVolunteersAvg.toFixed(1), ")") : '';
+    return "\n      <strong>Latest event:</strong> ".concat(latestDate, " (Event #").concat(latestEventNumber, ") |\n      <span style=\"color: ").concat(STYLES.barColor, "\">Finishers: ").concat(latestFinishers).concat(finishersAvgSuffix, "</span> |\n      <span style=\"color: ").concat(STYLES.lineColor, "\">Volunteers: ").concat(latestVolunteers).concat(volunteersAvgSuffix, "</span>\n    ");
+  }
   function createEventHistoryChart() {
     if (document.getElementById('eventHistoryChart')) {
       console.log('Event history chart already exists, skipping render');
@@ -538,6 +550,24 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     canvas.style.maxHeight = '400px';
     insertAfterFirst('h1', container);
     var ctx = canvas.getContext('2d');
+    var latestIndex = historyData.dates.length - 1;
+    var latestSummary = document.createElement('div');
+    latestSummary.className = 'chart-latest-summary';
+    latestSummary.style.marginTop = '10px';
+    latestSummary.style.color = STYLES.textColor;
+    latestSummary.style.fontSize = '14px';
+    latestSummary.style.textAlign = 'center';
+    latestSummary.style.wordBreak = 'break-word';
+    latestSummary.innerHTML = formatLatestEventSummaryHtml({
+      latestDate: historyData.dates[latestIndex],
+      latestEventNumber: historyData.eventNumbers[latestIndex],
+      latestFinishers: historyData.finishers[latestIndex],
+      latestVolunteers: historyData.volunteers[latestIndex],
+      latestFinishersAvg: finishersRollingAvg[latestIndex],
+      latestVolunteersAvg: volunteersRollingAvg[latestIndex],
+      rollingAvgWindowSize: rollingAvgWindowSize
+    });
+    container.appendChild(latestSummary);
     var statsFooter = document.createElement('div');
     statsFooter.className = 'chart-stats-footer';
     statsFooter.style.marginTop = '10px';
@@ -723,6 +753,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     module.exports.sameOrderOfMagnitude = sameOrderOfMagnitude;
     module.exports.eventHistoryHasEnoughEventsForRollingAverage = eventHistoryHasEnoughEventsForRollingAverage;
     module.exports.isRecordFinisherOrVolunteerCount = isRecordFinisherOrVolunteerCount;
+    module.exports.formatLatestEventSummaryHtml = formatLatestEventSummaryHtml;
   } else {
     initCharts();
   }
