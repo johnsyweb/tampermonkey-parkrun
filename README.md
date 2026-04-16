@@ -17,38 +17,49 @@ This project uses [mise][mise] for development environment management.
 
 ### Setup
 
-1. Install dependencies with mise (installs Ruby, Node, and pnpm):
+1. Bootstrap the project:
    ```bash
-   mise install
+   mise run bootstrap
    ```
 
-2. Install npm dependencies:
+2. Confirm task availability:
    ```bash
-   pnpm install
+   mise tasks
    ```
-   
+
 The `.tool-versions` file specifies the required versions:
 - Ruby 3.4.7 (for Jekyll)
-- Node LTS (for development tools)
-- pnpm latest (for package management)
+- Node 22 (for development tools)
+- pnpm 10.8.0 (for package management)
 
-> [!NOTE]
-> GitHub Actions uses the same versions via `jdx/mise-action@v2`, which reads `.tool-versions` to ensure consistent environments across local development and CI.
+### Standard task commands (scripts-to-rule-them-all style)
 
-3. For microsite development, install Ruby/Jekyll dependencies:
-   ```bash
-   cd docs
-   bundle install
-   ```
+This repo includes `mise` tasks with consistent names for common workflows:
+
+- `mise run bootstrap` - install tools and all dependencies
+- `mise run setup` - bootstrap and build generated scripts
+- `mise run update` - refresh dependencies and generated data
+- `mise run build` - build scripts and the microsite
+- `mise run server` - serve the microsite locally
+- `mise run test` - run lint and tests
+- `mise run screenshots` - generate microsite screenshots
+- `mise run preview` - preview a userscript in a browser
+- `mise run docs-check` - run local microsite checks
+- `mise run cibuild` - run the full CI-equivalent pipeline
+
+List all available tasks:
+
+```bash
+mise tasks
+```
 
 ### Previewing the Microsite Locally
 
 The microsite documentation is built with Jekyll and served from the `docs/` directory.
 
-1. Start the Jekyll server:
+1. Start the local server:
    ```bash
-   cd docs
-   bundle exec jekyll serve --port 4000 --host 0.0.0.0
+   mise run server
    ```
 
 2. Visit http://localhost:4000/tampermonkey-parkrun/ in your browser
@@ -58,7 +69,7 @@ The microsite documentation is built with Jekyll and served from the `docs/` dir
 To generate screenshots for the microsite:
 
 ```bash
-pnpm screenshots
+mise run screenshots
 ```
 
 This will create screenshots of all userscripts in `docs/images/`. Scripts are included if their UserScript header contains `@screenshot-url`; you can optionally add `@screenshot-selector`, `@screenshot-timeout`, and `@screenshot-viewport` (e.g. `1200x800`) in the script header to control how the screenshot is taken.
@@ -68,10 +79,10 @@ This will create screenshots of all userscripts in `docs/images/`. Scripts are i
 To build the userscripts, open the script’s `@screenshot-url` in a new browser window with the built script injected (so you can verify changes without installing Tampermonkey):
 
 ```bash
-pnpm run preview
+mise run preview
 ```
 
-This builds from `src/`, then launches a browser, navigates to the default script’s screenshot URL (e.g. parkrun Cancellation Impact → Aurora event history), injects the built script, and leaves the window open. To preview a different script, pass its name: `pnpm run preview -- parkrun-charts`.
+This builds from `src/`, then launches a browser, navigates to the default script’s screenshot URL (e.g. parkrun Cancellation Impact → Aurora event history), injects the built script, and leaves the window open. To preview a different script, pass its name: `mise run preview -- parkrun-charts`.
 
 ### Building the Microsite
 
@@ -80,23 +91,17 @@ The microsite is automatically deployed to GitHub Pages on every push to `main`.
 To build the site locally:
 
 ```bash
-pnpm docs:build
-```
-
-To serve the site locally:
-
-```bash
-pnpm docs:serve
+mise run build
 ```
 
 The site will be available at http://localhost:4000/tampermonkey-parkrun/
 
 ### Avoiding Merge Conflicts in Built Files
 
-The root directory contains built `.user.js` files that are generated from `src/` by `pnpm run build:scripts`. To prevent merge conflicts during rebases or pulls:
+The root directory contains built `.user.js` files that are generated from `src/` by `mise run update` (which runs the script build). To prevent merge conflicts during rebases or pulls:
 
 1. **`.gitattributes`** marks these files with the `ours` merge strategy, which automatically keeps your local version during conflicts
-2. After any merge/rebase, simply run `pnpm run build:scripts` to regenerate them from `src/`
+2. After any merge/rebase, run `mise run update` to regenerate built files and data from `src/`
 3. The git config `merge.ours.driver` should be set to `true`:
    ```bash
    git config merge.ours.driver true
@@ -109,7 +114,7 @@ This approach ensures that:
 
 ### Git Hooks
 
-This project uses [husky][husky] to manage git hooks. Hooks are automatically installed when you run `pnpm install`.
+This project uses [husky][husky] to manage git hooks. Hooks are automatically installed during `mise run bootstrap`.
 
 #### Pre-commit Hook
 
@@ -182,12 +187,12 @@ Contributions are welcome! Here's how to get started:
 
 - **Code Quality**: All code must pass formatting (Prettier), linting (ESLint), and tests (Jest). These checks run automatically via git hooks before commit and push.
 - **Screenshots**: If you modify a userscript, screenshots will be automatically regenerated on push. Make sure to commit the updated screenshots in `docs/images/`.
-- **Testing**: Add tests for new functionality in the `__tests__/` directory. Run `pnpm test` to verify your tests pass.
+- **Testing**: Add tests for new functionality in the `__tests__/` directory. Run `mise run test` to verify your tests pass.
 - **Documentation**: Update the microsite documentation if your changes affect user-facing features. The microsite is built from the `docs/` directory.
 
 ### Submitting Changes
 
-1. Ensure all checks pass locally (`pnpm ci` runs the full test suite)
+1. Ensure all checks pass locally (`mise run cibuild` runs the full CI-equivalent suite)
 2. Commit your changes with clear, descriptive commit messages
 3. Push to your fork: `git push origin feature/your-feature-name`
 4. Open a Pull Request on GitHub
