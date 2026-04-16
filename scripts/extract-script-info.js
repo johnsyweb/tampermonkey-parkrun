@@ -7,6 +7,13 @@ const projectRoot = path.resolve(__dirname, '..');
 const THUMB_MAX_WIDTH = getThumbMaxWidth();
 const DEFAULT_DIMENSIONS = { width: 1200, height: 800 };
 
+function escapeYamlDoubleQuoted(value) {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\r?\n/g, ' ');
+}
+
 function parseUserscriptHeader(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const match = content.match(/\/\/ ==UserScript==([\s\S]*?)\/\/ ==\/UserScript==/);
@@ -92,12 +99,13 @@ async function run() {
     const stat = fs.statSync(userScriptPath);
     const lastMod = stat.mtime.toISOString();
     const mdPath = path.join(docsDir, `${script.slug}.md`);
-    const desc = (script.description || '').replace(/"/g, '\\"').replace(/\n/g, ' ');
-    const ogImageAlt = `Screenshot of ${(script.name || '').replace(/"/g, '\\"')}`;
+    const desc = escapeYamlDoubleQuoted(script.description || '');
+    const ogImageAlt = escapeYamlDoubleQuoted(`Screenshot of ${script.name || ''}`);
+    const title = escapeYamlDoubleQuoted(script.name || '');
     const frontmatter = [
       '---',
       `layout: script`,
-      `title: "${script.name.replace(/"/g, '\\"')}"`,
+      `title: "${title}"`,
       `permalink: /${script.slug}/`,
       `slug: ${script.slug}`,
       `description: "${desc}"`,
