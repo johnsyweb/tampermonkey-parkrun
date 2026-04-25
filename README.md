@@ -152,6 +152,10 @@ This workflow runs on every push to `main` and automatically keeps the microsite
 
 Why not?
 
+## Notable script behaviour
+
+- `p-index.user.js` now shows p-index progression over finishes, jump-point markers, difficulty summary metrics, plus chart export.
+
 ## How to Install Bookmarklets
 
 Each script now has its own page on the microsite with a “bookmarklet” button and a copy‑and‑paste JavaScript snippet.
