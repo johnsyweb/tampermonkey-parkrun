@@ -1,7 +1,10 @@
 const {
+  applyPlanToEventCounts,
   buildDifficultySummary,
+  buildCompactPlanSummary,
   calculatePIndex,
   calculatePIndexProgression,
+  calculateMinimumFinishesPlan,
   extractFinishTimeline,
   groupFinishesByEvent,
 } = require('../src/p-index.user');
@@ -169,6 +172,69 @@ describe('progression analytics', () => {
       'Current p-index: 2',
       'Finishes since previous increase: 1',
       'Longest gap: 3 finishes (between p-index 1 and 2)',
+      'Minimum finishes to next p-index 3: 4 finishes. Add B once, and add New event 1 3 times.',
+      'Then minimum finishes to p-index 4: 7 finishes. Add A, B, and New event 1 once, and add New event 2 4 times.',
+    ]);
+  });
+
+  test('calculateMinimumFinishesPlan finds minimum additional finishes', () => {
+    const eventCounts = [
+      { eventName: 'A', count: 4 },
+      { eventName: 'B', count: 2 },
+      { eventName: 'C', count: 1 },
+    ];
+    const plan = calculateMinimumFinishesPlan(eventCounts, 3);
+
+    expect(plan.totalAdditionalFinishes).toBe(3);
+    expect(plan.actions).toEqual([
+      { eventName: 'B', additionalFinishes: 1, isNewEvent: false },
+      { eventName: 'C', additionalFinishes: 2, isNewEvent: false },
+    ]);
+  });
+
+  test('applyPlanToEventCounts updates counts for existing and new events', () => {
+    const updated = applyPlanToEventCounts(
+      [
+        { eventName: 'A', count: 4, lastVisitIndex: 5 },
+        { eventName: 'B', count: 2, lastVisitIndex: 6 },
+      ],
+      [
+        { eventName: 'B', additionalFinishes: 1, isNewEvent: false },
+        { eventName: 'New event 1', additionalFinishes: 3, isNewEvent: true },
+      ]
+    );
+
+    expect(updated).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ eventName: 'A', count: 4 }),
+        expect.objectContaining({ eventName: 'B', count: 3 }),
+        expect.objectContaining({ eventName: 'New event 1', count: 3 }),
+      ])
+    );
+  });
+
+  test('buildCompactPlanSummary formats compact tooltip text', () => {
+    const text = buildCompactPlanSummary([
+      { eventName: 'B', additionalFinishes: 1, isNewEvent: false },
+      { eventName: 'New event 1', additionalFinishes: 3, isNewEvent: true },
+    ]);
+
+    expect(text).toBe('+1 B, +3 New event 1');
+  });
+
+  test('calculateMinimumFinishesPlan orders actions by oldest visit first', () => {
+    const plan = calculateMinimumFinishesPlan(
+      [
+        { eventName: 'Old Event', count: 2, lastVisitIndex: 2 },
+        { eventName: 'Recent Event', count: 2, lastVisitIndex: 9 },
+        { eventName: 'Anchor', count: 4, lastVisitIndex: 10 },
+      ],
+      3
+    );
+
+    expect(plan.actions).toEqual([
+      { eventName: 'Old Event', additionalFinishes: 1, isNewEvent: false },
+      { eventName: 'Recent Event', additionalFinishes: 1, isNewEvent: false },
     ]);
   });
 });
