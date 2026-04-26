@@ -47,6 +47,12 @@ This repo includes `mise` tasks with consistent names for common workflows:
 - `mise run docs-check` - run local microsite checks
 - `mise run cibuild` - run the full CI-equivalent pipeline
 
+### Userscript build modes
+
+- Default mode uses Babel transpilation for scripts in `src/`.
+- Opt-in bundler mode uses esbuild and is configured centrally in `scripts/userscript-build.config.js`.
+- Use the `bundler.scripts` list to opt specific userscripts into bundled output while leaving others on the default path.
+
 List all available tasks:
 
 ```bash

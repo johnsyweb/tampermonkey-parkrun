@@ -3,6 +3,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
+const esbuild = require('esbuild');
 const UglifyJS = require('uglify-js');
 
 function run(cmd) {
@@ -14,6 +15,11 @@ const root = process.cwd();
 const srcDir = path.join(root, 'src');
 const distDir = path.join(root, 'dist');
 const docsDir = path.join(root, 'docs');
+const buildConfigPath = path.join(root, 'scripts', 'userscript-build.config.js');
+
+const buildConfig = fs.existsSync(buildConfigPath) ? require(buildConfigPath) : {};
+const bundledScripts = new Set((buildConfig?.bundler?.scripts || []).map((name) => name.trim()));
+const metaRegex = /\/\/\s*==UserScript==[\s\S]*?\/\/\s*==\/UserScript==/;
 
 // Clean dist
 if (fs.existsSync(distDir)) {
@@ -26,6 +32,41 @@ try {
 } catch (err) {
   console.error('Babel transpile failed:', err);
   process.exit(1);
+}
+
+for (const scriptName of bundledScripts) {
+  const entryPath = path.join(srcDir, scriptName);
+  const outPath = path.join(distDir, scriptName);
+
+  if (!fs.existsSync(entryPath)) {
+    console.error(`Bundler entry not found: ${entryPath}`);
+    process.exit(1);
+  }
+
+  try {
+    const buildResult = esbuild.buildSync({
+      entryPoints: [entryPath],
+      bundle: true,
+      write: false,
+      format: 'iife',
+      platform: 'browser',
+      target: ['es2018'],
+      charset: 'utf8',
+      legalComments: 'none',
+    });
+
+    const bundledBody = buildResult.outputFiles[0].text;
+    const sourceContent = fs.readFileSync(entryPath, 'utf8');
+    const sourceMetaMatch = sourceContent.match(metaRegex);
+    const sourceMeta = sourceMetaMatch ? sourceMetaMatch[0].trim() : null;
+    const finalContent = sourceMeta ? `${sourceMeta}\n\n${bundledBody.trim()}\n` : bundledBody;
+
+    fs.writeFileSync(outPath, finalContent, 'utf8');
+    console.log(`Bundled ${scriptName} with esbuild`);
+  } catch (err) {
+    console.error(`esbuild bundling failed for ${scriptName}:`, err);
+    process.exit(1);
+  }
 }
 
 // Find built .user.js files and copy to repo root with banner
@@ -42,7 +83,6 @@ for (const rel of builtFiles) {
   const destPath = path.join(root, path.basename(rel));
   const content = fs.readFileSync(srcPath, 'utf8');
   // Extract userscript metadata block if present
-  const metaRegex = /\/\/\s*==UserScript==[\s\S]*?\/\/\s*==\/UserScript==/;
   const metaMatch = content.match(metaRegex);
   let destContent;
   if (metaMatch) {
