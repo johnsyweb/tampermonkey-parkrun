@@ -288,7 +288,7 @@
           };
           return window.innerWidth < 768 ? mobileConfig : desktopConfig;
         }
-        if (typeof module !== "undefined" && module.exports) {
+        if (typeof module !== "undefined" && module.exports && typeof globalThis !== "undefined" && globalThis.process && globalThis.process.versions && globalThis.process.versions.node) {
           module.exports = {
             buildCompactPlanSummary,
             buildDifficultySummary,
