@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 
-import puppeteer, { Browser } from 'puppeteer';
+import puppeteer, { Browser, Page } from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -11,6 +11,91 @@ interface ScreenshotConfig {
   waitForSelector?: string;
   waitForTimeout?: number;
   viewport?: { width: number; height: number };
+}
+
+async function removeThirdPartyOverlays(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const selectorsToHide = [
+      // Recite Me and accessibility launchers/overlays.
+      '#reciteme',
+      '#recite-me',
+      '#reciteMe',
+      '[id*="recite" i]',
+      '[class*="recite" i]',
+      '[id*="accessibility" i]',
+      '[class*="accessibility" i]',
+      // Generic popups/overlays.
+      'iframe[src*="close"]',
+      'iframe[src*="message"]',
+      'iframe[src*="popup"]',
+      'iframe[src*="overlay"]',
+      'iframe[title*="close" i]',
+      'iframe[title*="message" i]',
+      '.close-message',
+      '.popup-overlay',
+      '.third-party-iframe',
+      '[id*="popup" i]',
+      '[class*="popup" i]',
+      '[id*="overlay" i]',
+      '[class*="overlay" i]',
+      '[id*="consent" i]',
+      '[class*="consent" i]',
+      '[id*="cookie" i]',
+      '[class*="cookie" i]',
+      '[id*="modal" i]',
+      '[class*="modal" i]',
+    ];
+
+    selectorsToHide.forEach((selector) => {
+      document.querySelectorAll(selector).forEach((element) => {
+        (element as HTMLElement).style.display = 'none';
+      });
+    });
+
+    // Hide fixed elements that commonly float above content.
+    document.querySelectorAll<HTMLElement>('*').forEach((element) => {
+      const style = window.getComputedStyle(element);
+      if (style.position !== 'fixed' && style.position !== 'sticky') {
+        return;
+      }
+      const zIndex = Number.parseInt(style.zIndex || '0', 10);
+      if (Number.isFinite(zIndex) && zIndex >= 999) {
+        element.style.display = 'none';
+      }
+    });
+  });
+}
+
+async function injectUserscript(page: Page, scriptContent: string): Promise<void> {
+  const requireMatches = scriptContent.matchAll(/@require\s+(https:\/\/[^\s]+)/g);
+  for (const match of requireMatches) {
+    const requireUrl = match[1];
+    console.log(`   Loading @require: ${requireUrl}`);
+    try {
+      const requireContent = await (await fetch(requireUrl)).text();
+      await page.addScriptTag({ content: requireContent });
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    } catch (error) {
+      console.warn(`   Failed to load @require ${requireUrl}:`, error);
+    }
+  }
+
+  const cleanScript = scriptContent.replace(
+    /^\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==\n\n?/gm,
+    ''
+  );
+
+  const wrappedScript = `(() => {
+    const module = undefined;
+    const exports = undefined;
+    ${cleanScript}
+  })();`;
+
+  try {
+    await page.evaluate(wrappedScript);
+  } catch (error) {
+    console.warn('⚠️  Script injection had an error, but continuing...', error);
+  }
 }
 
 function getMeta(content: string, key: string): string | null {
@@ -176,39 +261,28 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
       console.log('💉 Injecting userscript...');
       const scriptContent = fs.readFileSync(path.join(process.cwd(), config.script), 'utf8');
 
-      // Extract @require URLs and inject them first
-      const requireMatches = scriptContent.matchAll(/@require\s+(https:\/\/[^\s]+)/g);
-      for (const match of requireMatches) {
-        const requireUrl = match[1];
-        console.log(`   Loading @require: ${requireUrl}`);
-        try {
-          const requireContent = await (await fetch(requireUrl)).text();
-          await page.addScriptTag({ content: requireContent });
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        } catch (error) {
-          console.warn(`   Failed to load @require ${requireUrl}:`, error);
-        }
-      }
-
-      // Remove @require and other metadata from script before injecting
-      const cleanScript = scriptContent.replace(
-        /^\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==\n\n?/gm,
-        ''
-      );
-
-      try {
-        await page.evaluate(cleanScript);
-      } catch (error) {
-        console.warn('⚠️  Script injection had an error, but continuing...', error);
-      }
+      await injectUserscript(page, scriptContent);
 
       if (config.waitForSelector) {
         try {
           await page.waitForSelector(config.waitForSelector, {
-            timeout: 15000,
+            timeout: 30000,
           });
-        } catch {
-          console.warn(`⚠️  Selector ${config.waitForSelector} not found, continuing...`);
+        } catch (error) {
+          const localFallbackPath = path.join(process.cwd(), 'test-data', '1001388.html');
+          if (!fs.existsSync(localFallbackPath)) {
+            throw error;
+          }
+          const fallbackUrl = `file://${localFallbackPath}`;
+          console.warn(
+            `⚠️  Selector ${config.waitForSelector} not found on remote page; retrying with local fixture ${fallbackUrl}`
+          );
+          await page.goto(fallbackUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await injectUserscript(page, scriptContent);
+          await page.waitForSelector(config.waitForSelector, {
+            timeout: 30000,
+          });
         }
       }
 
@@ -218,17 +292,13 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
 
       // Scroll to the target element for better screenshot composition
       if (config.waitForSelector) {
-        try {
-          await page.evaluate((selector) => {
-            const element = document.querySelector(selector);
-            if (element) {
-              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          }, config.waitForSelector);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        } catch {
-          // Ignore scroll errors
-        }
+        await page.evaluate((selector) => {
+          const element = document.querySelector(selector);
+          if (element) {
+            element.scrollIntoView({ behavior: 'auto', block: 'center' });
+          }
+        }, config.waitForSelector);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
       console.log('🧹 Configuring page and cleaning up third-party content...');
@@ -262,53 +332,7 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
       // Wait for any updates after changing the display
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      await page.evaluate(() => {
-        const selectorsToHide = [
-          'iframe[src*="close"]',
-          'iframe[src*="message"]',
-          'iframe[src*="popup"]',
-          'iframe[src*="overlay"]',
-          'iframe[src*="Close"]',
-          'iframe[src*="Message"]',
-          'iframe[title*="close"]',
-          'iframe[title*="Close"]',
-          'iframe[title*="message"]',
-          'iframe[title*="Message"]',
-          '.close-message',
-          '.popup-overlay',
-          '.third-party-iframe',
-          '[id*="close"]',
-          '[class*="close"]',
-          '[id*="popup"]',
-          '[class*="popup"]',
-          '[id*="Close"]',
-          '[class*="Close"]',
-          '[id*="Message"]',
-          '[class*="Message"]',
-        ];
-
-        let hiddenCount = 0;
-        selectorsToHide.forEach((selector) => {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach((element) => {
-            (element as HTMLElement).style.display = 'none';
-            hiddenCount++;
-          });
-        });
-
-        // Also hide any iframes that might be positioned over the content
-        const allIframes = document.querySelectorAll('iframe');
-        allIframes.forEach((iframe) => {
-          const rect = iframe.getBoundingClientRect();
-          // Hide iframes that are positioned like overlays (small, positioned absolutely/fixed)
-          if (rect.width < 400 && rect.height < 300) {
-            (iframe as HTMLElement).style.display = 'none';
-            hiddenCount++;
-          }
-        });
-
-        console.log(`Hidden ${hiddenCount} third-party elements`);
-      });
+      await removeThirdPartyOverlays(page);
 
       const screenshotPath = path.join(process.cwd(), 'docs', 'images', `${config.name}.png`);
 
