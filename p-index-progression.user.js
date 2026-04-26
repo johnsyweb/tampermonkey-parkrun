@@ -337,9 +337,10 @@
           card.style.boxSizing = "border-box";
           const title = document.createElement("h3");
           title.textContent = "p-index progression over finishes";
-          title.style.margin = "0 0 12px 0";
+          title.style.margin = "0 0 15px 0";
           title.style.fontSize = responsive.typography.heading;
           title.style.textAlign = "center";
+          title.style.color = THEME.accentColor;
           card.appendChild(title);
           const chartContainer = document.createElement("div");
           chartContainer.style.height = responsive.chart.height;
@@ -452,10 +453,7 @@
               },
               plugins: {
                 title: {
-                  display: true,
-                  text: "p-index progression over finishes",
-                  font: { size: responsive.chart.titleSize },
-                  color: THEME.textColor
+                  display: false
                 },
                 legend: { display: false },
                 tooltip: {
@@ -502,7 +500,7 @@
                 ctx.fillText(
                   `+${item.point.finishesSincePreviousIncrease}`,
                   pointElement.x,
-                  pointElement.y - 10
+                  pointElement.y - 4
                 );
               });
               ctx.restore();
