@@ -160,7 +160,8 @@ Why not?
 
 ## Notable script behaviour
 
-- `p-index.user.js` now shows p-index progression over finishes, jump-point markers, difficulty summary metrics, plus chart export.
+- `p-index.user.js` shows the p-index summary card.
+- `p-index-progression.user.js` shows p-index progression over finishes, jump-point markers, difficulty summary metrics, plus chart export.
 
 ## How to Install Bookmarklets
 
