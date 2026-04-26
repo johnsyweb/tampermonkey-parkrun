@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun p-index display
-// @description  The parkrun p-index is an unofficial statistic that measures the number of different parkrun events a person has completed a specific number of times. To achieve a p-index of 10, you must have completed at least 10 different parkrun events 10 times each. This script calculate the p-index for a parkrunner and displays it on their results page.
+// @description  The parkrun p-index is an unofficial statistic that measures the number of different parkrun events a person has completed a specific number of times. To achieve a p-index of 10, you must have completed at least 10 different parkrun events 10 times each. This script calculates the p-index for a parkrunner and displays it on their results page.
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
 // @grant        none
@@ -38,19 +38,22 @@
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/p-index.user.js
-// @version      1.1.7
+// @version      1.1.8
 // ==/UserScript==
 
 (function () {
   'use strict';
 
+  const {
+    calculatePIndex,
+    groupFinishesByEvent,
+    parseDateDdMmYyyy,
+  } = require('../lib/p-index-core');
+
   function getResponsiveConfig() {
     const mobileConfig = {
       isMobile: true,
-      spacing: {
-        small: '10px',
-        medium: '15px',
-      },
+      spacing: { small: '10px' },
       container: {
         padding: '10px',
         marginTop: '10px',
@@ -58,27 +61,14 @@
         maxWidth: '800px',
         aspectRatio: 'auto',
       },
-      typography: {
-        pIndex: '1.2em',
-        listItem: '0.9em',
-      },
-      listItem: {
-        marginBottom: '5px',
-        textAlign: 'left',
-      },
-      button: {
-        padding: '6px 12px',
-        fontSize: '0.9em',
-        marginTop: '10px',
-      },
+      typography: { pIndex: '1.2em', listItem: '0.9em' },
+      listItem: { marginBottom: '5px', textAlign: 'left' },
+      button: { padding: '6px 12px', fontSize: '0.9em', marginTop: '10px' },
     };
 
     const desktopConfig = {
       isMobile: false,
-      spacing: {
-        small: '20px',
-        medium: '20px',
-      },
+      spacing: { small: '20px' },
       container: {
         padding: '20px',
         marginTop: '20px',
@@ -86,100 +76,99 @@
         maxWidth: 'none',
         aspectRatio: '1',
       },
-      typography: {
-        pIndex: '1.5em',
-        listItem: '1em',
-      },
-      listItem: {
-        marginBottom: '8px',
-        textAlign: 'center',
-      },
-      button: {
-        padding: '8px 15px',
-        fontSize: '1em',
-        marginTop: '15px',
-      },
+      typography: { pIndex: '1.5em', listItem: '1em' },
+      listItem: { marginBottom: '8px', textAlign: 'center' },
+      button: { padding: '8px 15px', fontSize: '1em', marginTop: '15px' },
     };
 
-    const isMobile = window.innerWidth < 768;
-    return isMobile ? mobileConfig : desktopConfig;
+    return window.innerWidth < 768 ? mobileConfig : desktopConfig;
   }
 
-  if (typeof module !== 'undefined' && module.exports) {
+  if (
+    typeof module !== 'undefined' &&
+    module.exports &&
+    typeof globalThis !== 'undefined' &&
+    globalThis.process &&
+    globalThis.process.versions &&
+    globalThis.process.versions.node
+  ) {
     module.exports = {
-      calculatePIndex,
-      extractEventDetails,
+      buildContributingEvents,
+      extractFinishTimeline,
       findResultsTable,
     };
   } else {
     main();
   }
+
   function main() {
     const table = findResultsTable();
     if (!table) {
       console.error('Results table not found');
       return;
     }
-    const eventDetails = extractEventDetails(table);
-    const { pIndex, contributingEvents } = calculatePIndex(eventDetails);
+    const finishTimeline = extractFinishTimeline(table);
+    const groupedEvents = groupFinishesByEvent(finishTimeline);
+    const pIndex = calculatePIndex(groupedEvents);
+    const contributingEvents = buildContributingEvents(groupedEvents, pIndex);
     displayPIndex(pIndex, contributingEvents);
   }
 
   function displayPIndex(pIndex, contributingEvents) {
     const responsive = getResponsiveConfig();
     const h2Element = document.querySelector('h2');
-    if (h2Element) {
-      const pIndexElement = document.createElement('div');
-      pIndexElement.textContent = 'p-index: ' + pIndex;
-      pIndexElement.style.fontSize = responsive.typography.pIndex;
-      pIndexElement.style.fontWeight = 'bold';
-      pIndexElement.style.marginTop = responsive.container.marginTop;
-      pIndexElement.style.backgroundColor = '#2b223d';
-      pIndexElement.style.color = '#ffa300';
-      pIndexElement.style.padding = responsive.container.padding;
-      pIndexElement.style.borderRadius = '5px';
-      pIndexElement.style.display = 'flex';
-      pIndexElement.style.flexDirection = 'column';
-      pIndexElement.style.alignItems = 'center';
-      pIndexElement.style.justifyContent = 'center';
-      pIndexElement.style.width = responsive.container.width;
-      pIndexElement.style.maxWidth = responsive.container.maxWidth;
-      pIndexElement.style.marginLeft = 'auto';
-      pIndexElement.style.marginRight = 'auto';
-      pIndexElement.style.aspectRatio = responsive.container.aspectRatio;
-      pIndexElement.setAttribute('id', 'p-index-display');
+    if (!h2Element) return;
 
-      const eventList = document.createElement('ul');
-      eventList.style.listStyleType = 'none';
-      eventList.style.padding = '0';
-      eventList.style.marginTop = responsive.spacing.small;
-      eventList.style.width = '100%';
-      contributingEvents.forEach((event) => {
-        const listItem = document.createElement('li');
-        listItem.textContent = event;
-        listItem.style.fontWeight = 'normal';
-        listItem.style.fontSize = responsive.typography.listItem;
-        listItem.style.marginBottom = responsive.listItem.marginBottom;
-        listItem.style.textAlign = responsive.listItem.textAlign;
-        listItem.style.wordBreak = 'break-word';
-        eventList.appendChild(listItem);
-      });
-      pIndexElement.appendChild(eventList);
+    const pIndexElement = document.createElement('div');
+    pIndexElement.style.fontSize = responsive.typography.pIndex;
+    pIndexElement.style.fontWeight = 'bold';
+    pIndexElement.style.marginTop = responsive.container.marginTop;
+    pIndexElement.style.backgroundColor = '#2b223d';
+    pIndexElement.style.color = '#ffa300';
+    pIndexElement.style.padding = responsive.container.padding;
+    pIndexElement.style.borderRadius = '5px';
+    pIndexElement.style.display = 'flex';
+    pIndexElement.style.flexDirection = 'column';
+    pIndexElement.style.alignItems = 'center';
+    pIndexElement.style.justifyContent = 'center';
+    pIndexElement.style.width = responsive.container.width;
+    pIndexElement.style.maxWidth = responsive.container.maxWidth;
+    pIndexElement.style.marginLeft = 'auto';
+    pIndexElement.style.marginRight = 'auto';
+    pIndexElement.style.aspectRatio = responsive.container.aspectRatio;
+    pIndexElement.setAttribute('id', 'p-index-display');
 
-      // Add download button
-      addDownloadButton(pIndexElement);
+    const heading = document.createElement('div');
+    heading.textContent = 'p-index: ' + pIndex;
+    pIndexElement.appendChild(heading);
 
-      h2Element.parentNode.insertBefore(pIndexElement, h2Element.nextSibling);
+    const eventList = document.createElement('ul');
+    eventList.style.listStyleType = 'none';
+    eventList.style.padding = '0';
+    eventList.style.marginTop = responsive.spacing.small;
+    eventList.style.width = '100%';
+    contributingEvents.forEach((event) => {
+      const listItem = document.createElement('li');
+      listItem.textContent = event;
+      listItem.style.fontWeight = 'normal';
+      listItem.style.fontSize = responsive.typography.listItem;
+      listItem.style.marginBottom = responsive.listItem.marginBottom;
+      listItem.style.textAlign = responsive.listItem.textAlign;
+      listItem.style.wordBreak = 'break-word';
+      eventList.appendChild(listItem);
+    });
+    pIndexElement.appendChild(eventList);
 
-      // Make container square on desktop after content is rendered
-      if (!responsive.isMobile) {
-        setTimeout(() => {
-          const rect = pIndexElement.getBoundingClientRect();
-          const maxDimension = Math.max(rect.width, rect.height);
-          pIndexElement.style.width = maxDimension + 'px';
-          pIndexElement.style.height = maxDimension + 'px';
-        }, 0);
-      }
+    addDownloadButton(pIndexElement);
+    h2Element.parentNode.insertBefore(pIndexElement, h2Element.nextSibling);
+
+    if (!responsive.isMobile) {
+      setTimeout(() => {
+        const rect = pIndexElement.getBoundingClientRect();
+        const maxDimension = Math.max(rect.width, rect.height);
+        pIndexElement.style.width = maxDimension + 'px';
+        pIndexElement.style.height = maxDimension + 'px';
+      }, 0);
     }
   }
 
@@ -200,32 +189,22 @@
     downloadBtn.style.fontWeight = 'bold';
     downloadBtn.style.fontSize = responsive.button.fontSize;
 
-    // Add hover effect
     downloadBtn.addEventListener('mouseover', function () {
       this.style.backgroundColor = '#e59200';
     });
-
     downloadBtn.addEventListener('mouseout', function () {
       this.style.backgroundColor = '#ffa300';
     });
-
-    // Download handler
     downloadBtn.addEventListener('click', function () {
-      // Hide the download button temporarily for the screenshot
       downloadBtn.style.display = 'none';
-
-      // Use html2canvas to capture the container
-      // eslint-disable-next-line no-undef
       html2canvas(container, {
         backgroundColor: '#2b223d',
-        scale: 2, // Higher resolution
+        scale: 2,
         logging: false,
         allowTaint: true,
         useCORS: true,
       }).then((canvas) => {
-        // Show the button again
         downloadBtn.style.display = 'block';
-
         const link = document.createElement('a');
         const timestamp = new Date().toISOString().split('T')[0];
         const pageUrl = window.location.pathname.split('/');
@@ -240,31 +219,16 @@
     container.appendChild(btnContainer);
   }
 
-  function extractEventDetails(table) {
-    const eventDetails = [];
+  function extractFinishTimeline(table) {
+    const finishes = [];
     const rows = table.querySelectorAll('tbody > tr');
     rows.forEach((row) => {
-      const eventName = row.querySelector('td:nth-child(1) > a').textContent.trim();
+      const eventName = row.querySelector('td:nth-child(1)').textContent.trim();
       const date = row.querySelector('td:nth-child(2)').textContent.trim();
       const eventNumber = row.querySelector('td:nth-child(3)').textContent.trim();
-      eventDetails.unshift({ eventName, date, eventNumber });
+      finishes.push({ eventName, date, eventNumber });
     });
-
-    // Group event details by event name
-    const groupedEvents = eventDetails.reduce((acc, { eventName, date, eventNumber }) => {
-      if (!acc[eventName]) {
-        acc[eventName] = [];
-      }
-      acc[eventName].push({ date, eventNumber });
-      return acc;
-    }, {});
-
-    // Convert groupedEvents to an array of entries and sort by the number of visits
-    const sortedGroupedEvents = Object.entries(groupedEvents).sort(
-      (a, b) => b[1].length - a[1].length
-    );
-
-    return sortedGroupedEvents;
+    return finishes.sort((a, b) => parseDateDdMmYyyy(a.date) - parseDateDdMmYyyy(b.date));
   }
 
   function findResultsTable() {
@@ -272,15 +236,9 @@
     return tables[tables.length - 1];
   }
 
-  function calculatePIndex(eventDetails) {
-    const filteredGroupedEvents = eventDetails.filter(([, events], index) => events.length > index);
-    const pIndex = filteredGroupedEvents.length;
-
-    function convertDate(dateStr) {
-      return new Date(dateStr.split('/').reverse().join('-'));
-    }
-
-    const contributingEvents = filteredGroupedEvents
+  function buildContributingEvents(groupedEvents, pIndex) {
+    return groupedEvents
+      .slice(0, pIndex)
       .map(([eventName, events]) => {
         const first = events[0];
         const pIndexReached = events[pIndex - 1];
@@ -291,12 +249,10 @@
           firstEventNumber: first.eventNumber,
           pIndexDate: pIndexReached.date,
           pIndexEventNumber: pIndexReached.eventNumber,
-          firstDateForSorting: convertDate(first.date),
-          pIndexDateForSorting: convertDate(pIndexReached.date),
+          pIndexDateForSorting: parseDateDdMmYyyy(pIndexReached.date),
         };
       })
       .sort((a, b) => a.pIndexDateForSorting - b.pIndexDateForSorting)
-      .slice(0, pIndex)
       .map(
         (event) =>
           event.eventName +
@@ -312,7 +268,5 @@
           event.pIndexEventNumber +
           ')'
       );
-
-    return { pIndex, contributingEvents };
   }
 })();
