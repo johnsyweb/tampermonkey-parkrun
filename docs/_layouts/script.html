@@ -46,6 +46,12 @@ layout: default
   <a href="{{ script.install_url }}" class="script-install-button">Install {{ script.name }}</a>
 </p>
 
+{% if script.supportURL %}
+<p class="script-support">
+  <a href="{{ script.supportURL }}">Issues and support on GitHub</a>
+</p>
+{% endif %}
+
 <details class="script-details">
   <summary>Userscript basics and installation steps</summary>
 
@@ -134,26 +140,6 @@ bookmarklets[script.filename] %} {% assign bm = bookmarklets[script.filename] %}
 
   <pre><code class="language-js">{{ bm.bookmarklet | escape }}</code></pre>
 </details>
-{% endif %} {% if script.author or script.homepage or script.supportURL or script.license %}
-<dl class="script-meta">
-  {% if script.author %}
-  <dt>Author</dt>
-  <dd>{{ script.author }}</dd>
-  {% endif %} {% if script.homepage %}
-  <dt>Homepage</dt>
-  <dd><a href="{{ script.homepage }}">{{ script.homepage }}</a></dd>
-  {% endif %} {% if script.supportURL %}
-  <dt>Support</dt>
-  <dd><a href="{{ script.supportURL }}">Issues / support</a></dd>
-  {% endif %} {% if script.license %}
-  <dt>License</dt>
-  <dd>
-    {% if script.license == "MIT" %}
-    <a href="https://opensource.org/licenses/MIT">MIT</a>
-    {% else %} {{ script.license }} {% endif %}
-  </dd>
-  {% endif %}
-</dl>
 {% endif %} {% else %}
 <p>Script not found.</p>
 {% endif %}

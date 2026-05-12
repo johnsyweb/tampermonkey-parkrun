@@ -70,7 +70,7 @@ The microsite documentation is built with Jekyll and served from the `docs/` dir
 
 2. Visit http://localhost:4000/tampermonkey-parkrun/ in your browser
 
-On each script’s page, the description, version, last-updated date, screenshot, and install actions appear first. Generic userscript explanation and manager installation steps live in an expandable **Userscript basics and installation steps** section. Where a bookmarklet exists, mobile setup and the full JavaScript snippet are under **Mobile bookmarklet setup and full code**.
+On each script’s page, the description, version, last-updated date, screenshot, and install actions appear first, with a link to **Issues and support on GitHub** directly under the install button when `@supportURL` is set in the userscript header. Generic userscript explanation and manager installation steps live in an expandable **Userscript basics and installation steps** section. Where a bookmarklet exists, mobile setup and the full JavaScript snippet are under **Mobile bookmarklet setup and full code**. Author and licence for the collection appear in the site footer; per-script metadata is no longer repeated in a definition list at the bottom of the page.
 
 ### Generating Screenshots
 

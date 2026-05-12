@@ -363,6 +363,17 @@ p img {
   margin-top: 0;
 }
 
+/* Support link (GitHub issues) below install CTA */
+.script-support {
+  margin: -0.5rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+.script-support a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 /* Per-script install CTA button */
 .script-install-cta {
   margin: 1.5em 0;
@@ -403,42 +414,9 @@ p img {
   margin-top: 0.5em;
 }
 
-/* Per-script page metadata */
-.script-meta {
-  margin: 2em 0 0;
-  padding: 1.5em 1.75em;
-  border-radius: 12px;
-  background: var(--parkrun-light-grey);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  column-gap: 1.75em;
-  row-gap: 0.5em;
-}
-
-.script-meta dt {
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--parkrun-grey);
-}
-
-.script-meta dd {
-  margin: 0;
-  font-size: 0.95rem;
-  color: var(--parkrun-black);
-}
-
 @media (max-width: 768px) {
   .scripts-grid {
     grid-template-columns: 1fr;
-  }
-
-  .script-meta {
-    grid-template-columns: 1fr;
-    row-gap: 0.25em;
   }
 }
 
