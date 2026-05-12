@@ -325,6 +325,44 @@ p img {
   text-decoration: underline;
 }
 
+/* Collapsible boilerplate on per-script pages (<details> / <summary>) */
+.script-lead.script-facts {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  color: var(--parkrun-grey);
+}
+
+#content .script-details {
+  margin: 1.5rem 0;
+  padding: 0 1rem 0.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: var(--parkrun-light-grey);
+}
+
+#content .script-details summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--parkrun-aubergine);
+  padding: 0.85rem 0;
+  list-style-position: outside;
+}
+
+#content .script-details summary:focus-visible {
+  outline: 3px solid var(--parkrun-apricot);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+#content .script-details[open] summary {
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+#content .script-details .script-install-button {
+  margin-top: 0;
+}
+
 /* Per-script install CTA button */
 .script-install-cta {
   margin: 1.5em 0;

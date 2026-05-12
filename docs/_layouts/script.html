@@ -5,56 +5,24 @@ layout: default
 {% assign script = site.data.scripts | where: "slug", page.slug | first %} {% if script %}
 <p>{{ script.description }}</p>
 
-<h2>What is a userscript?</h2>
-<p>
-  A userscript is a small piece of JavaScript that runs in your browser and enhances specific
-  websites. These scripts work with parkrun event pages, parkrunner profile pages, and results
-  pages, and can be used with any userscript manager including
-  <a href="https://github.com/quoid/userscripts">Userscripts</a>,
-  <a href="https://www.tampermonkey.net/">Tampermonkey</a>,
-  <a href="https://violentmonkey.github.io/">Violentmonkey</a>, or any compatible browser extension.
+{% if script.version or page.last_modified_at %}
+<p class="script-lead script-facts">
+  {% if script.version %}<span class="script-facts__item">Version {{ script.version }}</span>{%
+  endif %} {% if script.version and page.last_modified_at %}<span
+    class="script-facts__sep"
+    aria-hidden="true"
+  >
+    · </span
+  >{% endif %} {% if page.last_modified_at %}
+  <span class="script-facts__item">
+    Updated
+    <time datetime="{{ page.last_modified_at }}"
+      >{{ page.last_modified_at | date: "%Y-%m-%d" }}</time
+    >
+  </span>
+  {% endif %}
 </p>
-
-<h2>Installation</h2>
-<ol>
-  <li>
-    <strong>Install a userscript manager for your browser:</strong>
-    <ul>
-      <li>
-        <strong>Desktop:</strong>
-        <a href="https://github.com/quoid/userscripts">Userscripts</a> (Safari),
-        <a href="https://www.tampermonkey.net/">Tampermonkey</a> (Chrome, Firefox, Edge, Opera), or
-        <a href="https://violentmonkey.github.io/">Violentmonkey</a>
-        (<a href="https://orionbrowser.com">Orion</a>)
-      </li>
-      <li>
-        <strong>iOS:</strong>
-        <a href="https://github.com/quoid/userscripts">Userscripts</a> (Safari) or
-        <a href="https://violentmonkey.github.io/">Violentmonkey</a>
-        (<a href="https://orionbrowser.com">Orion</a>)
-      </li>
-      <li>
-        <strong>Android:</strong>
-        Install
-        <a href="https://play.google.com/store/apps/details?id=com.kiwibrowser.browser"
-          >Kiwi Browser</a
-        >, then install
-        <a
-          href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo"
-          >Tampermonkey</a
-        >
-        or
-        <a
-          href="https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag"
-          >Violentmonkey</a
-        >
-        from the Chrome Web Store.
-      </li>
-    </ul>
-  </li>
-  <li>Click the install link below for this script.</li>
-  <li>Click “Install” when prompted by your userscript manager.</li>
-</ol>
+{% endif %}
 
 <p>
   <a
@@ -78,6 +46,63 @@ layout: default
   <a href="{{ script.install_url }}" class="script-install-button">Install {{ script.name }}</a>
 </p>
 
+<details class="script-details">
+  <summary>Userscript basics and installation steps</summary>
+
+  <h2>What is a userscript?</h2>
+  <p>
+    A userscript is a small piece of JavaScript that runs in your browser and enhances specific
+    websites. These scripts work with parkrun event pages, parkrunner profile pages, and results
+    pages, and can be used with any userscript manager including
+    <a href="https://github.com/quoid/userscripts">Userscripts</a>,
+    <a href="https://www.tampermonkey.net/">Tampermonkey</a>,
+    <a href="https://violentmonkey.github.io/">Violentmonkey</a>, or any compatible browser
+    extension.
+  </p>
+
+  <h2>Installation</h2>
+  <ol>
+    <li>
+      <strong>Install a userscript manager for your browser:</strong>
+      <ul>
+        <li>
+          <strong>Desktop:</strong>
+          <a href="https://github.com/quoid/userscripts">Userscripts</a> (Safari),
+          <a href="https://www.tampermonkey.net/">Tampermonkey</a> (Chrome, Firefox, Edge, Opera),
+          or
+          <a href="https://violentmonkey.github.io/">Violentmonkey</a>
+          (<a href="https://orionbrowser.com">Orion</a>)
+        </li>
+        <li>
+          <strong>iOS:</strong>
+          <a href="https://github.com/quoid/userscripts">Userscripts</a> (Safari) or
+          <a href="https://violentmonkey.github.io/">Violentmonkey</a>
+          (<a href="https://orionbrowser.com">Orion</a>)
+        </li>
+        <li>
+          <strong>Android:</strong>
+          Install
+          <a href="https://play.google.com/store/apps/details?id=com.kiwibrowser.browser"
+            >Kiwi Browser</a
+          >, then install
+          <a
+            href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo"
+            >Tampermonkey</a
+          >
+          or
+          <a
+            href="https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag"
+            >Violentmonkey</a
+          >
+          from the Chrome Web Store.
+        </li>
+      </ul>
+    </li>
+    <li>Click the <strong>Install</strong> button above for this script.</li>
+    <li>Click “Install” when prompted by your userscript manager.</li>
+  </ol>
+</details>
+
 {% assign bookmarklets = site.data.bookmarklets %} {% if bookmarklets and
 bookmarklets[script.filename] %} {% assign bm = bookmarklets[script.filename] %}
 <h2>Bookmarklet version</h2>
@@ -94,31 +119,24 @@ bookmarklets[script.filename] %} {% assign bm = bookmarklets[script.filename] %}
   </a>
 </p>
 
-<h3>Mobile bookmarklet</h3>
-<p>On mobile browsers that let you edit bookmark URLs:</p>
-<ol>
-  <li>Copy the JavaScript code below to your clipboard.</li>
-  <li>Create a new bookmark for any page.</li>
-  <li>Edit the bookmark and replace its URL with the code you copied.</li>
-  <li>Navigate to the relevant parkrun page.</li>
-  <li>Select the bookmark to run the script.</li>
-</ol>
+<details class="script-details">
+  <summary>Mobile bookmarklet setup and full code</summary>
 
-<pre><code class="language-js">{{ bm.bookmarklet | escape }}</code></pre>
-{% endif %}
+  <h3>Mobile bookmarklet</h3>
+  <p>On mobile browsers that let you edit bookmark URLs:</p>
+  <ol>
+    <li>Copy the JavaScript code below to your clipboard.</li>
+    <li>Create a new bookmark for any page.</li>
+    <li>Edit the bookmark and replace its URL with the code you copied.</li>
+    <li>Navigate to the relevant parkrun page.</li>
+    <li>Select the bookmark to run the script.</li>
+  </ol>
 
+  <pre><code class="language-js">{{ bm.bookmarklet | escape }}</code></pre>
+</details>
+{% endif %} {% if script.author or script.homepage or script.supportURL or script.license %}
 <dl class="script-meta">
-  {% if page.last_modified_at %}
-  <dt>Last updated</dt>
-  <dd>
-    <time datetime="{{ page.last_modified_at }}">
-      {{ page.last_modified_at | date: "%Y-%m-%d" }}
-    </time>
-  </dd>
-  {% endif %} {% if script.version %}
-  <dt>Version</dt>
-  <dd>{{ script.version }}</dd>
-  {% endif %} {% if script.author %}
+  {% if script.author %}
   <dt>Author</dt>
   <dd>{{ script.author }}</dd>
   {% endif %} {% if script.homepage %}
@@ -136,7 +154,6 @@ bookmarklets[script.filename] %} {% assign bm = bookmarklets[script.filename] %}
   </dd>
   {% endif %}
 </dl>
-
-{% else %}
+{% endif %} {% else %}
 <p>Script not found.</p>
 {% endif %}

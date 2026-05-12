@@ -70,6 +70,8 @@ The microsite documentation is built with Jekyll and served from the `docs/` dir
 
 2. Visit http://localhost:4000/tampermonkey-parkrun/ in your browser
 
+On each script’s page, the description, version, last-updated date, screenshot, and install actions appear first. Generic userscript explanation and manager installation steps live in an expandable **Userscript basics and installation steps** section. Where a bookmarklet exists, mobile setup and the full JavaScript snippet are under **Mobile bookmarklet setup and full code**.
+
 ### Generating Screenshots
 
 To generate screenshots for the microsite:
@@ -170,7 +172,7 @@ Each script now has its own page on the microsite with a “bookmarklet” butto
 To install a bookmarklet:
 
 1. Visit the script’s page on the microsite.
-2. Either drag the “bookmarklet” button to your bookmarks bar, **or** copy the JavaScript code shown under “Mobile bookmarklet”.
+2. Either drag the “bookmarklet” button to your bookmarks bar, **or** open **Mobile bookmarklet setup and full code** and copy the JavaScript shown there.
 3. In your browser’s bookmarks manager, create a new bookmark and paste the JavaScript into the URL field.
 4. Save the bookmark.
 
