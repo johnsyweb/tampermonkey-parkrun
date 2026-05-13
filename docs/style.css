@@ -278,13 +278,18 @@ p img {
 
 .script-item > p {
   margin: 0 20px 10px 20px;
-  flex-grow: 1;
 }
 
+/* Fills remaining grid row height and centres the thumbnail between copy and install CTA */
 .script-item .screenshot-link {
-  display: block;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
   max-width: 100%;
   line-height: 0;
+  padding: 8px 20px;
 }
 
 .script-item picture {
