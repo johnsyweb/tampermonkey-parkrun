@@ -123,7 +123,6 @@
     downloadBtn.addEventListener('click', function () {
       downloadBtn.style.display = 'none';
 
-      // eslint-disable-next-line no-undef
       html2canvas(container, {
         backgroundColor: STYLES.backgroundColor,
         scale: 2,

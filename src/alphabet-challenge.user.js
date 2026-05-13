@@ -341,7 +341,6 @@
       // Hide the download button temporarily for the screenshot
       downloadBtn.style.display = 'none';
 
-      // eslint-disable-next-line no-undef
       html2canvas(container, {
         backgroundColor: '#2b223d',
         scale: 2, // Higher resolution
