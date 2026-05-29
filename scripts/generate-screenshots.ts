@@ -13,6 +13,37 @@ interface ScreenshotConfig {
   viewport?: { width: number; height: number };
 }
 
+async function prepareFutureRosterScreenshot(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const secondDateHeader = document.querySelector('#rosterTable thead tr th:nth-child(2)');
+    if (secondDateHeader) {
+      secondDateHeader.textContent = 'This week';
+    }
+
+    let marshalIndex = 0;
+    document.querySelectorAll('#rosterTable tbody tr').forEach((row) => {
+      const roleHeader = row.querySelector('th');
+      if (!roleHeader) {
+        return;
+      }
+
+      const roleLink = roleHeader.querySelector('a');
+      const roleName = (roleLink?.textContent ?? roleHeader.textContent ?? '').trim();
+      if (roleName !== 'Marshal') {
+        return;
+      }
+
+      marshalIndex += 1;
+      const label = `Marshal (${marshalIndex * 100}m)`;
+      if (roleLink) {
+        roleLink.textContent = label;
+      } else {
+        roleHeader.textContent = label;
+      }
+    });
+  });
+}
+
 async function removeThirdPartyOverlays(page: Page): Promise<void> {
   await page.evaluate(() => {
     const selectorsToHide = [
@@ -333,6 +364,11 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       await removeThirdPartyOverlays(page);
+
+      if (config.name === 'future-roster-printable') {
+        console.log('📝 Applying future roster screenshot demo edits...');
+        await prepareFutureRosterScreenshot(page);
+      }
 
       const screenshotPath = path.join(process.cwd(), 'docs', 'images', `${config.name}.png`);
 

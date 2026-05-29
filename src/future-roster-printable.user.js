@@ -32,7 +32,7 @@
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.com.au/albertmelbourne/futureroster/
+// @screenshot-url       https://www.parkrun.com.au/loganriver/futureroster/
 // @screenshot-selector  #rosterTable
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
