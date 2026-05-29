@@ -388,9 +388,6 @@
     downloadBtn.addEventListener('click', function () {
       // Hide the download button temporarily for the screenshot
       downloadBtn.style.display = 'none';
-
-      // Use the entire container instead of just the clock
-      // eslint-disable-next-line no-undef
       html2canvas(container, {
         backgroundColor: STYLES.backgroundColor,
         scale: 2,

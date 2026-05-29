@@ -477,9 +477,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     downloadBtn.addEventListener('click', function () {
       // Hide the download button temporarily for the screenshot
       downloadBtn.style.display = 'none';
-
-      // Use html2canvas to capture the container
-      // eslint-disable-next-line no-undef
       html2canvas(container, {
         backgroundColor: STYLES.backgroundColor,
         scale: 2,

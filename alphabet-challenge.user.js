@@ -306,8 +306,6 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     downloadBtn.addEventListener('click', function () {
       // Hide the download button temporarily for the screenshot
       downloadBtn.style.display = 'none';
-
-      // eslint-disable-next-line no-undef
       html2canvas(container, {
         backgroundColor: '#2b223d',
         scale: 2,
