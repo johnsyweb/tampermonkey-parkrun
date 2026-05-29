@@ -13,7 +13,16 @@ interface ScreenshotConfig {
   viewport?: { width: number; height: number };
 }
 
+const PREPARE_BUTTON_ID = 'parkrun-future-roster-prepare-button';
+
 async function prepareFutureRosterScreenshot(page: Page): Promise<void> {
+  await page.click(`#${PREPARE_BUTTON_ID}`);
+  await page.waitForFunction(
+    (buttonId) => document.body.querySelector('#rosterTable') && !document.getElementById(buttonId),
+    {},
+    PREPARE_BUTTON_ID
+  );
+
   await page.evaluate(() => {
     const secondDateHeader = document.querySelector('#rosterTable thead tr th:nth-child(2)');
     if (secondDateHeader) {

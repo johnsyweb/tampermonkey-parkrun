@@ -38,6 +38,11 @@
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
 var STYLE_ID = 'parkrun-future-roster-printable';
+var PREPARE_CONTROL_ID = 'parkrun-future-roster-prepare-control';
+var PREPARE_BUTTON_ID = 'parkrun-future-roster-prepare-button';
+var PREPARE_CONTROL_STYLE_ID = 'parkrun-future-roster-prepare-control-styles';
+var PREPARE_BUTTON_LABEL = '🖨️ Prepare for printing';
+var PREPARE_HELPER_TEXT = 'Opens a simplified view for editing and printing.';
 var CORE_ROLES_EXPLANATION_ID = 'parkrun-core-roles-explanation';
 var CORE_ROLE_FOOTNOTE_MARKER = '*';
 var DEFAULT_CORE_ROLES_EXPLANATION = "Rows marked ".concat(CORE_ROLE_FOOTNOTE_MARKER, " are core roles. Every core role must be covered for the event to go ahead.");
@@ -61,10 +66,27 @@ function findRosterTableStyles(main) {
     return node.tagName === 'STYLE';
   });
 }
+function findPrepareInsertionPoint(main) {
+  var _main$querySelector2;
+  return (_main$querySelector2 = main === null || main === void 0 ? void 0 : main.querySelector('#viewroster')) !== null && _main$querySelector2 !== void 0 ? _main$querySelector2 : findRosterTable(main);
+}
 function preserveRosterTableStyles(doc, main) {
   findRosterTableStyles(main).forEach(function (style) {
     return doc.head.appendChild(style);
   });
+}
+function buildControlStyles() {
+  return "\n#".concat(PREPARE_CONTROL_ID, " {\n  margin: 1rem 0;\n}\n\n#").concat(PREPARE_BUTTON_ID, " {\n  display: inline-block;\n  padding: 0.75em 1.5em;\n  background: #4c1a57;\n  color: #fff;\n  border: none;\n  border-radius: 999px;\n  font: inherit;\n  font-weight: 700;\n  font-size: 0.95rem;\n  letter-spacing: 0.03em;\n  cursor: pointer;\n  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);\n}\n\n#").concat(PREPARE_BUTTON_ID, ":hover {\n  background: #3d2f4f;\n}\n\n#").concat(PREPARE_BUTTON_ID, ":focus-visible {\n  outline: 3px solid #f7a541;\n  outline-offset: 2px;\n}\n\n#").concat(PREPARE_CONTROL_ID, " p {\n  margin: 0.65rem 0 0;\n  font-size: 0.9rem;\n  color: #666;\n}\n").trim();
+}
+function injectControlStyles() {
+  var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (doc.getElementById(PREPARE_CONTROL_STYLE_ID)) {
+    return;
+  }
+  var style = doc.createElement('style');
+  style.id = PREPARE_CONTROL_STYLE_ID;
+  style.textContent = buildControlStyles();
+  doc.head.appendChild(style);
 }
 function buildSupplementalStyles() {
   return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\ntable {\n  width: 100%;\n}\n\n#rosterTable {\n  border-collapse: collapse;\n}\n\n#rosterTable,\n#rosterTable th,\n#rosterTable td {\n  border: 1px solid black;\n  padding: 4px;\n}\n\n#rosterTable td,\n#rosterTable th {\n  cursor: text;\n}\n\n#rosterTable td:focus,\n#rosterTable th:focus {\n  outline: 2px solid #0072b1;\n  outline-offset: -2px;\n}\n\n#rosterTable tr.core-role th.corerole {\n  background: #f2f2f2 !important;\n}\n\n#rosterTable tr.core-role th.corerole::after {\n  content: ' ".concat(CORE_ROLE_FOOTNOTE_MARKER, "';\n  font-weight: normal;\n}\n\n.core-roles-explanation {\n  font-size: 0.9rem;\n  margin: 8px 0 0;\n}\n\n.core-roles-explanation:focus {\n  outline: 2px solid #0072b1;\n  outline-offset: 2px;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  #rosterTable td:focus,\n  #rosterTable th:focus {\n    outline: none;\n  }\n\n  .core-roles-explanation:focus {\n    outline: none;\n  }\n}\n").trim();
@@ -102,6 +124,43 @@ function createCoreRolesExplanation() {
   explanation.textContent = DEFAULT_CORE_ROLES_EXPLANATION;
   return explanation;
 }
+function createPrepareControl() {
+  var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  var control = doc.createElement('div');
+  control.id = PREPARE_CONTROL_ID;
+  var button = doc.createElement('button');
+  button.id = PREPARE_BUTTON_ID;
+  button.type = 'button';
+  button.textContent = PREPARE_BUTTON_LABEL;
+  button.addEventListener('click', function () {
+    prepareForPrinting(doc);
+  });
+  var helper = doc.createElement('p');
+  helper.textContent = PREPARE_HELPER_TEXT;
+  control.append(button, helper);
+  return control;
+}
+function injectPrepareControl() {
+  var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (doc.getElementById(PREPARE_CONTROL_ID)) {
+    return true;
+  }
+  var main = doc.getElementById('main');
+  if (!main) {
+    return false;
+  }
+  var table = findRosterTable(main);
+  if (!table) {
+    return false;
+  }
+  var insertionPoint = findPrepareInsertionPoint(main);
+  if (!(insertionPoint !== null && insertionPoint !== void 0 && insertionPoint.parentNode)) {
+    return false;
+  }
+  injectControlStyles(doc);
+  insertionPoint.parentNode.insertBefore(createPrepareControl(doc), insertionPoint);
+  return true;
+}
 function isolateMainForPrint() {
   var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
   var main = doc.getElementById('main');
@@ -121,26 +180,51 @@ function isolateMainForPrint() {
   doc.title = title;
   return true;
 }
+function prepareForPrinting() {
+  var _doc$defaultView;
+  var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (!isolateMainForPrint(doc)) {
+    return false;
+  }
+  (_doc$defaultView = doc.defaultView) === null || _doc$defaultView === void 0 || _doc$defaultView.scrollTo(0, 0);
+  return true;
+}
+function initFutureRosterPrintable() {
+  var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  injectPrepareControl(doc);
+}
 (function () {
   'use strict';
 
-  isolateMainForPrint(document);
+  initFutureRosterPrintable(document);
 })();
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = {
     STYLE_ID: STYLE_ID,
+    PREPARE_CONTROL_ID: PREPARE_CONTROL_ID,
+    PREPARE_BUTTON_ID: PREPARE_BUTTON_ID,
+    PREPARE_CONTROL_STYLE_ID: PREPARE_CONTROL_STYLE_ID,
+    PREPARE_BUTTON_LABEL: PREPARE_BUTTON_LABEL,
+    PREPARE_HELPER_TEXT: PREPARE_HELPER_TEXT,
     CORE_ROLES_EXPLANATION_ID: CORE_ROLES_EXPLANATION_ID,
     CORE_ROLE_FOOTNOTE_MARKER: CORE_ROLE_FOOTNOTE_MARKER,
     DEFAULT_CORE_ROLES_EXPLANATION: DEFAULT_CORE_ROLES_EXPLANATION,
+    buildControlStyles: buildControlStyles,
     buildSupplementalStyles: buildSupplementalStyles,
     createCoreRolesExplanation: createCoreRolesExplanation,
+    createPrepareControl: createPrepareControl,
     enableCellEditing: enableCellEditing,
     findRosterTable: findRosterTable,
     findRosterTableStyles: findRosterTableStyles,
+    findPrepareInsertionPoint: findPrepareInsertionPoint,
     getPrintableTitle: getPrintableTitle,
+    injectControlStyles: injectControlStyles,
+    injectPrepareControl: injectPrepareControl,
     injectSupplementalStyles: injectSupplementalStyles,
+    initFutureRosterPrintable: initFutureRosterPrintable,
     isolateMainForPrint: isolateMainForPrint,
     markCoreRoleRows: markCoreRoleRows,
+    prepareForPrinting: prepareForPrinting,
     preserveRosterTableStyles: preserveRosterTableStyles
   };
 }

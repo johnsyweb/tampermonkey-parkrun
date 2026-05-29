@@ -7,15 +7,23 @@ const {
   CORE_ROLES_EXPLANATION_ID,
   CORE_ROLE_FOOTNOTE_MARKER,
   DEFAULT_CORE_ROLES_EXPLANATION,
+  PREPARE_BUTTON_ID,
+  PREPARE_BUTTON_LABEL,
+  PREPARE_CONTROL_ID,
+  PREPARE_CONTROL_STYLE_ID,
+  PREPARE_HELPER_TEXT,
+  buildControlStyles,
   buildSupplementalStyles,
   createCoreRolesExplanation,
   enableCellEditing,
   findRosterTable,
   findRosterTableStyles,
   getPrintableTitle,
+  injectPrepareControl,
   injectSupplementalStyles,
   isolateMainForPrint,
   markCoreRoleRows,
+  prepareForPrinting,
   preserveRosterTableStyles,
 } = require('../src/future-roster-printable.user.js');
 
@@ -27,6 +35,30 @@ const FIXTURE_PATH = path.join(
 function parseFixtureHtml(html) {
   const parser = new DOMParser();
   return parser.parseFromString(html, 'text/html');
+}
+
+function setupSampleRosterPage() {
+  document.body.innerHTML = `
+    <header id="mainheader">Navigation</header>
+    <main id="page">
+      <div id="main">
+        <div id="mainleft">
+          <h1>Sample Event Future volunteer roster</h1>
+          <p>Intro text</p>
+          <div id="viewroster">
+            <table id="rosterTable">
+              <tbody>
+                <tr><th class="corerole">Run Director</th><td>Pat</td></tr>
+                <tr><th>Marshal</th><td>Sam</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>Footer</footer>
+  `;
+  document.title = 'future roster | Sample Event';
 }
 
 describe('getPrintableTitle', () => {
@@ -143,6 +175,113 @@ describe('createCoreRolesExplanation', () => {
   });
 });
 
+describe('buildControlStyles', () => {
+  it('styles the prepare control as a prominent call to action', () => {
+    const css = buildControlStyles();
+    expect(css).toContain(`#${PREPARE_BUTTON_ID}`);
+    expect(css).toContain('#4c1a57');
+  });
+});
+
+describe('injectPrepareControl', () => {
+  beforeEach(() => {
+    document.head.innerHTML = '';
+    document.body.innerHTML = '';
+  });
+
+  it('returns false when #main is missing', () => {
+    document.body.innerHTML = '<p>No main element</p>';
+    expect(injectPrepareControl(document)).toBe(false);
+    expect(document.getElementById(PREPARE_CONTROL_ID)).toBeNull();
+  });
+
+  it('returns false when #main has no roster table', () => {
+    document.body.innerHTML = '<div id="main"><h1>Event</h1><p>Intro only</p></div>';
+    expect(injectPrepareControl(document)).toBe(false);
+    expect(document.getElementById(PREPARE_CONTROL_ID)).toBeNull();
+  });
+
+  it('inserts the prepare control immediately before #viewroster', () => {
+    setupSampleRosterPage();
+    expect(injectPrepareControl(document)).toBe(true);
+
+    const viewroster = document.getElementById('viewroster');
+    expect(viewroster.previousElementSibling.id).toBe(PREPARE_CONTROL_ID);
+
+    const button = document.getElementById(PREPARE_BUTTON_ID);
+    expect(button.tagName).toBe('BUTTON');
+    expect(button.type).toBe('button');
+    expect(button.textContent).toBe(PREPARE_BUTTON_LABEL);
+
+    const helper = document.getElementById(PREPARE_CONTROL_ID).querySelector('p');
+    expect(helper.textContent).toBe(PREPARE_HELPER_TEXT);
+
+    expect(document.getElementById('main')).not.toBeNull();
+    expect(document.getElementById('mainheader')).not.toBeNull();
+    expect(document.getElementById(STYLE_ID)).toBeNull();
+    expect(document.querySelector('#rosterTable td')?.getAttribute('contenteditable')).toBeNull();
+    expect(document.getElementById(PREPARE_CONTROL_STYLE_ID)).not.toBeNull();
+  });
+
+  it('does not inject duplicate controls when called twice', () => {
+    setupSampleRosterPage();
+    injectPrepareControl(document);
+    injectPrepareControl(document);
+    expect(document.querySelectorAll(`#${PREPARE_CONTROL_ID}`)).toHaveLength(1);
+  });
+
+  it('leaves the Albert Melbourne fixture intact', () => {
+    const html = fs.readFileSync(FIXTURE_PATH, 'utf8');
+    const doc = parseFixtureHtml(html);
+
+    expect(injectPrepareControl(doc)).toBe(true);
+    expect(doc.getElementById('main')).not.toBeNull();
+    expect(doc.getElementById('mainheader')).not.toBeNull();
+    expect(doc.getElementById('viewroster')).not.toBeNull();
+    expect(doc.getElementById('viewroster').previousElementSibling.id).toBe(PREPARE_CONTROL_ID);
+    expect(doc.getElementById(STYLE_ID)).toBeNull();
+  });
+});
+
+describe('prepareForPrinting', () => {
+  beforeEach(() => {
+    document.head.innerHTML = '';
+    document.body.innerHTML = '';
+    window.scrollTo = jest.fn();
+  });
+
+  it('returns false when the roster table is missing', () => {
+    document.body.innerHTML = '<div id="main"><p>No table</p></div>';
+    expect(prepareForPrinting(document)).toBe(false);
+    expect(window.scrollTo).not.toHaveBeenCalled();
+  });
+
+  it('transforms the page, removes the prepare control, and scrolls to top', () => {
+    setupSampleRosterPage();
+    injectPrepareControl(document);
+
+    expect(prepareForPrinting(document)).toBe(true);
+
+    expect(document.getElementById(PREPARE_CONTROL_ID)).toBeNull();
+    expect(document.body.firstElementChild.id).toBe('rosterTable');
+    expect(document.getElementById(CORE_ROLES_EXPLANATION_ID)).not.toBeNull();
+    expect(document.getElementById('main')).toBeNull();
+    expect(document.getElementById(STYLE_ID)).not.toBeNull();
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+  });
+
+  it('transforms when the prepare button is clicked', () => {
+    setupSampleRosterPage();
+    injectPrepareControl(document);
+
+    document.getElementById(PREPARE_BUTTON_ID).click();
+
+    expect(document.getElementById(PREPARE_CONTROL_ID)).toBeNull();
+    expect(document.body.firstElementChild.id).toBe('rosterTable');
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+  });
+});
+
 describe('buildSupplementalStyles', () => {
   it('includes landscape A4 page rules and print link styling', () => {
     const css = buildSupplementalStyles();
@@ -180,27 +319,7 @@ describe('isolateMainForPrint', () => {
   });
 
   it('isolates the roster table, injects styles, and sets title from h1', () => {
-    document.body.innerHTML = `
-      <header id="mainheader">Navigation</header>
-      <main id="page">
-        <div id="main">
-          <div id="mainleft">
-            <h1>Sample Event Future volunteer roster</h1>
-            <p>Intro text</p>
-            <div id="viewroster">
-              <table id="rosterTable">
-                <tbody>
-                  <tr><th class="corerole">Run Director</th><td>Pat</td></tr>
-                  <tr><th>Marshal</th><td>Sam</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </main>
-      <footer>Footer</footer>
-    `;
-    document.title = 'future roster | Sample Event';
+    setupSampleRosterPage();
 
     expect(isolateMainForPrint(document)).toBe(true);
     expect(document.body.children).toHaveLength(2);

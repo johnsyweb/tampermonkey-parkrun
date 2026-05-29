@@ -41,6 +41,11 @@
 // ==/UserScript==
 
 const STYLE_ID = 'parkrun-future-roster-printable';
+const PREPARE_CONTROL_ID = 'parkrun-future-roster-prepare-control';
+const PREPARE_BUTTON_ID = 'parkrun-future-roster-prepare-button';
+const PREPARE_CONTROL_STYLE_ID = 'parkrun-future-roster-prepare-control-styles';
+const PREPARE_BUTTON_LABEL = '🖨️ Prepare for printing';
+const PREPARE_HELPER_TEXT = 'Opens a simplified view for editing and printing.';
 const CORE_ROLES_EXPLANATION_ID = 'parkrun-core-roles-explanation';
 const CORE_ROLE_FOOTNOTE_MARKER = '*';
 const DEFAULT_CORE_ROLES_EXPLANATION = `Rows marked ${CORE_ROLE_FOOTNOTE_MARKER} are core roles. Every core role must be covered for the event to go ahead.`;
@@ -64,8 +69,61 @@ function findRosterTableStyles(main) {
   return Array.from(viewroster.children).filter((node) => node.tagName === 'STYLE');
 }
 
+function findPrepareInsertionPoint(main) {
+  return main?.querySelector('#viewroster') ?? findRosterTable(main);
+}
+
 function preserveRosterTableStyles(doc, main) {
   findRosterTableStyles(main).forEach((style) => doc.head.appendChild(style));
+}
+
+function buildControlStyles() {
+  return `
+#${PREPARE_CONTROL_ID} {
+  margin: 1rem 0;
+}
+
+#${PREPARE_BUTTON_ID} {
+  display: inline-block;
+  padding: 0.75em 1.5em;
+  background: #4c1a57;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#${PREPARE_BUTTON_ID}:hover {
+  background: #3d2f4f;
+}
+
+#${PREPARE_BUTTON_ID}:focus-visible {
+  outline: 3px solid #f7a541;
+  outline-offset: 2px;
+}
+
+#${PREPARE_CONTROL_ID} p {
+  margin: 0.65rem 0 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+`.trim();
+}
+
+function injectControlStyles(doc = document) {
+  if (doc.getElementById(PREPARE_CONTROL_STYLE_ID)) {
+    return;
+  }
+
+  const style = doc.createElement('style');
+  style.id = PREPARE_CONTROL_STYLE_ID;
+  style.textContent = buildControlStyles();
+  doc.head.appendChild(style);
 }
 
 function buildSupplementalStyles() {
@@ -200,6 +258,50 @@ function createCoreRolesExplanation(doc = document) {
   return explanation;
 }
 
+function createPrepareControl(doc = document) {
+  const control = doc.createElement('div');
+  control.id = PREPARE_CONTROL_ID;
+
+  const button = doc.createElement('button');
+  button.id = PREPARE_BUTTON_ID;
+  button.type = 'button';
+  button.textContent = PREPARE_BUTTON_LABEL;
+  button.addEventListener('click', () => {
+    prepareForPrinting(doc);
+  });
+
+  const helper = doc.createElement('p');
+  helper.textContent = PREPARE_HELPER_TEXT;
+
+  control.append(button, helper);
+  return control;
+}
+
+function injectPrepareControl(doc = document) {
+  if (doc.getElementById(PREPARE_CONTROL_ID)) {
+    return true;
+  }
+
+  const main = doc.getElementById('main');
+  if (!main) {
+    return false;
+  }
+
+  const table = findRosterTable(main);
+  if (!table) {
+    return false;
+  }
+
+  const insertionPoint = findPrepareInsertionPoint(main);
+  if (!insertionPoint?.parentNode) {
+    return false;
+  }
+
+  injectControlStyles(doc);
+  insertionPoint.parentNode.insertBefore(createPrepareControl(doc), insertionPoint);
+  return true;
+}
+
 function isolateMainForPrint(doc = document) {
   const main = doc.getElementById('main');
   if (!main) {
@@ -221,26 +323,51 @@ function isolateMainForPrint(doc = document) {
   return true;
 }
 
+function prepareForPrinting(doc = document) {
+  if (!isolateMainForPrint(doc)) {
+    return false;
+  }
+
+  doc.defaultView?.scrollTo(0, 0);
+  return true;
+}
+
+function initFutureRosterPrintable(doc = document) {
+  injectPrepareControl(doc);
+}
+
 (function () {
   'use strict';
-  isolateMainForPrint(document);
+  initFutureRosterPrintable(document);
 })();
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = {
     STYLE_ID,
+    PREPARE_CONTROL_ID,
+    PREPARE_BUTTON_ID,
+    PREPARE_CONTROL_STYLE_ID,
+    PREPARE_BUTTON_LABEL,
+    PREPARE_HELPER_TEXT,
     CORE_ROLES_EXPLANATION_ID,
     CORE_ROLE_FOOTNOTE_MARKER,
     DEFAULT_CORE_ROLES_EXPLANATION,
+    buildControlStyles,
     buildSupplementalStyles,
     createCoreRolesExplanation,
+    createPrepareControl,
     enableCellEditing,
     findRosterTable,
     findRosterTableStyles,
+    findPrepareInsertionPoint,
     getPrintableTitle,
+    injectControlStyles,
+    injectPrepareControl,
     injectSupplementalStyles,
+    initFutureRosterPrintable,
     isolateMainForPrint,
     markCoreRoleRows,
+    prepareForPrinting,
     preserveRosterTableStyles,
   };
 }
