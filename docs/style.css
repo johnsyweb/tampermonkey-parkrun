@@ -187,6 +187,61 @@ body {
   margin-top: 0;
 }
 
+#content h3 {
+  color: var(--parkrun-aubergine);
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+#content h4 {
+  color: var(--parkrun-aubergine);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.script-install-intro {
+  max-width: 70ch;
+  margin: 0 0 1.25rem;
+  color: var(--parkrun-grey);
+}
+
+.script-install-path {
+  margin-top: 1.5rem;
+}
+
+.script-install-path:first-of-type {
+  margin-top: 0;
+}
+
+.script-recommended {
+  font-weight: 400;
+  color: var(--parkrun-grey);
+  font-size: 0.95em;
+}
+
+.script-section {
+  margin-bottom: 2rem;
+}
+
+.script-section:last-child {
+  margin-bottom: 0;
+}
+
+.script-section > h2 {
+  margin-top: 0;
+}
+
+.script-section + .script-section > h2 {
+  margin-top: 0;
+  padding-top: 0.25rem;
+}
+
+.script-section--about .script-about {
+  margin-top: 0;
+}
+
 #content a {
   color: var(--parkrun-aubergine);
   text-decoration: underline;
@@ -357,13 +412,13 @@ p img {
 
 /* Collapsible boilerplate on per-script pages (<details> / <summary>) */
 .script-lead.script-facts {
-  margin: 0 0 1.25rem;
+  margin: 0.85rem 0 0;
   font-size: 0.95rem;
   color: var(--parkrun-grey);
 }
 
 #content .script-details {
-  margin: 1.5rem 0;
+  margin: 0.75rem 0 0;
   padding: 0 1rem 0.25rem;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -395,8 +450,8 @@ p img {
 
 /* Support link (GitHub issues) below install CTA */
 .script-support {
-  margin: -0.5rem 0 1.5rem;
-  font-size: 0.95rem;
+  margin: 0;
+  font-size: 1rem;
 }
 
 .script-support a {
@@ -406,7 +461,7 @@ p img {
 
 /* Per-script install CTA button */
 .script-install-cta {
-  margin: 1.5em 0;
+  margin: 0;
 }
 
 .script-install-button {
