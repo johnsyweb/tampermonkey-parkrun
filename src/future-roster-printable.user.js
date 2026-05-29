@@ -41,6 +41,9 @@
 // ==/UserScript==
 
 const STYLE_ID = 'parkrun-future-roster-printable';
+const CORE_ROLES_EXPLANATION_ID = 'parkrun-core-roles-explanation';
+const CORE_ROLE_FOOTNOTE_MARKER = '*';
+const DEFAULT_CORE_ROLES_EXPLANATION = `Rows marked ${CORE_ROLE_FOOTNOTE_MARKER} are core roles. Every core role must be covered for the event to go ahead.`;
 
 function getPrintableTitle(main, fallbackTitle = '') {
   const heading = main?.querySelector('h1');
@@ -104,6 +107,25 @@ table {
   outline-offset: -2px;
 }
 
+#rosterTable tr.core-role th.corerole {
+  background: #f2f2f2 !important;
+}
+
+#rosterTable tr.core-role th.corerole::after {
+  content: ' ${CORE_ROLE_FOOTNOTE_MARKER}';
+  font-weight: normal;
+}
+
+.core-roles-explanation {
+  font-size: 0.9rem;
+  margin: 8px 0 0;
+}
+
+.core-roles-explanation:focus {
+  outline: 2px solid #0072b1;
+  outline-offset: 2px;
+}
+
 @page {
   size: A4 landscape;
   margin: 10mm;
@@ -134,6 +156,10 @@ table {
   #rosterTable th:focus {
     outline: none;
   }
+
+  .core-roles-explanation:focus {
+    outline: none;
+  }
 }
 `.trim();
 }
@@ -156,6 +182,24 @@ function enableCellEditing(table) {
   });
 }
 
+function markCoreRoleRows(table) {
+  table.querySelectorAll('tr').forEach((row) => {
+    if (row.querySelector('th.corerole')) {
+      row.classList.add('core-role');
+    }
+  });
+}
+
+function createCoreRolesExplanation(doc = document) {
+  const explanation = doc.createElement('p');
+  explanation.id = CORE_ROLES_EXPLANATION_ID;
+  explanation.className = 'core-roles-explanation';
+  explanation.setAttribute('contenteditable', 'true');
+  explanation.setAttribute('tabindex', '0');
+  explanation.textContent = DEFAULT_CORE_ROLES_EXPLANATION;
+  return explanation;
+}
+
 function isolateMainForPrint(doc = document) {
   const main = doc.getElementById('main');
   if (!main) {
@@ -169,7 +213,8 @@ function isolateMainForPrint(doc = document) {
 
   const title = getPrintableTitle(main, doc.title);
   preserveRosterTableStyles(doc, main);
-  doc.body.replaceChildren(table);
+  doc.body.replaceChildren(table, createCoreRolesExplanation(doc));
+  markCoreRoleRows(table);
   injectSupplementalStyles(doc);
   enableCellEditing(table);
   doc.title = title;
@@ -184,13 +229,18 @@ function isolateMainForPrint(doc = document) {
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = {
     STYLE_ID,
+    CORE_ROLES_EXPLANATION_ID,
+    CORE_ROLE_FOOTNOTE_MARKER,
+    DEFAULT_CORE_ROLES_EXPLANATION,
     buildSupplementalStyles,
+    createCoreRolesExplanation,
     enableCellEditing,
     findRosterTable,
     findRosterTableStyles,
     getPrintableTitle,
     injectSupplementalStyles,
     isolateMainForPrint,
+    markCoreRoleRows,
     preserveRosterTableStyles,
   };
 }

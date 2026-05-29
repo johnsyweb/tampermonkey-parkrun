@@ -4,13 +4,18 @@ const fs = require('fs');
 const path = require('path');
 const {
   STYLE_ID,
+  CORE_ROLES_EXPLANATION_ID,
+  CORE_ROLE_FOOTNOTE_MARKER,
+  DEFAULT_CORE_ROLES_EXPLANATION,
   buildSupplementalStyles,
+  createCoreRolesExplanation,
   enableCellEditing,
   findRosterTable,
   findRosterTableStyles,
   getPrintableTitle,
   injectSupplementalStyles,
   isolateMainForPrint,
+  markCoreRoleRows,
   preserveRosterTableStyles,
 } = require('../src/future-roster-printable.user.js');
 
@@ -109,6 +114,35 @@ describe('enableCellEditing', () => {
   });
 });
 
+describe('markCoreRoleRows', () => {
+  it('marks rows with th.corerole as core roles', () => {
+    document.body.innerHTML = `
+      <table id="rosterTable">
+        <tbody>
+          <tr><th class="corerole">Run Director</th><td>Pat</td></tr>
+          <tr><th>Marshal</th><td>Sam</td></tr>
+        </tbody>
+      </table>
+    `;
+    markCoreRoleRows(document.getElementById('rosterTable'));
+    expect(document.querySelector('#rosterTable tr.core-role th.corerole')).not.toBeNull();
+    expect(document.querySelectorAll('#rosterTable tr.core-role')).toHaveLength(1);
+  });
+});
+
+describe('createCoreRolesExplanation', () => {
+  it('creates an editable explanation with default text', () => {
+    const explanation = createCoreRolesExplanation(document);
+    expect(explanation.id).toBe(CORE_ROLES_EXPLANATION_ID);
+    expect(explanation.getAttribute('contenteditable')).toBe('true');
+    expect(explanation.getAttribute('tabindex')).toBe('0');
+    expect(explanation.textContent).toBe(DEFAULT_CORE_ROLES_EXPLANATION);
+    expect(explanation.textContent).toContain(CORE_ROLE_FOOTNOTE_MARKER);
+    expect(explanation.textContent).toContain('covered');
+    expect(explanation.textContent).not.toContain('filled');
+  });
+});
+
 describe('buildSupplementalStyles', () => {
   it('includes landscape A4 page rules and print link styling', () => {
     const css = buildSupplementalStyles();
@@ -119,6 +153,9 @@ describe('buildSupplementalStyles', () => {
     expect(css).toContain('background: #fff');
     expect(css).toContain('table {\n  width: 100%;');
     expect(css).toContain('border: 1px solid black');
+    expect(css).toContain('tr.core-role th.corerole');
+    expect(css).toContain("content: ' *'");
+    expect(css).toContain('.core-roles-explanation');
   });
 });
 
@@ -150,7 +187,14 @@ describe('isolateMainForPrint', () => {
           <div id="mainleft">
             <h1>Sample Event Future volunteer roster</h1>
             <p>Intro text</p>
-            <div id="viewroster"><table id="rosterTable"><tr><td>Role</td></tr></table></div>
+            <div id="viewroster">
+              <table id="rosterTable">
+                <tbody>
+                  <tr><th class="corerole">Run Director</th><td>Pat</td></tr>
+                  <tr><th>Marshal</th><td>Sam</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
@@ -159,9 +203,13 @@ describe('isolateMainForPrint', () => {
     document.title = 'future roster | Sample Event';
 
     expect(isolateMainForPrint(document)).toBe(true);
-    expect(document.body.children).toHaveLength(1);
+    expect(document.body.children).toHaveLength(2);
     expect(document.body.firstElementChild.tagName).toBe('TABLE');
     expect(document.body.firstElementChild.id).toBe('rosterTable');
+    expect(
+      document.getElementById(CORE_ROLES_EXPLANATION_ID)?.getAttribute('contenteditable')
+    ).toBe('true');
+    expect(document.querySelector('#rosterTable tr.core-role')).not.toBeNull();
     expect(document.getElementById('main')).toBeNull();
     expect(document.getElementById('viewroster')).toBeNull();
     expect(document.getElementById(STYLE_ID)).not.toBeNull();
@@ -174,8 +222,12 @@ describe('isolateMainForPrint', () => {
     const doc = parseFixtureHtml(html);
 
     expect(isolateMainForPrint(doc)).toBe(true);
-    expect(doc.body.children).toHaveLength(1);
+    expect(doc.body.children).toHaveLength(2);
     expect(doc.body.firstElementChild.id).toBe('rosterTable');
+    expect(doc.getElementById(CORE_ROLES_EXPLANATION_ID)?.textContent).toBe(
+      DEFAULT_CORE_ROLES_EXPLANATION
+    );
+    expect(doc.querySelectorAll('#rosterTable tr.core-role').length).toBeGreaterThan(0);
     expect(doc.getElementById('mainheader')).toBeNull();
     expect(doc.getElementById('main')).toBeNull();
     expect(doc.getElementById('viewroster')).toBeNull();

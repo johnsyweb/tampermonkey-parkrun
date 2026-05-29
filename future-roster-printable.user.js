@@ -38,6 +38,9 @@
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
 var STYLE_ID = 'parkrun-future-roster-printable';
+var CORE_ROLES_EXPLANATION_ID = 'parkrun-core-roles-explanation';
+var CORE_ROLE_FOOTNOTE_MARKER = '*';
+var DEFAULT_CORE_ROLES_EXPLANATION = "Rows marked ".concat(CORE_ROLE_FOOTNOTE_MARKER, " are core roles. Every core role must be covered for the event to go ahead.");
 function getPrintableTitle(main) {
   var _heading$textContent;
   var fallbackTitle = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
@@ -64,7 +67,7 @@ function preserveRosterTableStyles(doc, main) {
   });
 }
 function buildSupplementalStyles() {
-  return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\ntable {\n  width: 100%;\n}\n\n#rosterTable {\n  border-collapse: collapse;\n}\n\n#rosterTable,\n#rosterTable th,\n#rosterTable td {\n  border: 1px solid black;\n  padding: 4px;\n}\n\n#rosterTable td,\n#rosterTable th {\n  cursor: text;\n}\n\n#rosterTable td:focus,\n#rosterTable th:focus {\n  outline: 2px solid #0072b1;\n  outline-offset: -2px;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  #rosterTable td:focus,\n  #rosterTable th:focus {\n    outline: none;\n  }\n}\n".trim();
+  return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\ntable {\n  width: 100%;\n}\n\n#rosterTable {\n  border-collapse: collapse;\n}\n\n#rosterTable,\n#rosterTable th,\n#rosterTable td {\n  border: 1px solid black;\n  padding: 4px;\n}\n\n#rosterTable td,\n#rosterTable th {\n  cursor: text;\n}\n\n#rosterTable td:focus,\n#rosterTable th:focus {\n  outline: 2px solid #0072b1;\n  outline-offset: -2px;\n}\n\n#rosterTable tr.core-role th.corerole {\n  background: #f2f2f2 !important;\n}\n\n#rosterTable tr.core-role th.corerole::after {\n  content: ' ".concat(CORE_ROLE_FOOTNOTE_MARKER, "';\n  font-weight: normal;\n}\n\n.core-roles-explanation {\n  font-size: 0.9rem;\n  margin: 8px 0 0;\n}\n\n.core-roles-explanation:focus {\n  outline: 2px solid #0072b1;\n  outline-offset: 2px;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  #rosterTable td:focus,\n  #rosterTable th:focus {\n    outline: none;\n  }\n\n  .core-roles-explanation:focus {\n    outline: none;\n  }\n}\n").trim();
 }
 function injectSupplementalStyles() {
   var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
@@ -82,6 +85,23 @@ function enableCellEditing(table) {
     cell.setAttribute('tabindex', '0');
   });
 }
+function markCoreRoleRows(table) {
+  table.querySelectorAll('tr').forEach(function (row) {
+    if (row.querySelector('th.corerole')) {
+      row.classList.add('core-role');
+    }
+  });
+}
+function createCoreRolesExplanation() {
+  var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  var explanation = doc.createElement('p');
+  explanation.id = CORE_ROLES_EXPLANATION_ID;
+  explanation.className = 'core-roles-explanation';
+  explanation.setAttribute('contenteditable', 'true');
+  explanation.setAttribute('tabindex', '0');
+  explanation.textContent = DEFAULT_CORE_ROLES_EXPLANATION;
+  return explanation;
+}
 function isolateMainForPrint() {
   var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
   var main = doc.getElementById('main');
@@ -94,7 +114,8 @@ function isolateMainForPrint() {
   }
   var title = getPrintableTitle(main, doc.title);
   preserveRosterTableStyles(doc, main);
-  doc.body.replaceChildren(table);
+  doc.body.replaceChildren(table, createCoreRolesExplanation(doc));
+  markCoreRoleRows(table);
   injectSupplementalStyles(doc);
   enableCellEditing(table);
   doc.title = title;
@@ -108,13 +129,18 @@ function isolateMainForPrint() {
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = {
     STYLE_ID: STYLE_ID,
+    CORE_ROLES_EXPLANATION_ID: CORE_ROLES_EXPLANATION_ID,
+    CORE_ROLE_FOOTNOTE_MARKER: CORE_ROLE_FOOTNOTE_MARKER,
+    DEFAULT_CORE_ROLES_EXPLANATION: DEFAULT_CORE_ROLES_EXPLANATION,
     buildSupplementalStyles: buildSupplementalStyles,
+    createCoreRolesExplanation: createCoreRolesExplanation,
     enableCellEditing: enableCellEditing,
     findRosterTable: findRosterTable,
     findRosterTableStyles: findRosterTableStyles,
     getPrintableTitle: getPrintableTitle,
     injectSupplementalStyles: injectSupplementalStyles,
     isolateMainForPrint: isolateMainForPrint,
+    markCoreRoleRows: markCoreRoleRows,
     preserveRosterTableStyles: preserveRosterTableStyles
   };
 }
