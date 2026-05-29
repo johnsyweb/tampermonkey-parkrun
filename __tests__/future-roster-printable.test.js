@@ -5,6 +5,7 @@ const path = require('path');
 const {
   STYLE_ID,
   buildSupplementalStyles,
+  findRosterTable,
   getPrintableTitle,
   injectSupplementalStyles,
   isolateMainForPrint,
@@ -40,6 +41,23 @@ describe('getPrintableTitle', () => {
   });
 });
 
+describe('findRosterTable', () => {
+  it('finds the table inside #viewroster', () => {
+    document.body.innerHTML = `
+      <div id="main">
+        <div id="viewroster"><table id="rosterTable"><tr><td>Role</td></tr></table></div>
+      </div>
+    `;
+    const table = findRosterTable(document.getElementById('main'));
+    expect(table?.id).toBe('rosterTable');
+  });
+
+  it('returns null when no table exists', () => {
+    document.body.innerHTML = '<div id="main"><p>No table</p></div>';
+    expect(findRosterTable(document.getElementById('main'))).toBeNull();
+  });
+});
+
 describe('buildSupplementalStyles', () => {
   it('includes landscape A4 page rules and print link styling', () => {
     const css = buildSupplementalStyles();
@@ -48,6 +66,7 @@ describe('buildSupplementalStyles', () => {
     expect(css).toContain('a[href]::after');
     expect(css).toContain('break-inside: avoid');
     expect(css).toContain('background: #fff');
+    expect(css).toContain('table {\n  width: 100%;');
   });
 });
 
@@ -66,14 +85,20 @@ describe('isolateMainForPrint', () => {
     expect(isolateMainForPrint(document)).toBe(false);
   });
 
-  it('isolates #main, injects styles, and sets title from h1', () => {
+  it('returns false when #main has no roster table', () => {
+    document.body.innerHTML = '<div id="main"><h1>Event</h1><p>Intro only</p></div>';
+    expect(isolateMainForPrint(document)).toBe(false);
+  });
+
+  it('isolates the roster table, injects styles, and sets title from h1', () => {
     document.body.innerHTML = `
       <header id="mainheader">Navigation</header>
       <main id="page">
         <div id="main">
           <div id="mainleft">
             <h1>Sample Event Future volunteer roster</h1>
-            <div id="viewroster"><table><tr><td>Role</td></tr></table></div>
+            <p>Intro text</p>
+            <div id="viewroster"><table id="rosterTable"><tr><td>Role</td></tr></table></div>
           </div>
         </div>
       </main>
@@ -83,8 +108,10 @@ describe('isolateMainForPrint', () => {
 
     expect(isolateMainForPrint(document)).toBe(true);
     expect(document.body.children).toHaveLength(1);
-    expect(document.body.firstElementChild.id).toBe('main');
-    expect(document.getElementById('viewroster')).not.toBeNull();
+    expect(document.body.firstElementChild.tagName).toBe('TABLE');
+    expect(document.body.firstElementChild.id).toBe('rosterTable');
+    expect(document.getElementById('main')).toBeNull();
+    expect(document.getElementById('viewroster')).toBeNull();
     expect(document.getElementById(STYLE_ID)).not.toBeNull();
     expect(document.title).toBe('Sample Event Future volunteer roster');
   });
@@ -95,9 +122,10 @@ describe('isolateMainForPrint', () => {
 
     expect(isolateMainForPrint(doc)).toBe(true);
     expect(doc.body.children).toHaveLength(1);
-    expect(doc.body.firstElementChild.id).toBe('main');
+    expect(doc.body.firstElementChild.id).toBe('rosterTable');
     expect(doc.getElementById('mainheader')).toBeNull();
-    expect(doc.getElementById('viewroster')).not.toBeNull();
+    expect(doc.getElementById('main')).toBeNull();
+    expect(doc.getElementById('viewroster')).toBeNull();
     expect(doc.getElementById(STYLE_ID)).not.toBeNull();
     expect(doc.title).toBe('Albert parkrun, Melbourne Future volunteer roster');
   });

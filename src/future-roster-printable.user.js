@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun Future Roster Printable View
-// @description  Strips parkrun Future Roster pages to #main for a print-like landscape A4 view
+// @description  Strips parkrun Future Roster pages to the roster table for a print-like landscape A4 view
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/future-roster-printable.user.js
 // @grant        none
@@ -33,7 +33,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @screenshot-url       https://www.parkrun.com.au/albertmelbourne/futureroster/
-// @screenshot-selector  #main
+// @screenshot-selector  #rosterTable
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/future-roster-printable.user.js
@@ -46,6 +46,10 @@ function getPrintableTitle(main, fallbackTitle = '') {
   const heading = main?.querySelector('h1');
   const text = heading?.textContent?.trim();
   return text || fallbackTitle;
+}
+
+function findRosterTable(main) {
+  return main?.querySelector('#viewroster table') ?? main?.querySelector('table') ?? null;
 }
 
 function buildSupplementalStyles() {
@@ -61,19 +65,7 @@ body {
   background-image: none !important;
 }
 
-#main {
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0;
-  padding: 0;
-}
-
-#mainleft {
-  width: 100% !important;
-  max-width: none !important;
-}
-
-#viewroster table {
+table {
   width: 100%;
 }
 
@@ -123,8 +115,13 @@ function isolateMainForPrint(doc = document) {
     return false;
   }
 
+  const table = findRosterTable(main);
+  if (!table) {
+    return false;
+  }
+
   const title = getPrintableTitle(main, doc.title);
-  doc.body.replaceChildren(main);
+  doc.body.replaceChildren(table);
   injectSupplementalStyles(doc);
   doc.title = title;
   return true;
@@ -139,6 +136,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = {
     STYLE_ID,
     buildSupplementalStyles,
+    findRosterTable,
     getPrintableTitle,
     injectSupplementalStyles,
     isolateMainForPrint,

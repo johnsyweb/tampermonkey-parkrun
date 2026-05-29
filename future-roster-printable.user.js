@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun Future Roster Printable View
-// @description  Strips parkrun Future Roster pages to #main for a print-like landscape A4 view
+// @description  Strips parkrun Future Roster pages to the roster table for a print-like landscape A4 view
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/future-roster-printable.user.js
 // @grant        none
@@ -45,8 +45,12 @@ function getPrintableTitle(main) {
   var text = heading === null || heading === void 0 || (_heading$textContent = heading.textContent) === null || _heading$textContent === void 0 ? void 0 : _heading$textContent.trim();
   return text || fallbackTitle;
 }
+function findRosterTable(main) {
+  var _ref, _main$querySelector;
+  return (_ref = (_main$querySelector = main === null || main === void 0 ? void 0 : main.querySelector('#viewroster table')) !== null && _main$querySelector !== void 0 ? _main$querySelector : main === null || main === void 0 ? void 0 : main.querySelector('table')) !== null && _ref !== void 0 ? _ref : null;
+}
 function buildSupplementalStyles() {
-  return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\n#main {\n  width: 100% !important;\n  max-width: none !important;\n  margin: 0;\n  padding: 0;\n}\n\n#mainleft {\n  width: 100% !important;\n  max-width: none !important;\n}\n\n#viewroster table {\n  width: 100%;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n}\n".trim();
+  return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\ntable {\n  width: 100%;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n}\n".trim();
 }
 function injectSupplementalStyles() {
   var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
@@ -64,8 +68,12 @@ function isolateMainForPrint() {
   if (!main) {
     return false;
   }
+  var table = findRosterTable(main);
+  if (!table) {
+    return false;
+  }
   var title = getPrintableTitle(main, doc.title);
-  doc.body.replaceChildren(main);
+  doc.body.replaceChildren(table);
   injectSupplementalStyles(doc);
   doc.title = title;
   return true;
@@ -79,6 +87,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = {
     STYLE_ID: STYLE_ID,
     buildSupplementalStyles: buildSupplementalStyles,
+    findRosterTable: findRosterTable,
     getPrintableTitle: getPrintableTitle,
     injectSupplementalStyles: injectSupplementalStyles,
     isolateMainForPrint: isolateMainForPrint
