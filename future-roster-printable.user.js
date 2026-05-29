@@ -1,0 +1,86 @@
+// ==UserScript==
+// @name         parkrun Future Roster Printable View
+// @description  Strips parkrun Future Roster pages to #main for a print-like landscape A4 view
+// @author       Pete Johns (@johnsyweb)
+// @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/future-roster-printable.user.js
+// @grant        none
+// @homepage     https://www.johnsy.com/tampermonkey-parkrun/
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=parkrun.com.au
+// @license      MIT
+// @match        *://www.parkrun.ca/*/futureroster/
+// @match        *://www.parkrun.co.at/*/futureroster/
+// @match        *://www.parkrun.co.nl/*/futureroster/
+// @match        *://www.parkrun.co.nz/*/futureroster/
+// @match        *://www.parkrun.co.za/*/futureroster/
+// @match        *://www.parkrun.com.au/*/futureroster/
+// @match        *://www.parkrun.com.de/*/futureroster/
+// @match        *://www.parkrun.dk/*/futureroster/
+// @match        *://www.parkrun.fi/*/futureroster/
+// @match        *://www.parkrun.fr/*/futureroster/
+// @match        *://www.parkrun.ie/*/futureroster/
+// @match        *://www.parkrun.it/*/futureroster/
+// @match        *://www.parkrun.jp/*/futureroster/
+// @match        *://www.parkrun.lt/*/futureroster/
+// @match        *://www.parkrun.my/*/futureroster/
+// @match        *://www.parkrun.no/*/futureroster/
+// @match        *://www.parkrun.org.uk/*/futureroster/
+// @match        *://www.parkrun.pl/*/futureroster/
+// @match        *://www.parkrun.se/*/futureroster/
+// @match        *://www.parkrun.sg/*/futureroster/
+// @match        *://www.parkrun.us/*/futureroster/
+// @namespace    http://tampermonkey.net/
+// @run-at       document-end
+// @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
+// @tag          parkrun
+// @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/future-roster-printable.user.js
+// @version      0.1.0
+// ==/UserScript==
+// DO NOT EDIT - generated from src/ by scripts/build-scripts.js
+
+var STYLE_ID = 'parkrun-future-roster-printable';
+function getPrintableTitle(main) {
+  var _heading$textContent;
+  var fallbackTitle = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+  var heading = main === null || main === void 0 ? void 0 : main.querySelector('h1');
+  var text = heading === null || heading === void 0 || (_heading$textContent = heading.textContent) === null || _heading$textContent === void 0 ? void 0 : _heading$textContent.trim();
+  return text || fallbackTitle;
+}
+function buildSupplementalStyles() {
+  return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\n#main {\n  width: 100% !important;\n  max-width: none !important;\n  margin: 0;\n  padding: 0;\n}\n\n#mainleft {\n  width: 100% !important;\n  max-width: none !important;\n}\n\n#viewroster table {\n  width: 100%;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n}\n".trim();
+}
+function injectSupplementalStyles() {
+  var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (doc.getElementById(STYLE_ID)) {
+    return;
+  }
+  var style = doc.createElement('style');
+  style.id = STYLE_ID;
+  style.textContent = buildSupplementalStyles();
+  doc.head.appendChild(style);
+}
+function isolateMainForPrint() {
+  var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  var main = doc.getElementById('main');
+  if (!main) {
+    return false;
+  }
+  var title = getPrintableTitle(main, doc.title);
+  doc.body.replaceChildren(main);
+  injectSupplementalStyles(doc);
+  doc.title = title;
+  return true;
+}
+(function () {
+  'use strict';
+
+  isolateMainForPrint(document);
+})();
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = {
+    STYLE_ID: STYLE_ID,
+    buildSupplementalStyles: buildSupplementalStyles,
+    getPrintableTitle: getPrintableTitle,
+    injectSupplementalStyles: injectSupplementalStyles,
+    isolateMainForPrint: isolateMainForPrint
+  };
+}
