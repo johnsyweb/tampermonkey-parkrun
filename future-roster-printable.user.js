@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun Future Roster Printable View
-// @description  Strips parkrun Future Roster pages to the roster table for a print-like landscape A4 view
+// @description  Printable Future Roster table with editable cells for run director clarifications
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/future-roster-printable.user.js
 // @grant        none
@@ -64,7 +64,7 @@ function preserveRosterTableStyles(doc, main) {
   });
 }
 function buildSupplementalStyles() {
-  return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\ntable {\n  width: 100%;\n}\n\n#rosterTable {\n  border-collapse: collapse;\n}\n\n#rosterTable,\n#rosterTable th,\n#rosterTable td {\n  border: 1px solid black;\n  padding: 4px;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n}\n".trim();
+  return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\ntable {\n  width: 100%;\n}\n\n#rosterTable {\n  border-collapse: collapse;\n}\n\n#rosterTable,\n#rosterTable th,\n#rosterTable td {\n  border: 1px solid black;\n  padding: 4px;\n}\n\n#rosterTable td,\n#rosterTable th {\n  cursor: text;\n}\n\n#rosterTable td:focus,\n#rosterTable th:focus {\n  outline: 2px solid #0072b1;\n  outline-offset: -2px;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  #rosterTable td:focus,\n  #rosterTable th:focus {\n    outline: none;\n  }\n}\n".trim();
 }
 function injectSupplementalStyles() {
   var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
@@ -75,6 +75,12 @@ function injectSupplementalStyles() {
   style.id = STYLE_ID;
   style.textContent = buildSupplementalStyles();
   doc.head.appendChild(style);
+}
+function enableCellEditing(table) {
+  table.querySelectorAll('td, th').forEach(function (cell) {
+    cell.setAttribute('contenteditable', 'true');
+    cell.setAttribute('tabindex', '0');
+  });
 }
 function isolateMainForPrint() {
   var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
@@ -90,6 +96,7 @@ function isolateMainForPrint() {
   preserveRosterTableStyles(doc, main);
   doc.body.replaceChildren(table);
   injectSupplementalStyles(doc);
+  enableCellEditing(table);
   doc.title = title;
   return true;
 }
@@ -102,6 +109,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = {
     STYLE_ID: STYLE_ID,
     buildSupplementalStyles: buildSupplementalStyles,
+    enableCellEditing: enableCellEditing,
     findRosterTable: findRosterTable,
     findRosterTableStyles: findRosterTableStyles,
     getPrintableTitle: getPrintableTitle,

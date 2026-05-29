@@ -5,6 +5,7 @@ const path = require('path');
 const {
   STYLE_ID,
   buildSupplementalStyles,
+  enableCellEditing,
   findRosterTable,
   findRosterTableStyles,
   getPrintableTitle,
@@ -92,6 +93,22 @@ describe('preserveRosterTableStyles', () => {
   });
 });
 
+describe('enableCellEditing', () => {
+  it('makes every table cell editable and keyboard focusable', () => {
+    document.body.innerHTML = `
+      <table id="rosterTable">
+        <thead><tr><th>Role</th><th>Date</th></tr></thead>
+        <tbody><tr><th>Marshal</th><td>Pat</td></tr></tbody>
+      </table>
+    `;
+    enableCellEditing(document.getElementById('rosterTable'));
+    document.querySelectorAll('#rosterTable td, #rosterTable th').forEach((cell) => {
+      expect(cell.getAttribute('contenteditable')).toBe('true');
+      expect(cell.getAttribute('tabindex')).toBe('0');
+    });
+  });
+});
+
 describe('buildSupplementalStyles', () => {
   it('includes landscape A4 page rules and print link styling', () => {
     const css = buildSupplementalStyles();
@@ -148,6 +165,7 @@ describe('isolateMainForPrint', () => {
     expect(document.getElementById('main')).toBeNull();
     expect(document.getElementById('viewroster')).toBeNull();
     expect(document.getElementById(STYLE_ID)).not.toBeNull();
+    expect(document.querySelector('#rosterTable td')?.getAttribute('contenteditable')).toBe('true');
     expect(document.title).toBe('Sample Event Future volunteer roster');
   });
 
@@ -167,6 +185,10 @@ describe('isolateMainForPrint', () => {
         style.textContent.includes('border: 1px solid black')
       )
     ).toBe(true);
+    expect(doc.querySelectorAll('#rosterTable td, #rosterTable th')).not.toHaveLength(0);
+    doc.querySelectorAll('#rosterTable td, #rosterTable th').forEach((cell) => {
+      expect(cell.getAttribute('contenteditable')).toBe('true');
+    });
     expect(doc.title).toBe('Albert parkrun, Melbourne Future volunteer roster');
   });
 });

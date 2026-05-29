@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         parkrun Future Roster Printable View
-// @description  Strips parkrun Future Roster pages to the roster table for a print-like landscape A4 view
+// @description  Printable Future Roster table with editable cells for run director clarifications
 // @author       Pete Johns (@johnsyweb)
 // @downloadURL  https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/future-roster-printable.user.js
 // @grant        none
@@ -93,6 +93,17 @@ table {
   padding: 4px;
 }
 
+#rosterTable td,
+#rosterTable th {
+  cursor: text;
+}
+
+#rosterTable td:focus,
+#rosterTable th:focus {
+  outline: 2px solid #0072b1;
+  outline-offset: -2px;
+}
+
 @page {
   size: A4 landscape;
   margin: 10mm;
@@ -118,6 +129,11 @@ table {
     break-inside: avoid;
     page-break-inside: avoid;
   }
+
+  #rosterTable td:focus,
+  #rosterTable th:focus {
+    outline: none;
+  }
 }
 `.trim();
 }
@@ -131,6 +147,13 @@ function injectSupplementalStyles(doc = document) {
   style.id = STYLE_ID;
   style.textContent = buildSupplementalStyles();
   doc.head.appendChild(style);
+}
+
+function enableCellEditing(table) {
+  table.querySelectorAll('td, th').forEach((cell) => {
+    cell.setAttribute('contenteditable', 'true');
+    cell.setAttribute('tabindex', '0');
+  });
 }
 
 function isolateMainForPrint(doc = document) {
@@ -148,6 +171,7 @@ function isolateMainForPrint(doc = document) {
   preserveRosterTableStyles(doc, main);
   doc.body.replaceChildren(table);
   injectSupplementalStyles(doc);
+  enableCellEditing(table);
   doc.title = title;
   return true;
 }
@@ -161,6 +185,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = {
     STYLE_ID,
     buildSupplementalStyles,
+    enableCellEditing,
     findRosterTable,
     findRosterTableStyles,
     getPrintableTitle,
