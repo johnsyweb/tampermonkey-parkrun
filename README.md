@@ -53,6 +53,10 @@ This repo includes `mise` tasks with consistent names for common workflows:
 - Opt-in bundler mode uses esbuild and is configured centrally in `scripts/userscript-build.config.js`.
 - Use the `bundler.scripts` list to opt specific userscripts into bundled output while leaving others on the default path.
 
+### Script page descriptions
+
+Each script may include a Markdown sidecar at `src/{slug}.description.md` for extended prose on its microsite page. The short `@description` in the userscript header remains on the index and in SEO metadata; the sidecar populates the `about` field on the script page. If no sidecar exists, the script page falls back to `@description` and the build logs a warning.
+
 List all available tasks:
 
 ```bash
@@ -70,7 +74,7 @@ The microsite documentation is built with Jekyll and served from the `docs/` dir
 
 2. Visit http://localhost:4000/tampermonkey-parkrun/ in your browser
 
-On each script’s page, the description, version, last-updated date, screenshot, and install actions appear first, with a link to **Issues and support on GitHub** directly under the install button when `@supportURL` is set in the userscript header. Generic userscript explanation and manager installation steps live in an expandable **Userscript basics and installation steps** section. Where a bookmarklet exists, mobile setup and the full JavaScript snippet are under **Mobile bookmarklet setup and full code**. Author and licence for the collection appear in the site footer; per-script metadata is no longer repeated in a definition list at the bottom of the page.
+On each script’s page, extended Markdown from `src/{slug}.description.md` (when present) or the short `@description` otherwise appears first, followed by version, last-updated date, screenshot, and install actions, with a link to **Issues and support on GitHub** directly under the install button when `@supportURL` is set in the userscript header. Generic userscript explanation and manager installation steps live in an expandable **Userscript basics and installation steps** section. Where a bookmarklet exists, mobile setup and the full JavaScript snippet are under **Mobile bookmarklet setup and full code**. Author and licence for the collection appear in the site footer; per-script metadata is no longer repeated in a definition list at the bottom of the page.
 
 ### Generating Screenshots
 

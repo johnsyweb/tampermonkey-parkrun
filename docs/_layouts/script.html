@@ -2,8 +2,9 @@
 layout: default
 ---
 
-{% assign script = site.data.scripts | where: "slug", page.slug | first %} {% if script %}
-<p>{{ script.description }}</p>
+{% assign script = site.data.scripts | where: "slug", page.slug | first %} {% if script %} {% assign
+lead = script.about | default: script.description %}
+<div class="script-about">{{ lead | markdownify }}</div>
 
 {% if script.version or page.last_modified_at %}
 <p class="script-lead script-facts">

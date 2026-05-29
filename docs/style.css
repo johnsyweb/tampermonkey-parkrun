@@ -330,6 +330,31 @@ p img {
   text-decoration: underline;
 }
 
+.script-about {
+  max-width: 70ch;
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+}
+
+.script-about p {
+  margin: 0 0 0.85rem;
+}
+
+.script-about p:last-child {
+  margin-bottom: 0;
+}
+
+.script-about a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.script-about a:focus-visible {
+  outline: 3px solid var(--parkrun-apricot);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* Collapsible boilerplate on per-script pages (<details> / <summary>) */
 .script-lead.script-facts {
   margin: 0 0 1.25rem;

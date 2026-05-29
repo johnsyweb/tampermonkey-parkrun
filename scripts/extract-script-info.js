@@ -6,6 +6,7 @@ const { getThumbMaxWidth } = require('./docs-layout.js');
 const projectRoot = path.resolve(__dirname, '..');
 const THUMB_MAX_WIDTH = getThumbMaxWidth();
 const DEFAULT_DIMENSIONS = { width: 1200, height: 800 };
+const SCRIPT_DESCRIPTION_SUFFIX = '.description.md';
 
 function escapeYamlDoubleQuoted(value) {
   return String(value ?? '')
@@ -35,6 +36,25 @@ function parseUserscriptHeader(filePath) {
   };
 }
 
+function getScriptDescriptionPath(slug, srcDir = path.join(projectRoot, 'src')) {
+  return path.join(srcDir, `${slug}${SCRIPT_DESCRIPTION_SUFFIX}`);
+}
+
+function loadScriptAbout(slug, options = {}) {
+  const srcDir = options.srcDir ?? path.join(projectRoot, 'src');
+  const warn = options.warn ?? console.warn;
+  const sidecarPath = getScriptDescriptionPath(slug, srcDir);
+
+  if (!fs.existsSync(sidecarPath)) {
+    warn(
+      `⚠️ No sidecar at src/${slug}${SCRIPT_DESCRIPTION_SUFFIX}; script page will use @description`
+    );
+    return null;
+  }
+
+  return fs.readFileSync(sidecarPath, 'utf8').trim();
+}
+
 async function getImageDimensions(imagePath) {
   if (!fs.existsSync(imagePath)) return null;
   try {
@@ -60,7 +80,8 @@ async function run() {
     }
     const tw = Math.min(THUMB_MAX_WIDTH, dims.width);
     const th = Math.round((dims.height * tw) / dims.width);
-    scripts.push({
+    const about = loadScriptAbout(slug);
+    const script = {
       name: info.name,
       description: info.description || '',
       filename: file,
@@ -79,7 +100,11 @@ async function run() {
       homepage: info.homepage || null,
       supportURL: info.supportURL || null,
       license: info.license || null,
-    });
+    };
+    if (about) {
+      script.about = about;
+    }
+    scripts.push(script);
   }
 
   scripts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -123,7 +148,17 @@ async function run() {
   console.log('✅ Generated', scripts.length, 'script pages at docs/<slug>.md');
 }
 
-run().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) {
+  run().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  SCRIPT_DESCRIPTION_SUFFIX,
+  escapeYamlDoubleQuoted,
+  parseUserscriptHeader,
+  getScriptDescriptionPath,
+  loadScriptAbout,
+};
