@@ -52,6 +52,19 @@ function findRosterTable(main) {
   return main?.querySelector('#viewroster table') ?? main?.querySelector('table') ?? null;
 }
 
+function findRosterTableStyles(main) {
+  const viewroster = main?.querySelector('#viewroster');
+  if (!viewroster) {
+    return [];
+  }
+
+  return Array.from(viewroster.children).filter((node) => node.tagName === 'STYLE');
+}
+
+function preserveRosterTableStyles(doc, main) {
+  findRosterTableStyles(main).forEach((style) => doc.head.appendChild(style));
+}
+
 function buildSupplementalStyles() {
   return `
 html,
@@ -67,6 +80,17 @@ body {
 
 table {
   width: 100%;
+}
+
+#rosterTable {
+  border-collapse: collapse;
+}
+
+#rosterTable,
+#rosterTable th,
+#rosterTable td {
+  border: 1px solid black;
+  padding: 4px;
 }
 
 @page {
@@ -121,6 +145,7 @@ function isolateMainForPrint(doc = document) {
   }
 
   const title = getPrintableTitle(main, doc.title);
+  preserveRosterTableStyles(doc, main);
   doc.body.replaceChildren(table);
   injectSupplementalStyles(doc);
   doc.title = title;
@@ -137,8 +162,10 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     STYLE_ID,
     buildSupplementalStyles,
     findRosterTable,
+    findRosterTableStyles,
     getPrintableTitle,
     injectSupplementalStyles,
     isolateMainForPrint,
+    preserveRosterTableStyles,
   };
 }

@@ -49,8 +49,22 @@ function findRosterTable(main) {
   var _ref, _main$querySelector;
   return (_ref = (_main$querySelector = main === null || main === void 0 ? void 0 : main.querySelector('#viewroster table')) !== null && _main$querySelector !== void 0 ? _main$querySelector : main === null || main === void 0 ? void 0 : main.querySelector('table')) !== null && _ref !== void 0 ? _ref : null;
 }
+function findRosterTableStyles(main) {
+  var viewroster = main === null || main === void 0 ? void 0 : main.querySelector('#viewroster');
+  if (!viewroster) {
+    return [];
+  }
+  return Array.from(viewroster.children).filter(function (node) {
+    return node.tagName === 'STYLE';
+  });
+}
+function preserveRosterTableStyles(doc, main) {
+  findRosterTableStyles(main).forEach(function (style) {
+    return doc.head.appendChild(style);
+  });
+}
 function buildSupplementalStyles() {
-  return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\ntable {\n  width: 100%;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n}\n".trim();
+  return "\nhtml,\nbody {\n  background: #fff !important;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  background-image: none !important;\n}\n\ntable {\n  width: 100%;\n}\n\n#rosterTable {\n  border-collapse: collapse;\n}\n\n#rosterTable,\n#rosterTable th,\n#rosterTable td {\n  border: 1px solid black;\n  padding: 4px;\n}\n\n@page {\n  size: A4 landscape;\n  margin: 10mm;\n}\n\n@media print {\n  html,\n  body {\n    background: #fff !important;\n  }\n\n  a,\n  a:visited {\n    color: inherit !important;\n    text-decoration: none !important;\n  }\n\n  a[href]::after {\n    content: none !important;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n}\n".trim();
 }
 function injectSupplementalStyles() {
   var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
@@ -73,6 +87,7 @@ function isolateMainForPrint() {
     return false;
   }
   var title = getPrintableTitle(main, doc.title);
+  preserveRosterTableStyles(doc, main);
   doc.body.replaceChildren(table);
   injectSupplementalStyles(doc);
   doc.title = title;
@@ -88,8 +103,10 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     STYLE_ID: STYLE_ID,
     buildSupplementalStyles: buildSupplementalStyles,
     findRosterTable: findRosterTable,
+    findRosterTableStyles: findRosterTableStyles,
     getPrintableTitle: getPrintableTitle,
     injectSupplementalStyles: injectSupplementalStyles,
-    isolateMainForPrint: isolateMainForPrint
+    isolateMainForPrint: isolateMainForPrint,
+    preserveRosterTableStyles: preserveRosterTableStyles
   };
 }

@@ -6,9 +6,11 @@ const {
   STYLE_ID,
   buildSupplementalStyles,
   findRosterTable,
+  findRosterTableStyles,
   getPrintableTitle,
   injectSupplementalStyles,
   isolateMainForPrint,
+  preserveRosterTableStyles,
 } = require('../src/future-roster-printable.user.js');
 
 const FIXTURE_PATH = path.join(
@@ -58,6 +60,38 @@ describe('findRosterTable', () => {
   });
 });
 
+describe('findRosterTableStyles', () => {
+  it('finds inline style blocks inside #viewroster', () => {
+    document.body.innerHTML = `
+      <div id="main">
+        <div id="viewroster">
+          <style>table#rosterTable td { border: 1px solid black; }</style>
+          <table id="rosterTable"></table>
+        </div>
+      </div>
+    `;
+    const styles = findRosterTableStyles(document.getElementById('main'));
+    expect(styles).toHaveLength(1);
+    expect(styles[0].textContent).toContain('border: 1px solid black');
+  });
+});
+
+describe('preserveRosterTableStyles', () => {
+  it('moves #viewroster style blocks into the document head', () => {
+    document.body.innerHTML = `
+      <div id="main">
+        <div id="viewroster">
+          <style id="rosterStyle">table#rosterTable td { border: 1px solid black; }</style>
+          <table id="rosterTable"></table>
+        </div>
+      </div>
+    `;
+    document.head.innerHTML = '';
+    preserveRosterTableStyles(document, document.getElementById('main'));
+    expect(document.getElementById('rosterStyle')?.parentElement).toBe(document.head);
+  });
+});
+
 describe('buildSupplementalStyles', () => {
   it('includes landscape A4 page rules and print link styling', () => {
     const css = buildSupplementalStyles();
@@ -67,6 +101,7 @@ describe('buildSupplementalStyles', () => {
     expect(css).toContain('break-inside: avoid');
     expect(css).toContain('background: #fff');
     expect(css).toContain('table {\n  width: 100%;');
+    expect(css).toContain('border: 1px solid black');
   });
 });
 
@@ -127,6 +162,11 @@ describe('isolateMainForPrint', () => {
     expect(doc.getElementById('main')).toBeNull();
     expect(doc.getElementById('viewroster')).toBeNull();
     expect(doc.getElementById(STYLE_ID)).not.toBeNull();
+    expect(
+      Array.from(doc.head.querySelectorAll('style')).some((style) =>
+        style.textContent.includes('border: 1px solid black')
+      )
+    ).toBe(true);
     expect(doc.title).toBe('Albert parkrun, Melbourne Future volunteer roster');
   });
 });
