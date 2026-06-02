@@ -12,6 +12,9 @@ const {
   PREPARE_CONTROL_ID,
   PREPARE_CONTROL_STYLE_ID,
   PREPARE_HELPER_TEXT,
+  PERSISTENCE_ERROR_ID,
+  RESET_BUTTON_ID,
+  buildStorageKey,
   buildControlStyles,
   buildSupplementalStyles,
   createCoreRolesExplanation,
@@ -24,7 +27,10 @@ const {
   isolateMainForPrint,
   markCoreRoleRows,
   prepareForPrinting,
+  restorePersistedEdits,
+  savePersistedEdits,
   preserveRosterTableStyles,
+  resetPersistedEdits,
 } = require('../src/future-roster-printable.user.js');
 
 const FIXTURE_PATH = path.join(
@@ -248,6 +254,7 @@ describe('prepareForPrinting', () => {
     document.head.innerHTML = '';
     document.body.innerHTML = '';
     window.scrollTo = jest.fn();
+    window.localStorage.clear();
   });
 
   it('returns false when the roster table is missing', () => {
@@ -263,7 +270,7 @@ describe('prepareForPrinting', () => {
     expect(prepareForPrinting(document)).toBe(true);
 
     expect(document.getElementById(PREPARE_CONTROL_ID)).toBeNull();
-    expect(document.body.firstElementChild.id).toBe('rosterTable');
+    expect(document.getElementById('rosterTable')).not.toBeNull();
     expect(document.getElementById(CORE_ROLES_EXPLANATION_ID)).not.toBeNull();
     expect(document.getElementById('main')).toBeNull();
     expect(document.getElementById(STYLE_ID)).not.toBeNull();
@@ -277,8 +284,113 @@ describe('prepareForPrinting', () => {
     document.getElementById(PREPARE_BUTTON_ID).click();
 
     expect(document.getElementById(PREPARE_CONTROL_ID)).toBeNull();
-    expect(document.body.firstElementChild.id).toBe('rosterTable');
+    expect(document.getElementById('rosterTable')).not.toBeNull();
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+  });
+});
+
+describe('persistence', () => {
+  beforeEach(() => {
+    document.head.innerHTML = '';
+    document.body.innerHTML = '';
+    window.localStorage.clear();
+  });
+
+  it('builds storage keys from slug and tld', () => {
+    expect(buildStorageKey('loganriver', 'com.au')).toBe(
+      'parkrun-future-roster-printable:loganriver|com.au'
+    );
+  });
+
+  it('saves role headers and explanation text', () => {
+    setupSampleRosterPage();
+    prepareForPrinting(document);
+    const table = document.getElementById('rosterTable');
+    table.querySelectorAll('tbody tr th')[0].textContent = 'Run Director (A)';
+    table.querySelectorAll('tbody tr th')[1].textContent = 'Marshal 100m';
+    document.getElementById(CORE_ROLES_EXPLANATION_ID).textContent = 'Custom explanation';
+
+    savePersistedEdits(document);
+
+    const key = Object.keys(window.localStorage)[0];
+    const payload = JSON.parse(window.localStorage.getItem(key));
+    expect(payload.headers).toHaveLength(2);
+    expect(payload.headers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          rowIndex: 0,
+          originalText: 'Run Director',
+          value: 'Run Director (A)',
+        }),
+        expect.objectContaining({ rowIndex: 1, originalText: 'Marshal', value: 'Marshal 100m' }),
+      ])
+    );
+    expect(payload.explanation).toBe('Custom explanation');
+  });
+
+  it('does not persist unedited headers', () => {
+    setupSampleRosterPage();
+    prepareForPrinting(document);
+    savePersistedEdits(document);
+
+    const key = Object.keys(window.localStorage)[0];
+    const payload = JSON.parse(window.localStorage.getItem(key));
+    expect(payload.headers).toHaveLength(0);
+  });
+
+  it('restores persisted headers and explanation when original text matches', () => {
+    setupSampleRosterPage();
+    prepareForPrinting(document);
+    savePersistedEdits(document);
+    const key = Object.keys(window.localStorage)[0];
+    window.localStorage.setItem(
+      key,
+      JSON.stringify({
+        headers: [
+          { rowIndex: 0, originalText: 'Run Director', value: 'Run Director (A)' },
+          { rowIndex: 1, originalText: 'Marshal', value: 'Marshal 100m' },
+        ],
+        explanation: 'Saved explanation',
+      })
+    );
+
+    restorePersistedEdits(document);
+
+    const headers = Array.from(document.querySelectorAll('#rosterTable tbody tr th')).map((th) =>
+      th.textContent.trim()
+    );
+    expect(headers[0]).toContain('Run Director (A)');
+    expect(headers[1]).toContain('Marshal 100m');
+    expect(document.getElementById(CORE_ROLES_EXPLANATION_ID).textContent).toBe(
+      'Saved explanation'
+    );
+  });
+
+  it('reset clears saved values and restores defaults', () => {
+    setupSampleRosterPage();
+    prepareForPrinting(document);
+    const table = document.getElementById('rosterTable');
+    table.querySelectorAll('tbody tr th')[1].textContent = 'Marshal 100m';
+    document.getElementById(CORE_ROLES_EXPLANATION_ID).textContent = 'Saved explanation';
+    savePersistedEdits(document);
+
+    resetPersistedEdits(document);
+
+    expect(Object.keys(window.localStorage)).toHaveLength(0);
+    const headers = Array.from(document.querySelectorAll('#rosterTable tbody tr th')).map((th) =>
+      th.textContent.trim()
+    );
+    expect(headers[1]).toContain('Marshal');
+    expect(document.getElementById(CORE_ROLES_EXPLANATION_ID).textContent).toBe(
+      DEFAULT_CORE_ROLES_EXPLANATION
+    );
+  });
+
+  it('renders a reset button and error region in printable mode', () => {
+    setupSampleRosterPage();
+    prepareForPrinting(document);
+    expect(document.getElementById(RESET_BUTTON_ID)).not.toBeNull();
+    expect(document.getElementById(PERSISTENCE_ERROR_ID)).not.toBeNull();
   });
 });
 
