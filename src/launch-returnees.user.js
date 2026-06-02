@@ -37,7 +37,7 @@
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/launch-returnees.user.js
-// @version      1.1.11
+// @version      1.1.12
 // ==/UserScript==
 
 (async function () {
