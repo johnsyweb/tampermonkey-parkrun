@@ -37,7 +37,7 @@
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/future-roster-printable.user.js
-// @version      0.1.3
+// @version      0.1.2
 // ==/UserScript==
 
 const STYLE_ID = 'parkrun-future-roster-printable';
@@ -46,6 +46,10 @@ const PREPARE_BUTTON_ID = 'parkrun-future-roster-prepare-button';
 const PREPARE_CONTROL_STYLE_ID = 'parkrun-future-roster-prepare-control-styles';
 const PREPARE_BUTTON_LABEL = '🖨️ Prepare for printing';
 const PREPARE_HELPER_TEXT = 'Opens a simplified view for editing and printing.';
+const RESET_BUTTON_ID = 'parkrun-future-roster-reset-button';
+const PERSISTENCE_ERROR_ID = 'parkrun-future-roster-persistence-error';
+const PERSISTENCE_CONTROLS_ID = 'parkrun-future-roster-persistence-controls';
+const STORAGE_KEY_PREFIX = 'parkrun-future-roster-printable';
 const CORE_ROLES_EXPLANATION_ID = 'parkrun-core-roles-explanation';
 const CORE_ROLE_FOOTNOTE_MARKER = '*';
 const DEFAULT_CORE_ROLES_EXPLANATION = `Rows marked ${CORE_ROLE_FOOTNOTE_MARKER} are core roles. Every core role must be covered for the event to go ahead.`;
@@ -111,6 +115,28 @@ function buildControlStyles() {
   margin: 0.65rem 0 0;
   font-size: 0.9rem;
   color: #666;
+}
+
+#${RESET_BUTTON_ID} {
+  margin: 0 0 0.5rem;
+  padding: 0.5em 1em;
+  border: 1px solid #4c1a57;
+  background: #fff;
+  color: #4c1a57;
+  border-radius: 4px;
+  font: inherit;
+  cursor: pointer;
+}
+
+#${RESET_BUTTON_ID}:focus-visible {
+  outline: 3px solid #f7a541;
+  outline-offset: 2px;
+}
+
+#${PERSISTENCE_ERROR_ID} {
+  margin: 0 0 0.5rem;
+  color: #b00020;
+  font-size: 0.9rem;
 }
 `.trim();
 }
@@ -218,6 +244,10 @@ table {
   .core-roles-explanation:focus {
     outline: none;
   }
+
+  #${PERSISTENCE_CONTROLS_ID} {
+    display: none !important;
+  }
 }
 `.trim();
 }
@@ -256,6 +286,202 @@ function createCoreRolesExplanation(doc = document) {
   explanation.setAttribute('tabindex', '0');
   explanation.textContent = DEFAULT_CORE_ROLES_EXPLANATION;
   return explanation;
+}
+
+function getRoleHeaderCells(table) {
+  return Array.from(table.querySelectorAll('tbody tr th'));
+}
+
+function getHeaderText(cell) {
+  return (cell.textContent ?? '').trim();
+}
+
+function setHeaderText(cell, value) {
+  const link = cell.querySelector('a');
+  if (link) {
+    link.textContent = value;
+    return;
+  }
+  cell.textContent = value;
+}
+
+function buildStorageKey(slug, tld) {
+  return `${STORAGE_KEY_PREFIX}:${slug}|${tld}`;
+}
+
+function getEventContext(doc = document) {
+  const host = doc.location?.hostname ?? '';
+  const pathname = doc.location?.pathname ?? '';
+  const slug = pathname.split('/').filter(Boolean)[0] ?? 'unknown';
+  const tld = host.replace(/^www\.parkrun\./, '') || 'unknown';
+  return { slug, tld };
+}
+
+function getStorageKeyForDocument(doc = document) {
+  const { slug, tld } = getEventContext(doc);
+  return buildStorageKey(slug, tld);
+}
+
+function getPersistenceErrorElement(doc = document) {
+  return doc.getElementById(PERSISTENCE_ERROR_ID);
+}
+
+function setPersistenceError(doc = document, message = '') {
+  const errorElement = getPersistenceErrorElement(doc);
+  if (errorElement) {
+    errorElement.textContent = message;
+  }
+}
+
+function rememberDefaults(table, explanation) {
+  table.dataset.defaultHeaders = JSON.stringify(getRoleHeaderCells(table).map(getHeaderText));
+  explanation.dataset.defaultText = explanation.textContent;
+}
+
+function getDefaultHeaders(table) {
+  try {
+    return JSON.parse(table.dataset.defaultHeaders ?? '[]');
+  } catch {
+    return [];
+  }
+}
+
+function createPersistenceControls(doc = document) {
+  const controls = doc.createElement('div');
+  controls.id = PERSISTENCE_CONTROLS_ID;
+
+  const resetButton = doc.createElement('button');
+  resetButton.id = RESET_BUTTON_ID;
+  resetButton.type = 'button';
+  resetButton.textContent = 'Reset saved labels';
+
+  const error = doc.createElement('p');
+  error.id = PERSISTENCE_ERROR_ID;
+  error.setAttribute('role', 'status');
+  error.setAttribute('aria-live', 'polite');
+
+  controls.append(resetButton, error);
+  return controls;
+}
+
+function savePersistedEdits(doc = document) {
+  const table = doc.getElementById('rosterTable');
+  const explanation = doc.getElementById(CORE_ROLES_EXPLANATION_ID);
+  if (!table || !explanation) {
+    return false;
+  }
+
+  const defaultHeaders = getDefaultHeaders(table);
+  const headers = getRoleHeaderCells(table)
+    .map((cell, rowIndex) => ({
+      rowIndex,
+      originalText: defaultHeaders[rowIndex] ?? '',
+      value: getHeaderText(cell),
+    }))
+    .filter((header) => header.value !== header.originalText);
+  const payload = {
+    headers,
+    explanation: explanation.textContent ?? '',
+  };
+
+  try {
+    window.localStorage.setItem(getStorageKeyForDocument(doc), JSON.stringify(payload));
+    setPersistenceError(doc, '');
+    return true;
+  } catch {
+    setPersistenceError(doc, 'Could not save edits locally in this browser.');
+    return false;
+  }
+}
+
+function restorePersistedEdits(doc = document) {
+  const table = doc.getElementById('rosterTable');
+  const explanation = doc.getElementById(CORE_ROLES_EXPLANATION_ID);
+  if (!table || !explanation) {
+    return false;
+  }
+
+  let payload;
+  try {
+    payload = JSON.parse(window.localStorage.getItem(getStorageKeyForDocument(doc)) ?? 'null');
+  } catch {
+    setPersistenceError(doc, 'Could not read saved edits from local storage.');
+    return false;
+  }
+  if (!payload) {
+    return false;
+  }
+
+  const headers = getRoleHeaderCells(table);
+  const defaultHeaders = getDefaultHeaders(table);
+  (payload.headers ?? []).forEach((saved) => {
+    const rowIndex = saved?.rowIndex;
+    if (!Number.isInteger(rowIndex) || rowIndex < 0 || rowIndex >= headers.length) {
+      return;
+    }
+    if ((defaultHeaders[rowIndex] ?? '') !== (saved.originalText ?? '')) {
+      return;
+    }
+    setHeaderText(headers[rowIndex], saved.value ?? '');
+  });
+
+  if (typeof payload.explanation === 'string') {
+    explanation.textContent = payload.explanation;
+  }
+  return true;
+}
+
+function resetPersistedEdits(doc = document) {
+  const table = doc.getElementById('rosterTable');
+  const explanation = doc.getElementById(CORE_ROLES_EXPLANATION_ID);
+  if (!table || !explanation) {
+    return false;
+  }
+
+  try {
+    window.localStorage.removeItem(getStorageKeyForDocument(doc));
+  } catch {
+    setPersistenceError(doc, 'Could not clear saved edits in this browser.');
+    return false;
+  }
+
+  const headers = getRoleHeaderCells(table);
+  const defaultHeaders = getDefaultHeaders(table);
+  headers.forEach((cell, index) => {
+    setHeaderText(cell, defaultHeaders[index] ?? getHeaderText(cell));
+  });
+  explanation.textContent = explanation.dataset.defaultText ?? DEFAULT_CORE_ROLES_EXPLANATION;
+  setPersistenceError(doc, '');
+  return true;
+}
+
+function attachPersistenceHandlers(doc = document) {
+  const table = doc.getElementById('rosterTable');
+  const explanation = doc.getElementById(CORE_ROLES_EXPLANATION_ID);
+  const resetButton = doc.getElementById(RESET_BUTTON_ID);
+  if (!table || !explanation || !resetButton) {
+    return;
+  }
+
+  let timeoutId;
+  const scheduleSave = () => {
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+    }
+    timeoutId = window.setTimeout(() => {
+      savePersistedEdits(doc);
+    }, 250);
+  };
+
+  getRoleHeaderCells(table).forEach((cell) => {
+    cell.addEventListener('input', scheduleSave);
+    cell.addEventListener('blur', scheduleSave);
+  });
+  explanation.addEventListener('input', scheduleSave);
+  explanation.addEventListener('blur', scheduleSave);
+  resetButton.addEventListener('click', () => {
+    resetPersistedEdits(doc);
+  });
 }
 
 function createPrepareControl(doc = document) {
@@ -302,6 +528,15 @@ function injectPrepareControl(doc = document) {
   return true;
 }
 
+function injectPersistenceControls(doc = document) {
+  const table = doc.getElementById('rosterTable');
+  if (!table || doc.getElementById(PERSISTENCE_CONTROLS_ID)) {
+    return false;
+  }
+  table.parentNode.insertBefore(createPersistenceControls(doc), table);
+  return true;
+}
+
 function isolateMainForPrint(doc = document) {
   const main = doc.getElementById('main');
   if (!main) {
@@ -328,6 +563,14 @@ function prepareForPrinting(doc = document) {
     return false;
   }
 
+  const table = doc.getElementById('rosterTable');
+  const explanation = doc.getElementById(CORE_ROLES_EXPLANATION_ID);
+  if (table && explanation) {
+    rememberDefaults(table, explanation);
+  }
+  injectPersistenceControls(doc);
+  restorePersistedEdits(doc);
+  attachPersistenceHandlers(doc);
   doc.defaultView?.scrollTo(0, 0);
   return true;
 }
@@ -349,13 +592,18 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     PREPARE_CONTROL_STYLE_ID,
     PREPARE_BUTTON_LABEL,
     PREPARE_HELPER_TEXT,
+    RESET_BUTTON_ID,
+    PERSISTENCE_ERROR_ID,
+    PERSISTENCE_CONTROLS_ID,
     CORE_ROLES_EXPLANATION_ID,
     CORE_ROLE_FOOTNOTE_MARKER,
     DEFAULT_CORE_ROLES_EXPLANATION,
+    buildStorageKey,
     buildControlStyles,
     buildSupplementalStyles,
     createCoreRolesExplanation,
     createPrepareControl,
+    createPersistenceControls,
     enableCellEditing,
     findRosterTable,
     findRosterTableStyles,
@@ -363,11 +611,15 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     getPrintableTitle,
     injectControlStyles,
     injectPrepareControl,
+    injectPersistenceControls,
     injectSupplementalStyles,
     initFutureRosterPrintable,
     isolateMainForPrint,
     markCoreRoleRows,
     prepareForPrinting,
     preserveRosterTableStyles,
+    restorePersistedEdits,
+    savePersistedEdits,
+    resetPersistedEdits,
   };
 }
