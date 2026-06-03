@@ -1,50 +1,50 @@
 [tools]
 node = "22"
-pnpm = "10.8.0"
+aube = "1.17.1"
 ruby = "3.4.7"
 
 [tasks.bootstrap]
 description = "Install all project dependencies"
-run = "mise install && npx --yes pnpm install && npx --yes pnpm run docs:install"
+run = "mise install && aube install && aube run docs:install"
 
 [tasks.setup]
 description = "Prepare a fresh local checkout"
 depends = ["bootstrap"]
-run = "npx --yes pnpm run build:scripts"
+run = "aube run build:scripts"
 
 [tasks.update]
 description = "Update dependencies and rebuild local artifacts"
 depends = ["bootstrap"]
-run = "npx --yes pnpm run build:scripts && npx --yes pnpm run update-scripts-data"
+run = "aube run build:scripts && aube run update-scripts-data"
 
 [tasks.build]
 description = "Build userscripts and microsite"
-run = "npx --yes pnpm run docs:build"
+run = "aube run docs:build"
 
 [tasks.server]
 description = "Serve microsite locally"
-run = "npx --yes pnpm run docs:serve"
+run = "aube run docs:serve"
 
 [tasks.test]
 description = "Run lint and tests"
-run = "npx --yes pnpm run lint && npx --yes pnpm test"
+run = "aube run lint && aube test"
 
 [tasks.docs]
 description = "Build microsite only"
-run = "npx --yes pnpm run docs:build"
+run = "aube run docs:build"
 
 [tasks.docs-check]
 description = "Run microsite link checks"
-run = "npx --yes pnpm run docs:check"
+run = "aube run docs:check"
 
 [tasks.screenshots]
 description = "Generate microsite screenshots"
-run = "npx --yes pnpm run screenshots"
+run = "aube run screenshots"
 
 [tasks.preview]
 description = "Preview a userscript in the browser"
-run = "npx --yes pnpm run preview"
+run = "aube run preview"
 
 [tasks.cibuild]
 description = "Run full local CI build"
-run = "npx --yes pnpm run ci"
+run = "aube run ci"

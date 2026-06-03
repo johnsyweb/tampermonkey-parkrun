@@ -9,19 +9,19 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "build:data": "pnpm run docs:assets",
+    "build:data": "npm run docs:assets",
     "update-version": "node scripts/update-version.js",
     "screenshots": "ts-node scripts/generate-screenshots.ts",
     "update-scripts-data": "node scripts/extract-script-info.js",
-    "docs:assets": "pnpm run build:scripts && pnpm run screenshots && node scripts/generate-thumbnails.js && pnpm run update-scripts-data",
-    "docs:build": "pnpm run docs:assets && cd docs && bundle exec jekyll build && node ../scripts/generate-sitemap.js",
+    "docs:assets": "npm run build:scripts && npm run screenshots && node scripts/generate-thumbnails.js && npm run update-scripts-data",
+    "docs:build": "npm run docs:assets && cd docs && bundle exec jekyll build && node ../scripts/generate-sitemap.js",
     "docs:check": "cd docs && bundle exec htmlproofer ./_site --disable-external --root-dir \"$(pwd)/_site\" --swap-urls 'tampermonkey-parkrun/:' || echo \"htmlproofer reported issues (non-fatal)\"",
     "docs:install": "cd docs && bundle install",
-    "docs:serve": "pnpm run docs:assets && cd docs && bundle exec jekyll serve",
+    "docs:serve": "npm run docs:assets && cd docs && bundle exec jekyll serve",
     "build:scripts": "node scripts/build-scripts.js",
-    "preview": "pnpm run build:scripts && node scripts/preview-userscript.js",
+    "preview": "npm run build:scripts && node scripts/preview-userscript.js",
     "check:userscripts": "node scripts/check-userscript-metadata.js *.user.js",
-    "ci": "pnpm run build:scripts && pnpm run check:userscripts && pnpm test && pnpm lint && pnpm docs:build && pnpm docs:check",
+    "ci": "npm run build:scripts && npm run check:userscripts && npm test && npm run lint && npm run docs:build && npm run docs:check",
     "prepare": "husky"
   },
   "keywords": [
@@ -35,9 +35,14 @@
   "pnpm": {
     "overrides": {
       "minimatch": "10.2.2"
+    },
+    "allowBuilds": {
+      "esbuild": true,
+      "puppeteer": true,
+      "sharp": true,
+      "unrs-resolver": true
     }
   },
-  "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971",
   "devDependencies": {
     "@babel/cli": "^7.28.6",
     "@babel/core": "^7.29.0",
@@ -64,7 +69,7 @@
   "jest": {
     "testEnvironment": "jest-fixed-jsdom",
     "transformIgnorePatterns": [
-      "node_modules/(?!(.pnpm|parse5|whatwg-url|tr46|webidl-conversions|jsdom|@exodus|html-encoding-sniffer)/)"
+      "node_modules/(?!(.pnpm|.aube|parse5|whatwg-url|tr46|webidl-conversions|jsdom|@exodus|html-encoding-sniffer)/)"
     ],
     "transform": {
       "^.+\\.(js|mjs)$": "babel-jest"

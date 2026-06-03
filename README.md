@@ -27,10 +27,25 @@ This project uses [mise][mise] for development environment management.
    mise tasks
    ```
 
-The `.tool-versions` file specifies the required versions:
+`mise.toml` pins the required tool versions:
 - Ruby 3.4.7 (for Jekyll)
 - Node 22 (for development tools)
-- pnpm 10.8.0 (for package management)
+- [aube][aube] 1.17.1 (for package management; reads and updates `pnpm-lock.yaml` in place)
+
+### Package management with aube
+
+This project uses [aube][aube] as a drop-in replacement for pnpm. See the [pnpm users command map][aube-pnpm] for equivalents (`aube install`, `aube run <script>`, `aube test`, and so on).
+
+Common commands:
+
+| Task | Command |
+|------|---------|
+| Install dependencies | `aube install` |
+| Run a script | `aube run build:scripts` |
+| Run tests | `aube test` |
+| One-off CLI tool | `aubx <pkg>` (replaces `pnpm dlx`) |
+
+`aube run`, `aube test`, and `aube exec` auto-install when the lockfile is stale. Nested `package.json` scripts use `npm run` so they work regardless of which runner invokes them.
 
 ### Standard task commands (scripts-to-rule-them-all style)
 
@@ -131,9 +146,9 @@ This project uses [husky][husky] to manage git hooks. Hooks are automatically in
 #### Pre-commit Hook
 
 The pre-commit hook ensures code quality by running:
-- `pnpm check-format` - Checks code formatting with Prettier
-- `pnpm test` - Runs all Jest tests
-- `pnpm lint` - Runs ESLint to check for linting errors
+- `aube run check-format` - Checks code formatting with Prettier
+- `aube test` - Runs all Jest tests
+- `aube run lint` - Runs ESLint to check for linting errors
 
 All checks must pass before a commit is allowed. This ensures all code is properly formatted, tested, and linted before being committed.
 
@@ -142,7 +157,7 @@ All checks must pass before a commit is allowed. This ensures all code is proper
 The pre-push hook automatically generates screenshots when userscripts are modified:
 
 - Checks if any `.user.js` files have been modified in the commits being pushed
-- Automatically runs `pnpm screenshots` if userscripts were changed
+- Automatically runs `aube run screenshots` if userscripts were changed
 - Prevents the push if screenshot generation fails
 
 > [!NOTE]
@@ -153,7 +168,7 @@ The pre-push hook automatically generates screenshots when userscripts are modif
 The project includes a GitHub Actions workflow that:
 
 1. Sets up Ruby (for Jekyll) and Node.js (for scripts)
-2. Installs dependencies (via mise, pnpm, and bundler)
+2. Installs dependencies (via mise, aube, and bundler)
 3. Generates the scripts data file from userscript metadata in the built scripts
 4. Builds the Jekyll site
 5. Deploys to GitHub Pages
@@ -227,6 +242,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 <!-- Links -->
 
+[aube]: https://aube.en.dev/
+[aube-pnpm]: https://aube.en.dev/pnpm-users.html#for-pnpm-users
 [husky]: https://typicode.github.io/husky/
 [microsite]: https://www.johnsy.com/tampermonkey-parkrun/
 [mise]: https://mise.jdx.dev/

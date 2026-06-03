@@ -8,9 +8,6 @@ on:
     branches:
       - main
 
-env:
-  PNPM_STORE_DIR: ${{ github.workspace }}/.pnpm-store
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -20,23 +17,26 @@ jobs:
         uses: jdx/mise-action@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cache pnpm store
+      - name: Get aube store path
+        id: aube-store
+        run: echo "path=$(aube store path)" >> "$GITHUB_OUTPUT"
+      - name: Cache aube store
         uses: actions/cache@v5
         with:
-          path: .pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          path: ${{ steps.aube-store.outputs.path }}
+          key: ${{ runner.os }}-aube-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-
+            ${{ runner.os }}-aube-
       - name: Install dependencies
-        run: pnpm install
+        run: aube install
       - name: Check userscript metadata
-        run: pnpm run check:userscripts
+        run: aube run check:userscripts
       - name: Run tests
-        run: pnpm test
+        run: aube test
       - name: Run lint
-        run: pnpm lint
+        run: aube run lint
       - name: Build scripts
-        run: pnpm build:scripts
+        run: aube run build:scripts
       - name: Cache build artifacts
         if: github.ref == 'refs/heads/main'
         uses: actions/cache@v5
@@ -66,15 +66,18 @@ jobs:
         uses: jdx/mise-action@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cache pnpm store
+      - name: Get aube store path
+        id: aube-store
+        run: echo "path=$(aube store path)" >> "$GITHUB_OUTPUT"
+      - name: Cache aube store
         uses: actions/cache@v5
         with:
-          path: .pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          path: ${{ steps.aube-store.outputs.path }}
+          key: ${{ runner.os }}-aube-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-
+            ${{ runner.os }}-aube-
       - name: Install dependencies
-        run: pnpm install
+        run: aube install
       - name: Restore build artifacts
         uses: actions/cache@v5
         with:
@@ -88,9 +91,9 @@ jobs:
           name: dist
           path: dist
       - name: Build userscripts
-        run: pnpm build:scripts
+        run: aube run build:scripts
       - name: Update version string
-        run: pnpm update-version
+        run: aube run update-version
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
@@ -119,15 +122,18 @@ jobs:
         uses: jdx/mise-action@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cache pnpm store
+      - name: Get aube store path
+        id: aube-store
+        run: echo "path=$(aube store path)" >> "$GITHUB_OUTPUT"
+      - name: Cache aube store
         uses: actions/cache@v5
         with:
-          path: .pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          path: ${{ steps.aube-store.outputs.path }}
+          key: ${{ runner.os }}-aube-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-
+            ${{ runner.os }}-aube-
       - name: Install dependencies
-        run: pnpm install
+        run: aube install
       - name: Restore build artifacts
         uses: actions/cache@v5
         with:
@@ -150,7 +156,7 @@ jobs:
       - name: Install bundle
         run: cd docs && bundle config set --local path 'vendor/bundle' && bundle install
       - name: Build docs
-        run: pnpm docs:build
+        run: aube run docs:build
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Upload artifact

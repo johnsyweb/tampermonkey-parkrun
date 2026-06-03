@@ -4,7 +4,7 @@
 
 set -e
 
-# Ensure pnpm from mise is on PATH (hooks run with minimal env)
+# Ensure aube from mise is on PATH (hooks run with minimal env)
 export PATH="${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims:$PATH"
 
 # Skip in CI (GitHub Actions runs its own pipeline)
@@ -14,7 +14,7 @@ if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
 fi
 
 echo "🔍 Running full CI (build, check, test, lint, docs:build)..."
-if ! pnpm run ci; then
+if ! aube run ci; then
   echo ""
   echo "❌ CI failed. Fix the issues above before pushing."
   exit 1
@@ -45,7 +45,7 @@ while read local_ref local_sha remote_ref remote_sha; do
       echo ""
       echo "🔄 Generating screenshots locally..."
       
-      if ! pnpm screenshots; then
+      if ! aube run screenshots; then
         echo ""
         echo "❌ Screenshot generation failed!"
         echo "Please fix any issues and try again."

@@ -1,3 +1,3 @@
-# Ensure pnpm from mise is on PATH (hooks run with minimal env)
+# Ensure aube from mise is on PATH (hooks run with minimal env)
 export PATH="${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims:$PATH"
-pnpm check-format && pnpm test && pnpm lint
+aube run check-format && aube test && aube run lint

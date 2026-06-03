@@ -27,7 +27,7 @@ function loadPreviewConfig(scriptName) {
     process.exit(1);
   }
   if (!fs.existsSync(builtPath)) {
-    console.error(`❌ Built script not found: ${builtPath}. Run 'pnpm run build:scripts' first.`);
+    console.error(`❌ Built script not found: ${builtPath}. Run 'aube run build:scripts' first.`);
     process.exit(1);
   }
 
