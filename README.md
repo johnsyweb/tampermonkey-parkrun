@@ -181,6 +181,7 @@ Why not?
 
 ## Notable script behaviour
 
+- `event-results-navigation.user.js` adds a sticky bar for stepping between previous and next event results at the same location, with `[` and `]` keyboard shortcuts.
 - `p-index.user.js` shows the p-index summary card.
 - `p-index-progression.user.js` shows p-index progression over finishes, jump-point markers, difficulty summary metrics, plus chart export.
 
