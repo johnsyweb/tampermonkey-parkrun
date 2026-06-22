@@ -53,8 +53,13 @@ async function prepareFutureRosterScreenshot(page: Page): Promise<void> {
   });
 }
 
-async function removeThirdPartyOverlays(page: Page): Promise<void> {
-  await page.evaluate(() => {
+async function removeThirdPartyOverlays(page: Page, preserveSelector?: string): Promise<void> {
+  await page.evaluate((preserve) => {
+    const preserved =
+      preserve && document.querySelector(preserve) instanceof HTMLElement
+        ? (document.querySelector(preserve) as HTMLElement)
+        : null;
+
     const selectorsToHide = [
       // Recite Me and accessibility launchers/overlays.
       '#reciteme',
@@ -94,6 +99,9 @@ async function removeThirdPartyOverlays(page: Page): Promise<void> {
 
     // Hide fixed elements that commonly float above content.
     document.querySelectorAll<HTMLElement>('*').forEach((element) => {
+      if (preserved && (element === preserved || preserved.contains(element))) {
+        return;
+      }
       const style = window.getComputedStyle(element);
       if (style.position !== 'fixed' && style.position !== 'sticky') {
         return;
@@ -103,7 +111,7 @@ async function removeThirdPartyOverlays(page: Page): Promise<void> {
         element.style.display = 'none';
       }
     });
-  });
+  }, preserveSelector);
 }
 
 async function injectUserscript(page: Page, scriptContent: string): Promise<void> {
@@ -372,7 +380,12 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
       // Wait for any updates after changing the display
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      await removeThirdPartyOverlays(page);
+      await removeThirdPartyOverlays(page, config.waitForSelector);
+
+      if (config.waitForSelector) {
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
 
       if (config.name === 'future-roster-printable') {
         console.log('📝 Applying future roster screenshot demo edits...');
