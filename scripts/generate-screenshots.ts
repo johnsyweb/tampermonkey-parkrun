@@ -9,9 +9,14 @@ interface ScreenshotConfig {
   url: string;
   script: string;
   waitForSelector?: string;
+  scrollBlock: ScrollBlock;
   waitForTimeout?: number;
   viewport?: { width: number; height: number };
 }
+
+type ScrollBlock = 'start' | 'center' | 'nearest';
+
+const SCROLL_BLOCKS = new Set<ScrollBlock>(['start', 'center', 'nearest']);
 
 const PREPARE_BUTTON_ID = 'parkrun-future-roster-prepare-button';
 
@@ -151,6 +156,31 @@ function getMeta(content: string, key: string): string | null {
   return m ? m[1].trim() : null;
 }
 
+function parseScreenshotScrollBlock(value: string | null): ScrollBlock {
+  if (value && SCROLL_BLOCKS.has(value as ScrollBlock)) {
+    return value as ScrollBlock;
+  }
+  return 'center';
+}
+
+async function scrollToScreenshotTarget(
+  page: Page,
+  selector: string,
+  block: ScrollBlock
+): Promise<void> {
+  await page.evaluate(
+    (sel, scrollBlock) => {
+      const element = document.querySelector(sel);
+      if (element) {
+        element.scrollIntoView({ behavior: 'auto', block: scrollBlock });
+      }
+    },
+    selector,
+    block
+  );
+  await new Promise((resolve) => setTimeout(resolve, 500));
+}
+
 function loadScreenshotConfigs(): ScreenshotConfig[] {
   // Read from src/ so we see @screenshot-* keys (they are stripped from the built output)
   const srcDir = path.resolve(__dirname, '..', 'src');
@@ -167,6 +197,7 @@ function loadScreenshotConfigs(): ScreenshotConfig[] {
     if (!url) continue;
 
     const selector = getMeta(meta, 'screenshot-selector') ?? undefined;
+    const scrollBlock = parseScreenshotScrollBlock(getMeta(meta, 'screenshot-scroll-block'));
     const timeoutStr = getMeta(meta, 'screenshot-timeout');
     const timeout = timeoutStr ? parseInt(timeoutStr, 10) : 8000;
     const viewportStr = getMeta(meta, 'screenshot-viewport');
@@ -182,6 +213,7 @@ function loadScreenshotConfigs(): ScreenshotConfig[] {
       script: file,
       url,
       waitForSelector: selector,
+      scrollBlock,
       waitForTimeout: timeout,
       viewport,
     });
@@ -338,17 +370,6 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
         await new Promise((resolve) => setTimeout(resolve, config.waitForTimeout));
       }
 
-      // Scroll to the target element for better screenshot composition
-      if (config.waitForSelector) {
-        await page.evaluate((selector) => {
-          const element = document.querySelector(selector);
-          if (element) {
-            element.scrollIntoView({ behavior: 'auto', block: 'center' });
-          }
-        }, config.waitForSelector);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-
       console.log('🧹 Configuring page and cleaning up third-party content...');
       await page.evaluate(() => {
         // Set display to "detailed" if the select exists
@@ -382,14 +403,13 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
 
       await removeThirdPartyOverlays(page, config.waitForSelector);
 
-      if (config.waitForSelector) {
-        await page.evaluate(() => window.scrollTo(0, 0));
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
       if (config.name === 'future-roster-printable') {
         console.log('📝 Applying future roster screenshot demo edits...');
         await prepareFutureRosterScreenshot(page);
+      }
+
+      if (config.waitForSelector) {
+        await scrollToScreenshotTarget(page, config.waitForSelector, config.scrollBlock);
       }
 
       const screenshotPath = path.join(process.cwd(), 'docs', 'images', `${config.name}.png`);
@@ -436,4 +456,4 @@ if (require.main === module) {
 
 declare const require: any;
 
-export { generateScreenshots };
+export { generateScreenshots, parseScreenshotScrollBlock };
