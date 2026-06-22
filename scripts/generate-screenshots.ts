@@ -91,6 +91,18 @@ async function removeThirdPartyOverlays(page: Page): Promise<void> {
         (element as HTMLElement).style.display = 'none';
       });
     });
+
+    // Hide fixed elements that commonly float above content.
+    document.querySelectorAll<HTMLElement>('*').forEach((element) => {
+      const style = window.getComputedStyle(element);
+      if (style.position !== 'fixed' && style.position !== 'sticky') {
+        return;
+      }
+      const zIndex = Number.parseInt(style.zIndex || '0', 10);
+      if (Number.isFinite(zIndex) && zIndex >= 999) {
+        element.style.display = 'none';
+      }
+    });
   });
 }
 
@@ -98,10 +110,6 @@ async function injectUserscript(page: Page, scriptContent: string): Promise<void
   const requireMatches = scriptContent.matchAll(/@require\s+(https:\/\/[^\s]+)/g);
   for (const match of requireMatches) {
     const requireUrl = match[1];
-    if (requireUrl.includes('html2canvas')) {
-      console.log(`   Skipping @require for screenshot: ${requireUrl}`);
-      continue;
-    }
     console.log(`   Loading @require: ${requireUrl}`);
     try {
       const requireContent = await (await fetch(requireUrl)).text();
@@ -175,33 +183,6 @@ function loadScreenshotConfigs(): ScreenshotConfig[] {
 }
 
 const screenshotConfigs: ScreenshotConfig[] = loadScreenshotConfigs();
-const RESULTS_TABLE_SETUP_SKIP = new Set(['event-results-navigation']);
-
-async function saveScreenshot(
-  page: Page,
-  screenshotPath: string,
-  selector?: string
-): Promise<void> {
-  if (selector) {
-    const element = await page.$(selector);
-    if (element) {
-      const box = await element.boundingBox();
-      if (box) {
-        await page.screenshot({
-          path: screenshotPath as `${string}.png`,
-          type: 'png',
-          clip: box,
-        });
-        return;
-      }
-    }
-  }
-
-  await page.screenshot({
-    path: screenshotPath as `${string}.png`,
-    type: 'png',
-  });
-}
 
 async function generateScreenshots(scriptName?: string, force = false): Promise<void> {
   let browser: Browser | null = null;
@@ -275,7 +256,6 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
 
     browser = await puppeteer.launch({
       headless: isCI ? true : false,
-      protocolTimeout: 180000,
       args: [
         '--disable-web-security',
         '--disable-features=VizDisplayCompositor',
@@ -294,128 +274,118 @@ async function generateScreenshots(scriptName?: string, force = false): Promise<
     const page = await browser.newPage();
 
     for (const config of configsAfterSkip) {
-      try {
-        console.log(`📸 Capturing screenshot: ${config.name}`);
+      console.log(`📸 Capturing screenshot: ${config.name}`);
 
-        if (config.viewport) {
-          await page.setViewport(config.viewport);
-        }
-
-        console.log(`🌐 Navigating to ${config.url}...`);
-        const response = await page.goto(config.url, { waitUntil: 'networkidle2', timeout: 60000 });
-
-        if (!response) {
-          console.error(`❌ Failed to load page: ${config.url}`);
-          continue;
-        }
-
-        const status = response.status();
-        if (status < 200 || status >= 300) {
-          console.error(`❌ Page returned status ${status}: ${config.url}`);
-          continue;
-        }
-
-        console.log(`✅ Page loaded successfully (status: ${status})`);
-
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-
-        console.log('💉 Injecting userscript...');
-        const scriptContent = fs.readFileSync(path.join(process.cwd(), config.script), 'utf8');
-
-        await injectUserscript(page, scriptContent);
-
-        if (config.waitForSelector) {
-          try {
-            await page.waitForSelector(config.waitForSelector, {
-              timeout: 30000,
-            });
-          } catch (error) {
-            const localFallbackPath = path.join(process.cwd(), 'test-data', '1001388.html');
-            if (!fs.existsSync(localFallbackPath)) {
-              throw error;
-            }
-            const fallbackUrl = `file://${localFallbackPath}`;
-            console.warn(
-              `⚠️  Selector ${config.waitForSelector} not found on remote page; retrying with local fixture ${fallbackUrl}`
-            );
-            await page.goto(fallbackUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            await injectUserscript(page, scriptContent);
-            await page.waitForSelector(config.waitForSelector, {
-              timeout: 30000,
-            });
-          }
-        }
-
-        if (config.waitForTimeout) {
-          await new Promise((resolve) => setTimeout(resolve, config.waitForTimeout));
-        }
-
-        // Scroll to the target element for better screenshot composition
-        if (config.waitForSelector) {
-          await page.evaluate((selector) => {
-            const element = document.querySelector(selector);
-            if (element) {
-              element.scrollIntoView({ behavior: 'auto', block: 'center' });
-            }
-          }, config.waitForSelector);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-
-        const needsResultsTableSetup =
-          config.url.includes('/results/') && !RESULTS_TABLE_SETUP_SKIP.has(config.name);
-
-        if (needsResultsTableSetup) {
-          console.log('🧹 Configuring page and cleaning up third-party content...');
-          await page.evaluate(() => {
-            // Set display to "detailed" if the select exists
-            const displaySelect = document.querySelector(
-              'select[name="display"]'
-            ) as HTMLSelectElement;
-            if (displaySelect && displaySelect.value !== 'detailed') {
-              displaySelect.value = 'detailed';
-              // Trigger change event for any listeners
-              const changeEvent = new Event('change', { bubbles: true });
-              displaySelect.dispatchEvent(changeEvent);
-            }
-
-            // Set sort to "vols-desc" if the select exists
-            const sortSelect = document.querySelector('select[name="sort"]') as HTMLSelectElement;
-            if (sortSelect && sortSelect.value !== 'vols-desc') {
-              sortSelect.value = 'vols-desc';
-              // Trigger change event for any listeners
-              const changeEvent = new Event('change', { bubbles: true });
-              sortSelect.dispatchEvent(changeEvent);
-            }
-
-            // Click "Start Analysis" button if it exists (for cancellation-impact script)
-            const startAnalysisBtn = document.querySelector(
-              '.start-analysis-btn'
-            ) as HTMLButtonElement;
-            if (startAnalysisBtn && !startAnalysisBtn.disabled) {
-              console.log('Clicking Start Analysis button...');
-              startAnalysisBtn.click();
-            }
-          });
-
-          // Wait for any updates after changing the display
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          await removeThirdPartyOverlays(page);
-        }
-
-        if (config.name === 'future-roster-printable') {
-          console.log('📝 Applying future roster screenshot demo edits...');
-          await prepareFutureRosterScreenshot(page);
-        }
-
-        const screenshotPath = path.join(process.cwd(), 'docs', 'images', `${config.name}.png`);
-
-        await saveScreenshot(page, screenshotPath, config.waitForSelector);
-        console.log(`✅ Screenshot saved: ${screenshotPath}`);
-      } catch (error) {
-        console.error(`❌ Failed to capture screenshot for ${config.name}:`, error);
+      if (config.viewport) {
+        await page.setViewport(config.viewport);
       }
+
+      console.log(`🌐 Navigating to ${config.url}...`);
+      const response = await page.goto(config.url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+      if (!response) {
+        console.error(`❌ Failed to load page: ${config.url}`);
+        return;
+      }
+
+      const status = response.status();
+      if (status < 200 || status >= 300) {
+        console.error(`❌ Page returned status ${status}: ${config.url}`);
+        return;
+      }
+
+      console.log(`✅ Page loaded successfully (status: ${status})`);
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      console.log('💉 Injecting userscript...');
+      const scriptContent = fs.readFileSync(path.join(process.cwd(), config.script), 'utf8');
+
+      await injectUserscript(page, scriptContent);
+
+      if (config.waitForSelector) {
+        try {
+          await page.waitForSelector(config.waitForSelector, {
+            timeout: 30000,
+          });
+        } catch (error) {
+          const localFallbackPath = path.join(process.cwd(), 'test-data', '1001388.html');
+          if (!fs.existsSync(localFallbackPath)) {
+            throw error;
+          }
+          const fallbackUrl = `file://${localFallbackPath}`;
+          console.warn(
+            `⚠️  Selector ${config.waitForSelector} not found on remote page; retrying with local fixture ${fallbackUrl}`
+          );
+          await page.goto(fallbackUrl, { waitUntil: 'networkidle2', timeout: 60000 });
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await injectUserscript(page, scriptContent);
+          await page.waitForSelector(config.waitForSelector, {
+            timeout: 30000,
+          });
+        }
+      }
+
+      if (config.waitForTimeout) {
+        await new Promise((resolve) => setTimeout(resolve, config.waitForTimeout));
+      }
+
+      // Scroll to the target element for better screenshot composition
+      if (config.waitForSelector) {
+        await page.evaluate((selector) => {
+          const element = document.querySelector(selector);
+          if (element) {
+            element.scrollIntoView({ behavior: 'auto', block: 'center' });
+          }
+        }, config.waitForSelector);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
+      console.log('🧹 Configuring page and cleaning up third-party content...');
+      await page.evaluate(() => {
+        // Set display to "detailed" if the select exists
+        const displaySelect = document.querySelector('select[name="display"]') as HTMLSelectElement;
+        if (displaySelect && displaySelect.value !== 'detailed') {
+          displaySelect.value = 'detailed';
+          // Trigger change event for any listeners
+          const changeEvent = new Event('change', { bubbles: true });
+          displaySelect.dispatchEvent(changeEvent);
+        }
+
+        // Set sort to "vols-desc" if the select exists
+        const sortSelect = document.querySelector('select[name="sort"]') as HTMLSelectElement;
+        if (sortSelect && sortSelect.value !== 'vols-desc') {
+          sortSelect.value = 'vols-desc';
+          // Trigger change event for any listeners
+          const changeEvent = new Event('change', { bubbles: true });
+          sortSelect.dispatchEvent(changeEvent);
+        }
+
+        // Click "Start Analysis" button if it exists (for cancellation-impact script)
+        const startAnalysisBtn = document.querySelector('.start-analysis-btn') as HTMLButtonElement;
+        if (startAnalysisBtn && !startAnalysisBtn.disabled) {
+          console.log('Clicking Start Analysis button...');
+          startAnalysisBtn.click();
+        }
+      });
+
+      // Wait for any updates after changing the display
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      await removeThirdPartyOverlays(page);
+
+      if (config.name === 'future-roster-printable') {
+        console.log('📝 Applying future roster screenshot demo edits...');
+        await prepareFutureRosterScreenshot(page);
+      }
+
+      const screenshotPath = path.join(process.cwd(), 'docs', 'images', `${config.name}.png`);
+
+      await page.screenshot({
+        path: screenshotPath as `${string}.png`,
+        type: 'png',
+      });
+      console.log(`✅ Screenshot saved: ${screenshotPath}`);
     }
 
     if (scriptName) {
