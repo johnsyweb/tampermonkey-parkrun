@@ -39,3 +39,11 @@ _Avoid_: Canonical URL, results link
 **Event navigation controls**:
 A fixed bar at the top of the viewport containing Previous and Next controls for event navigation. The bar remains visible while scrolling results tables, pinned to the top of the viewport with page content offset so results are not hidden beneath it. Controls are anchor links (`<a href>`) styled as buttons, labelled with the target event number (e.g. “Previous event (#399)”). Previous at event #1 is non-navigable (`aria-disabled`, no `href`). The bar centre shows the current event number and formatted date wrapped in keyboard shortcut hints (e.g. “[ #400 · 15 Jun 2024 ]”), with tooltips on the bracket keys. The bar appears only once the page heading includes an event number and a finisher results table is present.
 _Avoid_: Nav bar, toolbar, event picker
+
+**Microsite screenshot**:
+A PNG image showing a userscript's effect on a live parkrun page, displayed on that script's page on the microsite.
+_Avoid_: Screenshot, thumbnail, preview image
+
+**Screenshot target**:
+The userscript UI element that a microsite screenshot is composed around, identified in the userscript header by `@screenshot-selector`.
+_Avoid_: Screenshot element, capture region
