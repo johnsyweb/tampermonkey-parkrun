@@ -37,7 +37,7 @@
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/future-roster-printable.user.js
-// @version      0.1.8
+// @version      0.1.9
 // ==/UserScript==
 
 const STYLE_ID = 'parkrun-future-roster-printable';
