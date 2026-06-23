@@ -37,7 +37,7 @@
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/event-results-navigation.user.js
-// @version      0.1.4
+// @version      0.1.5
 // ==/UserScript==
 
 (function () {
