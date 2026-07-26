@@ -47,3 +47,7 @@ _Avoid_: Screenshot, thumbnail, preview image
 **Screenshot target**:
 The userscript UI element that a microsite screenshot is composed around, identified in the userscript header by `@screenshot-selector`.
 _Avoid_: Screenshot element, capture region
+
+**Junior club milestone**:
+A junior-parkrun participation count recognised by parkrun's junior club ladder: 10, 25, 50, 75, 100, 150, 200, 250, or 300. These are the only junior-parkrun milestones used for next-milestone estimates; distance-named counts (Half marathon, Marathon, Ultra marathon) are not junior club milestones.
+_Avoid_: Junior milestone (ambiguous with adult milestones earned by juniors), Half marathon, Marathon, Ultra marathon
