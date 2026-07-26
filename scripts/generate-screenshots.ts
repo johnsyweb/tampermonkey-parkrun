@@ -183,7 +183,7 @@ async function scrollToScreenshotTarget(
 
 function loadScreenshotConfigs(): ScreenshotConfig[] {
   // Read from src/ so we see @screenshot-* keys (they are stripped from the built output)
-  const srcDir = path.resolve(__dirname, '..', 'src');
+  const srcDir = path.resolve(process.cwd(), 'src');
   const files = fs.readdirSync(srcDir).filter((f) => f.endsWith('.user.js'));
   const configs: ScreenshotConfig[] = [];
 
