@@ -7,6 +7,8 @@ const {
   findVolunteerCreditsTotal,
   findMostRecentFinishDate,
   juniorMilestones,
+  is2kEligibleAgeCategory,
+  isJuniorAgeCategory,
   getNextMilestone,
   getNextMilestoneDefinition,
   getNextSaturday,
@@ -21,6 +23,7 @@ const {
   getNextVolunteerMilestoneDate,
   isDateInNextWeek,
   highlightDateIfNeeded,
+  applyMilestoneEstimate,
 } = require('../src/next-milestone.user.js');
 
 describe('next-milestone', () => {
@@ -69,8 +72,9 @@ describe('next-milestone', () => {
       expect(getNextMilestone(1, 'SM25-29')).toBe(25);
     });
 
-    it('includes milestones with restricted_age for matching category', () => {
-      expect(getNextMilestone(1, 'J20-24')).toBe(10);
+    it('includes 5k junior finisher milestone 10 for junior age categories', () => {
+      expect(getNextMilestone(1, 'JM11-14')).toBe(10);
+      expect(getNextMilestone(1, 'JM15-17')).toBe(10);
     });
 
     it('returns next unrestricted milestone when no matching restricted ones exist', () => {
@@ -78,17 +82,38 @@ describe('next-milestone', () => {
     });
   });
 
+  describe('is2kEligibleAgeCategory', () => {
+    it('accepts under-15 junior age categories only', () => {
+      expect(is2kEligibleAgeCategory('JM10')).toBe(true);
+      expect(is2kEligibleAgeCategory('JW10')).toBe(true);
+      expect(is2kEligibleAgeCategory('JM11-14')).toBe(true);
+      expect(is2kEligibleAgeCategory('JW11-14')).toBe(true);
+      expect(is2kEligibleAgeCategory('JM15-17')).toBe(false);
+      expect(is2kEligibleAgeCategory('JW15-17')).toBe(false);
+      expect(is2kEligibleAgeCategory('SM18-19')).toBe(false);
+      expect(is2kEligibleAgeCategory(null)).toBe(false);
+    });
+  });
+
+  describe('isJuniorAgeCategory', () => {
+    it('accepts real junior age category codes', () => {
+      expect(isJuniorAgeCategory('JM11-14')).toBe(true);
+      expect(isJuniorAgeCategory('JW15-17')).toBe(true);
+      expect(isJuniorAgeCategory('SM25-29')).toBe(false);
+    });
+  });
+
   describe('getNextMilestoneDefinition', () => {
-    it('returns the next junior club milestone definition', () => {
-      const result = getNextMilestoneDefinition(135, 'J20-24', juniorMilestones);
+    it('returns the next 2k finisher milestone after a junior parkrun total', () => {
+      const result = getNextMilestoneDefinition(135, 'JM11-14', juniorMilestones);
       expect(result).not.toBeNull();
       expect(result.value).toBe(150);
       expect(result.definition.name).toBe('junior parkrun 150');
     });
 
-    it('returns null when junior total is at or above the top club milestone', () => {
-      expect(getNextMilestoneDefinition(300, 'J11-14', juniorMilestones)).toBeNull();
-      expect(getNextMilestoneDefinition(301, 'J11-14', juniorMilestones)).toBeNull();
+    it('returns null when the 2k finisher total is at or above 300', () => {
+      expect(getNextMilestoneDefinition(300, 'JM11-14', juniorMilestones)).toBeNull();
+      expect(getNextMilestoneDefinition(301, 'JW11-14', juniorMilestones)).toBeNull();
     });
   });
 
@@ -234,8 +259,8 @@ describe('next-milestone', () => {
     });
 
     it('handles junior age categories', () => {
-      document.body.innerHTML = '<p>Most recent age category was J20-24</p>';
-      expect(findAgeCategory(document)).toBe('J20-24');
+      document.body.innerHTML = '<p>Most recent age category was JM11-14</p>';
+      expect(findAgeCategory(document)).toBe('JM11-14');
     });
   });
 
@@ -469,6 +494,33 @@ describe('next-milestone', () => {
       const today = new Date(2026, 1, 3);
       const inTenDays = new Date(2026, 1, 13);
       expect(isDateInNextWeek(inTenDays, today)).toBe(false);
+    });
+  });
+
+  describe('applyMilestoneEstimate', () => {
+    const now = new Date(2026, 1, 3);
+
+    function parkrunnerHeadingHtml(ageCategory) {
+      return `
+        <h3>82 parkruns &amp; 139 junior parkruns total</h3>
+        <p>Most recent age category was ${ageCategory}</p>
+      `;
+    }
+
+    it('appends a 2k finisher milestone estimate for 2k-eligible age categories', () => {
+      document.body.innerHTML = parkrunnerHeadingHtml('JM11-14');
+      applyMilestoneEstimate(document, now);
+      expect(document.querySelector('h3').textContent).toContain(
+        'expected to reach junior parkrun 150'
+      );
+    });
+
+    it('does not append a 2k finisher milestone estimate for JM15-17', () => {
+      document.body.innerHTML = parkrunnerHeadingHtml('JM15-17');
+      applyMilestoneEstimate(document, now);
+      expect(document.querySelector('h3').textContent).not.toContain(
+        'expected to reach junior parkrun'
+      );
     });
   });
 
