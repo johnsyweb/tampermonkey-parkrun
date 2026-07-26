@@ -48,6 +48,34 @@ _Avoid_: Screenshot, thumbnail, preview image
 The userscript UI element that a microsite screenshot is composed around, identified in the userscript header by `@screenshot-selector`.
 _Avoid_: Screenshot element, capture region
 
-**Junior club milestone**:
-A junior-parkrun participation count recognised by parkrun's junior club ladder: 10, 25, 50, 75, 100, 150, 200, 250, or 300. These are the only junior-parkrun milestones used for next-milestone estimates; distance-named counts (Half marathon, Marathon, Ultra marathon) are not junior club milestones.
-_Avoid_: Junior milestone (ambiguous with adult milestones earned by juniors), Half marathon, Marathon, Ultra marathon
+**5k finisher milestone**:
+A Saturday 5k finish-count club open to all ages: 25, 50, 100, 250, 500, or 1000 finishes.
+_Avoid_: parkrun milestone, adult milestone, Saturday milestone (when meaning only the all-ages ladder)
+
+**5k junior finisher milestone**:
+The Saturday 5k finish-count club available only to juniors (under 18): 10 finishes.
+_Avoid_: Junior 10, under-18 milestone (when ambiguous with 2k or volunteer)
+
+**2k finisher milestone**:
+A junior-parkrun (2k) finish-count club earned only from finishes (running or walking) at 2k events: 10, 25, 50, 75, 100, 150, 200, 250, or 300. Distance-named counts (Half marathon, Marathon, Ultra marathon) are not 2k finisher milestones. These clubs are awarded only at 2k events. Only parkrunners under 15 may finish at 2k events.
+_Avoid_: Junior club milestone, junior milestone, Half marathon, Marathon, Ultra marathon
+
+**2k-eligible age category**:
+A junior age category for parkrunners who may still finish at 2k events (under 15): `JM10`, `JW10`, `JM11-14`, or `JW11-14`. 2k finisher milestone estimates apply only for these categories — not `JM15-17` / `JW15-17`.
+_Avoid_: Junior age category (when used as the 2k finisher gate), J*
+
+**Junior age category**:
+A parkrunner age category whose code begins with `J`, e.g. `JM10`, `JW10`, `JM11-14`, `JW11-14`, `JM15-17`, `JW15-17`. Used to gate under-18-only clubs on the 5k and volunteer ladders (5k junior finisher 10, junior volunteer 10). Specs must use real category codes — never invented forms such as `J20-24`.
+_Avoid_: J20-24
+
+**Volunteer milestone**:
+A volunteer-credit club earned across 5k and 2k volunteering, open to all ages: 25, 50, 100, 250, 500, or 1000 credits.
+_Avoid_: Volunteer club (when meaning only the all-ages ladder)
+
+**Junior volunteer milestone**:
+The volunteer-credit club available only to juniors (under 18), counting credits from both 5k and 2k volunteering: 10 credits. This is the cross-distance volunteer-club ladder, not the 2k junior participation clubs.
+_Avoid_: Volunteer 10 (when ambiguous with 2k junior participation)
+
+**2k junior volunteer milestone**:
+Progress for juniors toward the same 10–300 clubs awarded at 2k events, counted from volunteer credits at any parkrun (both 2k and 5k). Distinct from 2k finisher milestones (2k finishes only) and from the cross-distance junior volunteer milestone (volunteer-club 10).
+_Avoid_: Junior volunteer milestone (ambiguous with cross-distance volunteer 10)
