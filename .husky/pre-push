@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Pre-push: run full CI (build, check, test, lint, docs:build) then screenshot logic
+# Pre-push: run CI (without live screenshot capture), then regenerate committed
+# microsite screenshots only when src userscripts or the screenshot pipeline changed.
 
 set -e
 
@@ -22,42 +23,72 @@ fi
 echo "✅ CI passed."
 echo ""
 
-# Generate screenshots if userscripts have been modified
+PIPELINE_PATTERN='^(scripts/generate-screenshots\.ts|scripts/tsconfig\.json|scripts/generate-thumbnails\.js|\.husky/pre-push)$'
+screenshots_ran=false
 
-# Get the list of files being pushed
-while read local_ref local_sha remote_ref remote_sha; do
-  if [ "$local_sha" != "0000000000000000000000000000000000000000" ]; then
-    # Check if this is a new branch or if we're pushing updates
-    if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-      # New branch - check all commits
-      range="$local_sha"
-    else
-      # Existing branch - check commits between remote and local
-      range="$remote_sha..$local_sha"
-    fi
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+    continue
+  fi
 
-    # Check if any .user.js files have been modified
-    modified_files=$(git diff --name-only --diff-filter=ACMR "$range" | grep -E '\.user\.js$' || true)
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    range="$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
 
-    if [ -n "$modified_files" ]; then
-      echo "📸 Detected modified userscript files:"
-      echo "$modified_files" | sed 's/^/  - /'
+  pipeline_changed=$(git diff --name-only --diff-filter=ACMR "$range" | grep -E "$PIPELINE_PATTERN" || true)
+
+  if [ -n "$pipeline_changed" ]; then
+    echo "📸 Screenshot pipeline changed in commits being pushed:"
+    echo "$pipeline_changed" | sed 's/^/  - /'
+    echo ""
+    echo "🔄 Regenerating all microsite screenshots..."
+    if ! aube run screenshots -- --force; then
       echo ""
-      echo "🔄 Generating screenshots locally..."
-      
-      if ! aube run screenshots; then
+      echo "❌ Screenshot generation failed!"
+      exit 1
+    fi
+    screenshots_ran=true
+    break
+  fi
+
+  modified_src=$(git diff --name-only --diff-filter=ACMR "$range" | grep -E '^src/.*\.user\.js$' || true)
+
+  if [ -n "$modified_src" ]; then
+    echo "📸 Source userscripts changed in commits being pushed:"
+    echo "$modified_src" | sed 's/^/  - /'
+    echo ""
+    while IFS= read -r file; do
+      [ -z "$file" ] && continue
+      script_name=$(basename "$file" .user.js)
+      echo "🔄 Regenerating screenshot for ${script_name}..."
+      if ! aube run screenshots -- "$script_name"; then
         echo ""
-        echo "❌ Screenshot generation failed!"
-        echo "Please fix any issues and try again."
+        echo "❌ Screenshot generation failed for ${script_name}!"
         exit 1
       fi
-      
-      echo ""
-      echo "✅ Screenshots generated successfully!"
-      echo "💡 Remember to commit the updated screenshots before pushing."
-    fi
+    done <<< "$modified_src"
+    screenshots_ran=true
   fi
 done
 
-exit 0
+if [ "$screenshots_ran" = true ]; then
+  echo ""
+  echo "🖼️  Updating WebP thumbnails..."
+  node scripts/generate-thumbnails.js
+  echo ""
 
+  if [ -n "$(git status --porcelain docs/images/)" ]; then
+    echo "❌ Commit updated microsite screenshots before pushing."
+    echo ""
+    git status --short docs/images/
+    echo ""
+    echo "Stage and commit docs/images/, then push again."
+    exit 1
+  fi
+
+  echo "✅ Microsite screenshots are up to date and committed."
+fi
+
+exit 0

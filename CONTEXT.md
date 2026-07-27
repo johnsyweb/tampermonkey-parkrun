@@ -48,6 +48,18 @@ _Avoid_: Screenshot, thumbnail, preview image
 The userscript UI element that a microsite screenshot is composed around, identified in the userscript header by `@screenshot-selector`.
 _Avoid_: Screenshot element, capture region
 
+**Committed microsite screenshot**:
+A microsite screenshot checked into `docs/images/` (and its WebP thumbnail). Git is the cache for deploy; GitHub Actions does not capture live parkrun pages.
+_Avoid_: Build artefact (when meaning uncommitted output only), CI-generated screenshot
+
+**Screenshot pipeline**:
+The tooling that captures microsite screenshots: `scripts/generate-screenshots.ts`, `scripts/tsconfig.json`, `scripts/generate-thumbnails.js`, and `.husky/pre-push`. Changes here require regenerating all screenshots.
+_Avoid_: Screenshot script, docs:assets
+
+**Screenshot regeneration**:
+Capturing or refreshing committed microsite screenshots. Runs on pre-push when triggers match; never during `ci`, `docs:build`, or `docs:serve`. Per-script when `src/<script>.user.js` changes; all scripts when the screenshot pipeline changes.
+_Avoid_: docs:assets, automatic screenshot refresh
+
 **5k finisher milestone**:
 A Saturday 5k finish-count club open to all ages: 25, 50, 100, 250, 500, or 1000 finishes.
 _Avoid_: parkrun milestone, adult milestone, Saturday milestone (when meaning only the all-ages ladder)

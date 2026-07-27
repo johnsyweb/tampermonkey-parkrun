@@ -13,7 +13,7 @@
     "update-version": "node scripts/update-version.js",
     "screenshots": "tsc -p scripts/tsconfig.json --outDir scripts/dist && node scripts/dist/generate-screenshots.js",
     "update-scripts-data": "node scripts/extract-script-info.js",
-    "docs:assets": "npm run build:scripts && npm run screenshots && node scripts/generate-thumbnails.js && npm run update-scripts-data",
+    "docs:assets": "npm run build:scripts && node scripts/generate-thumbnails.js && npm run update-scripts-data",
     "docs:build": "npm run docs:assets && cd docs && bundle exec jekyll build && node ../scripts/generate-sitemap.js",
     "docs:check": "cd docs && bundle exec htmlproofer ./_site --disable-external --root-dir \"$(pwd)/_site\" --swap-urls 'tampermonkey-parkrun/:' || echo \"htmlproofer reported issues (non-fatal)\"",
     "docs:install": "cd docs && bundle install",

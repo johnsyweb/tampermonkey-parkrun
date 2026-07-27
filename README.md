@@ -93,13 +93,18 @@ On each script’s page, extended Markdown from `src/{slug}.description.md` (whe
 
 ### Generating Screenshots
 
-To generate screenshots for the microsite:
+Microsite screenshots are **committed** in `docs/images/`. They are captured locally (parkrun blocks automated access from GitHub Actions), then deployed from git.
+
+Regenerate explicitly when developing a script’s microsite image:
 
 ```bash
-mise run screenshots
+mise run screenshots -- <script-name>    # one script
+mise run screenshots -- --force          # all scripts (e.g. after pipeline changes)
 ```
 
-This will create screenshots of all userscripts in `docs/images/`. Scripts are included if their UserScript header contains `@screenshot-url`; you can optionally add `@screenshot-selector`, `@screenshot-timeout`, and `@screenshot-viewport` (e.g. `1200x800`) in the script header to control how the screenshot is taken.
+Scripts are included if their UserScript header contains `@screenshot-url`; you can optionally add `@screenshot-selector`, `@screenshot-scroll-block`, `@screenshot-timeout`, and `@screenshot-viewport` (e.g. `1200x800`) in the script header to control how the screenshot is taken.
+
+`docs:build`, `docs:serve`, and CI **do not** capture live parkrun pages — they use committed PNGs and WebP thumbnails only.
 
 ### Verifying a userscript in the browser
 
@@ -154,14 +159,13 @@ All checks must pass before a commit is allowed. This ensures all code is proper
 
 #### Pre-push Hook
 
-The pre-push hook automatically generates screenshots when userscripts are modified:
+The pre-push hook runs the full CI suite, then regenerates **committed** microsite screenshots only when needed:
 
-- Checks if any `.user.js` files have been modified in the commits being pushed
-- Automatically runs `aube run screenshots` if userscripts were changed
-- Prevents the push if screenshot generation fails
+- **`src/<script>.user.js` changed** in the commits being pushed → regenerate that script’s screenshot
+- **Screenshot pipeline changed** (`scripts/generate-screenshots.ts`, `scripts/tsconfig.json`, `scripts/generate-thumbnails.js`, `.husky/pre-push`) → regenerate all screenshots (`--force`)
+- **Blocks the push** if `docs/images/` has uncommitted changes after regeneration
 
-> [!NOTE]
-> Screenshots must be generated locally because parkrun websites block automated agents from accessing them in CI environments.
+`ci` and `docs:build` never hit live parkrun sites. GitHub Actions deploy uses the committed images in git.
 
 ### GitHub Actions Workflow
 
@@ -219,7 +223,7 @@ Contributions are welcome! Here's how to get started:
 ### Making Changes
 
 - **Code Quality**: All code must pass formatting (Prettier), linting (ESLint), and tests (Jest). These checks run automatically via git hooks before commit and push.
-- **Screenshots**: If you modify a userscript, screenshots will be automatically regenerated on push. Make sure to commit the updated screenshots in `docs/images/`.
+- **Screenshots**: Changing `src/<script>.user.js` triggers screenshot regeneration on push; commit the updated files in `docs/images/`. After screenshot-pipeline changes, run `mise run screenshots -- --force` and commit all images before pushing.
 - **Testing**: Add tests for new functionality in the `__tests__/` directory. Run `mise run test` to verify your tests pass.
 - **Documentation**: Update the microsite documentation if your changes affect user-facing features. The microsite is built from the `docs/` directory.
 
