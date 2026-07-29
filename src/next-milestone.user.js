@@ -32,7 +32,7 @@
 // @run-at       document-end
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
-// @screenshot-url       https://www.parkrun.com.au/parkrunner/2080650/
+// @screenshot-url       https://www.parkrun.org.uk/parkrunner/4886000/
 // @screenshot-selector  h3
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
@@ -54,12 +54,26 @@
   };
 
   const juniorMilestones = {
-    11: { restricted_age: 'J', name: 'Half marathon' },
-    21: { restricted_age: 'J', name: 'Marathon' },
-    50: { restricted_age: 'J', name: 'Ultra marathon' },
-    100: { restricted_age: 'J', name: 'junior parkrun 100' },
-    250: { restricted_age: 'J', name: 'junior parkrun 250' },
+    10: { name: 'junior parkrun 10' },
+    25: { name: 'junior parkrun 25' },
+    50: { name: 'junior parkrun 50' },
+    75: { name: 'junior parkrun 75' },
+    100: { name: 'junior parkrun 100' },
+    150: { name: 'junior parkrun 150' },
+    200: { name: 'junior parkrun 200' },
+    250: { name: 'junior parkrun 250' },
+    300: { name: 'junior parkrun 300' },
   };
+
+  const TWO_K_ELIGIBLE_AGE_CATEGORIES = new Set(['JM10', 'JW10', 'JM11-14', 'JW11-14']);
+
+  function is2kEligibleAgeCategory(ageCategory) {
+    return typeof ageCategory === 'string' && TWO_K_ELIGIBLE_AGE_CATEGORIES.has(ageCategory);
+  }
+
+  function isJuniorAgeCategory(ageCategory) {
+    return typeof ageCategory === 'string' && ageCategory.startsWith('J');
+  }
 
   const volunteerMilestones = {
     10: { restricted_age: 'J' },
@@ -141,6 +155,9 @@
       milestoneValues.find((value) => {
         if (value <= total) return false;
         const milestone = milestoneMap[value];
+        if (milestone.restricted_age === 'J') {
+          return isJuniorAgeCategory(ageCategory);
+        }
         if (milestone.restricted_age && ageCategory) {
           return ageCategory.startsWith(milestone.restricted_age);
         }
@@ -649,7 +666,7 @@
     }
 
     const juniorResult = findJuniorParkrunTotalHeading(doc);
-    if (juniorResult && ageCategory?.startsWith('J')) {
+    if (juniorResult && is2kEligibleAgeCategory(ageCategory)) {
       const juniorNext = getNextMilestoneDefinition(
         juniorResult.total,
         ageCategory,
@@ -680,6 +697,8 @@
       milestones,
       juniorMilestones,
       volunteerMilestones,
+      is2kEligibleAgeCategory,
+      isJuniorAgeCategory,
       findParkrunTotalHeading,
       findJuniorParkrunTotalHeading,
       findAgeCategory,

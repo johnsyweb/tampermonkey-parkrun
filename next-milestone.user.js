@@ -57,27 +57,41 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     1000: {}
   };
   var juniorMilestones = {
-    11: {
-      restricted_age: 'J',
-      name: 'Half marathon'
+    10: {
+      name: 'junior parkrun 10'
     },
-    21: {
-      restricted_age: 'J',
-      name: 'Marathon'
+    25: {
+      name: 'junior parkrun 25'
     },
     50: {
-      restricted_age: 'J',
-      name: 'Ultra marathon'
+      name: 'junior parkrun 50'
+    },
+    75: {
+      name: 'junior parkrun 75'
     },
     100: {
-      restricted_age: 'J',
       name: 'junior parkrun 100'
     },
+    150: {
+      name: 'junior parkrun 150'
+    },
+    200: {
+      name: 'junior parkrun 200'
+    },
     250: {
-      restricted_age: 'J',
       name: 'junior parkrun 250'
+    },
+    300: {
+      name: 'junior parkrun 300'
     }
   };
+  var TWO_K_ELIGIBLE_AGE_CATEGORIES = new Set(['JM10', 'JW10', 'JM11-14', 'JW11-14']);
+  function is2kEligibleAgeCategory(ageCategory) {
+    return typeof ageCategory === 'string' && TWO_K_ELIGIBLE_AGE_CATEGORIES.has(ageCategory);
+  }
+  function isJuniorAgeCategory(ageCategory) {
+    return typeof ageCategory === 'string' && ageCategory.startsWith('J');
+  }
   var volunteerMilestones = {
     10: {
       restricted_age: 'J'
@@ -194,6 +208,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     return (_milestoneValues$find = milestoneValues.find(function (value) {
       if (value <= total) return false;
       var milestone = milestoneMap[value];
+      if (milestone.restricted_age === 'J') {
+        return isJuniorAgeCategory(ageCategory);
+      }
       if (milestone.restricted_age && ageCategory) {
         return ageCategory.startsWith(milestone.restricted_age);
       }
@@ -625,7 +642,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       appendVolunteerCreditsSummary(result.heading, volunteerCreditsTotal, nextVolunteerMilestone, volunteerTargetDateFormatted);
     }
     var juniorResult = findJuniorParkrunTotalHeading(doc);
-    if (juniorResult && ageCategory !== null && ageCategory !== void 0 && ageCategory.startsWith('J')) {
+    if (juniorResult && is2kEligibleAgeCategory(ageCategory)) {
       var _juniorNext$definitio;
       var juniorNext = getNextMilestoneDefinition(juniorResult.total, ageCategory, juniorMilestones);
       if (juniorNext !== null && juniorNext !== void 0 && (_juniorNext$definitio = juniorNext.definition) !== null && _juniorNext$definitio !== void 0 && _juniorNext$definitio.name) {
@@ -642,6 +659,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       milestones: milestones,
       juniorMilestones: juniorMilestones,
       volunteerMilestones: volunteerMilestones,
+      is2kEligibleAgeCategory: is2kEligibleAgeCategory,
+      isJuniorAgeCategory: isJuniorAgeCategory,
       findParkrunTotalHeading: findParkrunTotalHeading,
       findJuniorParkrunTotalHeading: findJuniorParkrunTotalHeading,
       findAgeCategory: findAgeCategory,
