@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Pre-push: run CI (without live screenshot capture), then regenerate committed
-# microsite screenshots only when src userscripts or the screenshot pipeline changed.
+# Pre-push: run CI (without live screenshot capture), then refresh committed
+# microsite screenshots whose PNG or thumbnail predates its source userscript.
 
 set -e
 
@@ -23,61 +23,23 @@ fi
 echo "✅ CI passed."
 echo ""
 
-PIPELINE_PATTERN='^(scripts/generate-screenshots\.ts|scripts/tsconfig\.json|scripts/generate-thumbnails\.js|\.husky/pre-push)$'
-screenshots_ran=false
+stale_screenshots=$(node scripts/find-stale-screenshots.js)
 
-while read -r local_ref local_sha remote_ref remote_sha; do
-  if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
-    continue
-  fi
+if [ -n "$stale_screenshots" ]; then
+  echo "📸 Microsite screenshots older than their source userscripts:"
+  echo "$stale_screenshots" | sed 's/^/  - /'
+  echo ""
 
-  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-    range="$local_sha"
-  else
-    range="$remote_sha..$local_sha"
-  fi
-
-  pipeline_changed=$(git diff --name-only --diff-filter=ACMR "$range" | grep -E "$PIPELINE_PATTERN" || true)
-
-  if [ -n "$pipeline_changed" ]; then
-    echo "📸 Screenshot pipeline changed in commits being pushed:"
-    echo "$pipeline_changed" | sed 's/^/  - /'
-    echo ""
-    echo "🔄 Regenerating all microsite screenshots..."
-    if ! aube run screenshots -- --force; then
+  while IFS= read -r script_name; do
+    [ -z "$script_name" ] && continue
+    echo "🔄 Regenerating screenshot and thumbnail for ${script_name}..."
+    if ! aube run screenshots -- "$script_name" --force; then
       echo ""
-      echo "❌ Screenshot generation failed!"
+      echo "❌ Screenshot generation failed for ${script_name}!"
       exit 1
     fi
-    screenshots_ran=true
-    break
-  fi
-
-  modified_src=$(git diff --name-only --diff-filter=ACMR "$range" | grep -E '^src/.*\.user\.js$' || true)
-
-  if [ -n "$modified_src" ]; then
-    echo "📸 Source userscripts changed in commits being pushed:"
-    echo "$modified_src" | sed 's/^/  - /'
-    echo ""
-    while IFS= read -r file; do
-      [ -z "$file" ] && continue
-      script_name=$(basename "$file" .user.js)
-      echo "🔄 Regenerating screenshot for ${script_name}..."
-      if ! aube run screenshots -- "$script_name"; then
-        echo ""
-        echo "❌ Screenshot generation failed for ${script_name}!"
-        exit 1
-      fi
-    done <<< "$modified_src"
-    screenshots_ran=true
-  fi
-done
-
-if [ "$screenshots_ran" = true ]; then
-  echo ""
-  echo "🖼️  Updating WebP thumbnails..."
-  node scripts/generate-thumbnails.js
-  echo ""
+    node scripts/generate-thumbnails.js "$script_name"
+  done <<< "$stale_screenshots"
 
   if [ -n "$(git status --porcelain docs/images/)" ]; then
     echo "❌ Commit updated microsite screenshots before pushing."

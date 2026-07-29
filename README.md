@@ -99,7 +99,7 @@ Regenerate explicitly when developing a script’s microsite image:
 
 ```bash
 mise run screenshots -- <script-name>    # one script
-mise run screenshots -- --force          # all scripts (e.g. after pipeline changes)
+mise run screenshots -- --force          # all scripts
 ```
 
 Scripts are included if their UserScript header contains `@screenshot-url`; you can optionally add `@screenshot-selector`, `@screenshot-scroll-block`, `@screenshot-timeout`, and `@screenshot-viewport` (e.g. `1200x800`) in the script header to control how the screenshot is taken.
@@ -161,8 +161,7 @@ All checks must pass before a commit is allowed. This ensures all code is proper
 
 The pre-push hook runs the full CI suite, then regenerates **committed** microsite screenshots only when needed:
 
-- **`src/<script>.user.js` changed** in the commits being pushed → regenerate that script’s screenshot
-- **Screenshot pipeline changed** (`scripts/generate-screenshots.ts`, `scripts/tsconfig.json`, `scripts/generate-thumbnails.js`, `.husky/pre-push`) → regenerate all screenshots (`--force`)
+- **PNG or WebP thumbnail predates `src/<script>.user.js`** → regenerate that script’s screenshot and thumbnail
 - **Blocks the push** if `docs/images/` has uncommitted changes after regeneration
 
 `ci` and `docs:build` never hit live parkrun sites. GitHub Actions deploy uses the committed images in git.
@@ -223,7 +222,7 @@ Contributions are welcome! Here's how to get started:
 ### Making Changes
 
 - **Code Quality**: All code must pass formatting (Prettier), linting (ESLint), and tests (Jest). These checks run automatically via git hooks before commit and push.
-- **Screenshots**: Changing `src/<script>.user.js` triggers screenshot regeneration on push; commit the updated files in `docs/images/`. After screenshot-pipeline changes, run `mise run screenshots -- --force` and commit all images before pushing.
+- **Screenshots**: Pre-push regenerates a script when its committed PNG or WebP thumbnail predates `src/<script>.user.js`. Commit the updated files in `docs/images/`, then push again.
 - **Testing**: Add tests for new functionality in the `__tests__/` directory. Run `mise run test` to verify your tests pass.
 - **Documentation**: Update the microsite documentation if your changes affect user-facing features. The microsite is built from the `docs/` directory.
 

@@ -14,6 +14,7 @@ const WEBP_QUALITY = 82;
 const projectRoot = path.resolve(__dirname, '..');
 const imagesDir = path.join(projectRoot, 'docs', 'images');
 const thumbsDir = path.join(imagesDir, 'thumbs');
+const requestedNames = new Set(process.argv.slice(2));
 
 if (!fs.existsSync(imagesDir)) {
   console.log('docs/images not found, skipping thumbnails');
@@ -22,7 +23,10 @@ if (!fs.existsSync(imagesDir)) {
 fs.mkdirSync(thumbsDir, { recursive: true });
 
 async function run() {
-  const files = fs.readdirSync(imagesDir).filter((f) => f.endsWith('.png'));
+  const files = fs
+    .readdirSync(imagesDir)
+    .filter((file) => file.endsWith('.png'))
+    .filter((file) => requestedNames.size === 0 || requestedNames.has(path.basename(file, '.png')));
   let done = 0;
   for (const file of files) {
     const base = path.basename(file, '.png');

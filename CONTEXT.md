@@ -53,11 +53,11 @@ A microsite screenshot checked into `docs/images/` (and its WebP thumbnail). Git
 _Avoid_: Build artefact (when meaning uncommitted output only), CI-generated screenshot
 
 **Screenshot pipeline**:
-The tooling that captures microsite screenshots: `scripts/generate-screenshots.ts`, `scripts/tsconfig.json`, `scripts/generate-thumbnails.js`, and `.husky/pre-push`. Changes here require regenerating all screenshots.
+The tooling that captures microsite screenshots and creates their thumbnails.
 _Avoid_: Screenshot script, docs:assets
 
 **Screenshot regeneration**:
-Capturing or refreshing committed microsite screenshots. Runs on pre-push when triggers match; never during `ci`, `docs:build`, or `docs:serve`. Per-script when `src/<script>.user.js` changes; all scripts when the screenshot pipeline changes.
+Capturing or refreshing a committed microsite screenshot and its thumbnail. Pre-push regenerates a script's outputs only when either output was committed before its matching `src/<script>.user.js`; `ci`, `docs:build`, and `docs:serve` use committed outputs without regenerating them.
 _Avoid_: docs:assets, automatic screenshot refresh
 
 **5k finisher milestone**:
