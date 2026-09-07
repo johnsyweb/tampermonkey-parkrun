@@ -50,7 +50,7 @@
     "@babel/core": "^8.0.1",
     "@babel/preset-env": "^8.0.2",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.4.1",
     "babel-jest": "^30.5.1",
     "esbuild": "^0.28.2",
     "eslint": "^10.9.1",
