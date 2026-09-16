@@ -48,8 +48,15 @@
     25: {},
     50: {},
     100: {},
+    200: {},
     250: {},
+    300: {},
+    400: {},
     500: {},
+    600: {},
+    700: {},
+    800: {},
+    900: {},
     1000: {},
   };
 
@@ -74,16 +81,6 @@
   function isJuniorAgeCategory(ageCategory) {
     return typeof ageCategory === 'string' && ageCategory.startsWith('J');
   }
-
-  const volunteerMilestones = {
-    10: { restricted_age: 'J' },
-    25: {},
-    50: {},
-    100: {},
-    250: {},
-    500: {},
-    1000: {},
-  };
 
   function findParkrunTotalHeading(doc = document) {
     const headings = doc.querySelectorAll('h3');
@@ -641,11 +638,7 @@
 
     const volunteerCreditsTotal = findVolunteerCreditsTotal(doc);
     if (volunteerCreditsTotal !== null) {
-      const nextVolunteerMilestone = getNextMilestone(
-        volunteerCreditsTotal,
-        null,
-        volunteerMilestones
-      );
+      const nextVolunteerMilestone = getNextMilestone(volunteerCreditsTotal, null, milestones);
       let volunteerTargetDateFormatted = null;
       if (nextVolunteerMilestone) {
         const volunteerTargetDate = getNextVolunteerMilestoneDate(
@@ -696,7 +689,6 @@
     module.exports = {
       milestones,
       juniorMilestones,
-      volunteerMilestones,
       is2kEligibleAgeCategory,
       isJuniorAgeCategory,
       findParkrunTotalHeading,
