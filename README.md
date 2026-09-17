@@ -1,40 +1,45 @@
 # Pete's parkrun userscripts
 
-## A script or scripts for messing with parkrun results pages
+A collection of userscripts that enhance parkrun pages with extra statistics, visualisations, and challenges.
 
-You'll need a userscript manager like [Tampermonkey][tampermonkey], [Userscripts][userscripts], or [Violentmonkey][violentmonkey] if
-you'd like to enjoy them. Or you can use the bookmarklet versions.
+[![CI/CD](https://github.com/johnsyweb/tampermonkey-parkrun/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/johnsyweb/tampermonkey-parkrun/actions/workflows/ci-cd.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-A browsable list of scripts and bookmarklets lives on the microsite at: [johnsy.com/tampermonkey-parkrun][microsite].
+These scripts work on parkrun event pages, parkrunner profiles, and results pages. Use them with any userscript manager, or as bookmarklets, to dig into results without leaving the parkrun site.
 
-## Development Setup
+## Getting started
 
-This project uses [mise][mise] for development environment management.
+1. Install a userscript manager such as [Tampermonkey][tampermonkey], [Userscripts][userscripts], or [Violentmonkey][violentmonkey].
+2. Browse the scripts on the microsite: [johnsy.com/tampermonkey-parkrun][microsite].
+3. Open a script’s page and install via **Userscript (recommended)**, or use the bookmarklet instructions there.
 
-### Prerequisites
+Each script page includes a screenshot, install options, and first-time setup help. Bookmarklets can be dragged to the bookmarks bar or pasted as a bookmark URL.
 
-- [mise][mise] - for managing development tools
+## Help
 
-### Setup
+Report bugs or request features via [GitHub Issues](https://github.com/johnsyweb/tampermonkey-parkrun/issues). See [CONTRIBUTING.md](CONTRIBUTING.md) for what to include. Script pages on the microsite link to support when `@supportURL` is set.
 
-1. Bootstrap the project:
-   ```bash
-   mise run bootstrap
-   ```
+## Maintainers
 
-2. Confirm task availability:
-   ```bash
-   mise tasks
-   ```
+Maintained by [Pete Johns (@johnsyweb)](https://github.com/johnsyweb). Contributions are welcome.
 
-`mise.toml` pins the required tool versions:
-- Ruby 3.4.7 (for Jekyll)
-- Node 22 (for development tools)
-- [aube][aube] 1.17.1 (for package management; reads and updates `pnpm-lock.yaml` in place)
+## Development status
 
-### Package management with aube
+Maintained. Userscript versions are bumped automatically on `main` by CI (`scripts/update-version.js`). The package version is `1.0.0`.
 
-This project uses [aube][aube] as a drop-in replacement for pnpm. See the [pnpm users command map][aube-pnpm] for equivalents (`aube install`, `aube run <script>`, `aube test`, and so on).
+## Local development
+
+This project uses [mise][mise] for tools and [aube][aube] for packages (reads and updates `pnpm-lock.yaml`).
+
+Prerequisites: [mise][mise].
+
+```bash
+mise run bootstrap   # install tools and dependencies
+mise run setup       # bootstrap and build generated scripts
+mise tasks           # list available tasks
+```
+
+Pinned tools in `mise.toml`: Ruby 3.4.7 (Jekyll), Node 22, aube 1.17.1.
 
 Common commands:
 
@@ -43,212 +48,47 @@ Common commands:
 | Install dependencies | `aube install` |
 | Run a script | `aube run build:scripts` |
 | Run tests | `aube test` |
-| One-off CLI tool | `aubx <pkg>` (replaces `pnpm dlx`) |
+| One-off CLI tool | `aubx <pkg>` |
 
-`aube run`, `aube test`, and `aube exec` auto-install when the lockfile is stale. Nested `package.json` scripts use `npm run` so they work regardless of which runner invokes them.
+`mise` tasks: `bootstrap`, `setup`, `update`, `build`, `server`, `test`, `screenshots`, `preview`, `docs-check`, `cibuild`.
 
-### Standard task commands (scripts-to-rule-them-all style)
+Source lives in `src/`. Default build uses Babel; opt-in esbuild bundling is configured in `scripts/userscript-build.config.js`. Extended microsite copy can live in `src/{slug}.description.md`.
 
-This repo includes `mise` tasks with consistent names for common workflows:
+Screenshots are committed under `docs/images/` (parkrun blocks automated capture from GitHub Actions). Regenerate with `mise run screenshots -- <script-name>` or `--force` for all. `docs:build`, `docs:serve`, and CI use committed images only.
 
-- `mise run bootstrap` - install tools and all dependencies
-- `mise run setup` - bootstrap and build generated scripts
-- `mise run update` - refresh dependencies and generated data
-- `mise run build` - build scripts and the microsite
-- `mise run server` - serve the microsite locally
-- `mise run test` - run lint and tests
-- `mise run screenshots` - generate microsite screenshots
-- `mise run preview` - preview a userscript in a browser
-- `mise run docs-check` - run local microsite checks
-- `mise run cibuild` - run the full CI-equivalent pipeline
-
-### Userscript build modes
-
-- Default mode uses Babel transpilation for scripts in `src/`.
-- Opt-in bundler mode uses esbuild and is configured centrally in `scripts/userscript-build.config.js`.
-- Use the `bundler.scripts` list to opt specific userscripts into bundled output while leaving others on the default path.
-
-### Script page descriptions
-
-Each script may include a Markdown sidecar at `src/{slug}.description.md` for extended prose on its microsite page. The short `@description` in the userscript header remains on the index and in SEO metadata; the sidecar populates the `about` field on the script page. If no sidecar exists, the script page falls back to `@description` and the build logs a warning.
-
-List all available tasks:
+Preview a userscript in a browser (builds, opens `@screenshot-url`, injects the script):
 
 ```bash
-mise tasks
+mise run preview -- parkrun-charts
 ```
 
-### Previewing the Microsite Locally
-
-The microsite documentation is built with Jekyll and served from the `docs/` directory.
-
-1. Start the local server:
-   ```bash
-   mise run server
-   ```
-
-2. Visit http://localhost:4000/tampermonkey-parkrun/ in your browser
-
-On each script’s page, extended Markdown from `src/{slug}.description.md` (when present) or the short `@description` otherwise appears under **About**, followed by version and last-updated date, **Screenshot**, and a single **Install** section with **Userscript (recommended)** and **Bookmarklet** subsections. First-time userscript steps live in an expandable **First time? Userscript basics and installation steps** block; mobile bookmarklet setup and the full JavaScript snippet are under **Mobile bookmarklet setup and full code**. **Support** (GitHub issues) appears at the end when `@supportURL` is set in the userscript header. Author and licence for the collection appear in the site footer; per-script metadata is no longer repeated in a definition list at the bottom of the page.
-
-### Generating Screenshots
-
-Microsite screenshots are **committed** in `docs/images/`. They are captured locally (parkrun blocks automated access from GitHub Actions), then deployed from git.
-
-Regenerate explicitly when developing a script’s microsite image:
+Serve the microsite locally:
 
 ```bash
-mise run screenshots -- <script-name>    # one script
-mise run screenshots -- --force          # all scripts
+mise run server
 ```
 
-Scripts are included if their UserScript header contains `@screenshot-url`; you can optionally add `@screenshot-selector`, `@screenshot-scroll-block`, `@screenshot-timeout`, and `@screenshot-viewport` (e.g. `1200x800`) in the script header to control how the screenshot is taken.
+Visit http://localhost:4000/tampermonkey-parkrun/
 
-`docs:build`, `docs:serve`, and CI **do not** capture live parkrun pages — they use committed PNGs and WebP thumbnails only.
+Root `*.user.js` files are built from `src/`. `.gitattributes` uses the `ours` merge strategy for those outputs; after a merge or rebase run `mise run update`. Set `git config merge.ours.driver true` if needed.
 
-### Verifying a userscript in the browser
-
-To build the userscripts, open the script’s `@screenshot-url` in a new browser window with the built script injected (so you can verify changes without installing Tampermonkey):
-
-```bash
-mise run preview
-```
-
-This builds from `src/`, then launches a browser, navigates to the default script’s screenshot URL (e.g. parkrun Cancellation Impact → Aurora event history), injects the built script, and leaves the window open. To preview a different script, pass its name: `mise run preview -- parkrun-charts`.
-
-### Building the Microsite
-
-The microsite is automatically deployed to GitHub Pages on every push to `main`. 
-
-To build the site locally:
-
-```bash
-mise run build
-```
-
-The site will be available at http://localhost:4000/tampermonkey-parkrun/
-
-### Avoiding Merge Conflicts in Built Files
-
-The root directory contains built `.user.js` files that are generated from `src/` by `mise run update` (which runs the script build). To prevent merge conflicts during rebases or pulls:
-
-1. **`.gitattributes`** marks these files with the `ours` merge strategy, which automatically keeps your local version during conflicts
-2. After any merge/rebase, run `mise run update` to regenerate built files and data from `src/`
-3. The git config `merge.ours.driver` should be set to `true`:
-   ```bash
-   git config merge.ours.driver true
-   ```
-
-This approach ensures that:
-- Source files in `src/` are the single source of truth
-- Merge conflicts only occur in source files where they matter
-- Built files are automatically regenerated after conflict resolution
-
-### Git Hooks
-
-This project uses [husky][husky] to manage git hooks. Hooks are automatically installed during `mise run bootstrap`.
-
-#### Pre-commit Hook
-
-The pre-commit hook ensures code quality by running:
-- `aube run check-format` - Checks code formatting with Prettier
-- `aube test` - Runs all Jest tests
-- `aube run lint` - Runs ESLint to check for linting errors
-
-All checks must pass before a commit is allowed. This ensures all code is properly formatted, tested, and linted before being committed.
-
-#### Pre-push Hook
-
-The pre-push hook runs the full CI suite, then regenerates **committed** microsite screenshots only when needed:
-
-- **PNG or WebP thumbnail predates `src/<script>.user.js`** → regenerate that script’s screenshot and thumbnail
-- **Blocks the push** if `docs/images/` has uncommitted changes after regeneration
-
-`ci` and `docs:build` never hit live parkrun sites. GitHub Actions deploy uses the committed images in git.
-
-### GitHub Actions Workflow
-
-The project includes a GitHub Actions workflow that:
-
-1. Sets up Ruby (for Jekyll) and Node.js (for scripts)
-2. Installs dependencies (via mise, aube, and bundler)
-3. Generates the scripts data file from userscript metadata in the built scripts
-4. Builds the Jekyll site
-5. Deploys to GitHub Pages
-
-This workflow runs on every push to `main` and automatically keeps the microsite up to date with the latest scripts.
-
-## Why?
-
-Why not?
-
-## Notable script behaviour
-
-- `event-results-navigation.user.js` adds a sticky bar for stepping between previous and next event results at the same location, with `[` and `]` keyboard shortcuts.
-- `p-index.user.js` shows the p-index summary card.
-- `p-index-progression.user.js` shows p-index progression over finishes, jump-point markers, difficulty summary metrics, plus chart export.
-
-## How to Install Bookmarklets
-
-Each script now has its own page on the microsite with a “bookmarklet” button and a copy‑and‑paste JavaScript snippet.
-
-To install a bookmarklet:
-
-1. Visit the script’s page on the microsite.
-2. Either drag the “bookmarklet” button to your bookmarks bar, **or** open **Mobile bookmarklet setup and full code** and copy the JavaScript shown there.
-3. In your browser’s bookmarks manager, create a new bookmark and paste the JavaScript into the URL field.
-4. Save the bookmark.
-
-You can then click the bookmark while viewing the appropriate parkrun page to run the script.
-
-## Updating Versions
-
-Userscript `@version` fields are updated automatically in CI by a GitHub Actions job that runs `scripts/update-version.js`.
-
-> [!NOTE]
-> `scripts/update-version.js` is intended to run only in CI (it checks `CI`/`GITHUB_ACTIONS` and exits with an error otherwise), so you normally do **not** run it locally.
+Husky hooks: pre-commit runs format check, tests, and lint; pre-push runs CI and regenerates screenshots whose PNG or WebP thumbnail predates `src/<script>.user.js`, blocking the push until those images are committed.
 
 ## Contributing
 
-Contributions are welcome! Here's how to get started:
+See [CONTRIBUTING.md](CONTRIBUTING.md). Use conventional commits, keep changes focused, and run `mise run cibuild` before opening a pull request.
 
-### Getting Started
+## Releasing
 
-1. Fork the repository
-2. Clone your fork locally
-3. Follow the [Development Setup](#development-setup) instructions above
-4. Create a new branch for your changes: `git checkout -b feature/your-feature-name`
-
-### Making Changes
-
-- **Code Quality**: All code must pass formatting (Prettier), linting (ESLint), and tests (Jest). These checks run automatically via git hooks before commit and push.
-- **Screenshots**: Pre-push regenerates a script when its committed PNG or WebP thumbnail predates `src/<script>.user.js`. Commit the updated files in `docs/images/`, then push again.
-- **Testing**: Add tests for new functionality in the `__tests__/` directory. Run `mise run test` to verify your tests pass.
-- **Documentation**: Update the microsite documentation if your changes affect user-facing features. The microsite is built from the `docs/` directory.
-
-### Submitting Changes
-
-1. Ensure all checks pass locally (`mise run cibuild` runs the full CI-equivalent suite)
-2. Commit your changes with clear, descriptive commit messages
-3. Push to your fork: `git push origin feature/your-feature-name`
-4. Open a Pull Request on GitHub
-
-### Pull Request Guidelines
-
-- Provide a clear description of what your PR does
-- Reference any related issues
-- Ensure CI checks pass (they run automatically)
-- Keep PRs focused on a single feature or fix
+Push to `main` runs GitHub Actions CI/CD: tests and lint, builds userscripts, updates `@version` fields via `scripts/update-version.js`, builds the Jekyll microsite from committed assets, and deploys to GitHub Pages. Do not run `update-version` locally (it requires `CI`/`GITHUB_ACTIONS`).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+[MIT](LICENSE.md)
 
 <!-- Links -->
 
 [aube]: https://aube.en.dev/
-[aube-pnpm]: https://aube.en.dev/pnpm-users.html#for-pnpm-users
-[husky]: https://typicode.github.io/husky/
 [microsite]: https://www.johnsy.com/tampermonkey-parkrun/
 [mise]: https://mise.jdx.dev/
 [tampermonkey]: https://www.tampermonkey.net/
