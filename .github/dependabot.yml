@@ -10,6 +10,10 @@ updates:
     labels:
       - 'github-actions'
       - 'dependencies'
+    groups:
+      github-actions:
+        patterns:
+          - '*'
 
   - package-ecosystem: 'npm'
     directory: '/'
@@ -22,3 +26,22 @@ updates:
       - 'javascript'
       - 'dependencies'
     versioning-strategy: increase
+    groups:
+      npm-dependencies:
+        patterns:
+          - '*'
+
+  - package-ecosystem: 'bundler'
+    directory: '/docs'
+    schedule:
+      interval: 'weekly'
+    commit-message:
+      prefix: 'deps'
+      include: 'scope'
+    labels:
+      - 'ruby'
+      - 'dependencies'
+    groups:
+      bundler-dependencies:
+        patterns:
+          - '*'
