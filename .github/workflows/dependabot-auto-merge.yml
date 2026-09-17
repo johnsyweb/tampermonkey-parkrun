@@ -53,7 +53,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ steps.pr.outputs.pr_number }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           echo "Merging Dependabot PR #${PR_NUMBER} after successful CI"
-          gh pr merge "$PR_NUMBER" --merge --delete-branch
+          head_ref=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq .head.ref)
+          gh api --method PUT "repos/${REPO}/pulls/${PR_NUMBER}/merge" \
+            -f merge_method=merge
+          gh api --method DELETE "repos/${REPO}/git/refs/heads/${head_ref}"
