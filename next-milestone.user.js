@@ -52,8 +52,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     25: {},
     50: {},
     100: {},
+    200: {},
     250: {},
+    300: {},
+    400: {},
     500: {},
+    600: {},
+    700: {},
+    800: {},
+    900: {},
     1000: {}
   };
   var juniorMilestones = {
@@ -92,17 +99,6 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function isJuniorAgeCategory(ageCategory) {
     return typeof ageCategory === 'string' && ageCategory.startsWith('J');
   }
-  var volunteerMilestones = {
-    10: {
-      restricted_age: 'J'
-    },
-    25: {},
-    50: {},
-    100: {},
-    250: {},
-    500: {},
-    1000: {}
-  };
   function findParkrunTotalHeading() {
     var doc = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
     var headings = doc.querySelectorAll('h3');
@@ -631,7 +627,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     appendMilestoneEstimate(result.heading, nextMilestone, formatDate(targetDate), targetDate);
     var volunteerCreditsTotal = findVolunteerCreditsTotal(doc);
     if (volunteerCreditsTotal !== null) {
-      var nextVolunteerMilestone = getNextMilestone(volunteerCreditsTotal, null, volunteerMilestones);
+      var nextVolunteerMilestone = getNextMilestone(volunteerCreditsTotal, null, milestones);
       var volunteerTargetDateFormatted = null;
       if (nextVolunteerMilestone) {
         var volunteerTargetDate = getNextVolunteerMilestoneDate(volunteerCreditsTotal, nextVolunteerMilestone, now);
@@ -658,7 +654,6 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     module.exports = {
       milestones: milestones,
       juniorMilestones: juniorMilestones,
-      volunteerMilestones: volunteerMilestones,
       is2kEligibleAgeCategory: is2kEligibleAgeCategory,
       isJuniorAgeCategory: isJuniorAgeCategory,
       findParkrunTotalHeading: findParkrunTotalHeading,
