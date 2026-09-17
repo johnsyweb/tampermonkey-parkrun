@@ -627,7 +627,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     appendMilestoneEstimate(result.heading, nextMilestone, formatDate(targetDate), targetDate);
     var volunteerCreditsTotal = findVolunteerCreditsTotal(doc);
     if (volunteerCreditsTotal !== null) {
-      var nextVolunteerMilestone = getNextMilestone(volunteerCreditsTotal, null, milestones);
+      var nextVolunteerMilestone = getNextMilestone(volunteerCreditsTotal, ageCategory, milestones);
       var volunteerTargetDateFormatted = null;
       if (nextVolunteerMilestone) {
         var volunteerTargetDate = getNextVolunteerMilestoneDate(volunteerCreditsTotal, nextVolunteerMilestone, now);

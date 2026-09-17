@@ -638,7 +638,11 @@
 
     const volunteerCreditsTotal = findVolunteerCreditsTotal(doc);
     if (volunteerCreditsTotal !== null) {
-      const nextVolunteerMilestone = getNextMilestone(volunteerCreditsTotal, null, milestones);
+      const nextVolunteerMilestone = getNextMilestone(
+        volunteerCreditsTotal,
+        ageCategory,
+        milestones
+      );
       let volunteerTargetDateFormatted = null;
       if (nextVolunteerMilestone) {
         const volunteerTargetDate = getNextVolunteerMilestoneDate(

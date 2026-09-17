@@ -6,6 +6,7 @@ const {
   findAgeCategory,
   findVolunteerCreditsTotal,
   findMostRecentFinishDate,
+  milestones,
   juniorMilestones,
   is2kEligibleAgeCategory,
   isJuniorAgeCategory,
@@ -63,6 +64,15 @@ describe('next-milestone', () => {
     });
   });
 
+  describe('milestones', () => {
+    it('matches the parkrun Saturday 5k milestone clubs', () => {
+      expect(Object.keys(milestones).map(Number)).toEqual([
+        10, 25, 50, 100, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000,
+      ]);
+      expect(milestones[10]).toEqual({ restricted_age: 'J' });
+    });
+  });
+
   describe('getNextMilestone', () => {
     it('returns the next milestone after the total', () => {
       expect(getNextMilestone(443)).toBe(500);
@@ -72,7 +82,7 @@ describe('next-milestone', () => {
       expect(getNextMilestone(1, 'SM25-29')).toBe(25);
     });
 
-    it('includes 5k junior finisher milestone 10 for junior age categories', () => {
+    it('includes under-18 milestone 10 for junior age categories', () => {
       expect(getNextMilestone(1, 'JM11-14')).toBe(10);
       expect(getNextMilestone(1, 'JM15-17')).toBe(10);
     });
@@ -521,6 +531,45 @@ describe('next-milestone', () => {
       expect(document.querySelector('h3').textContent).not.toContain(
         'expected to reach junior parkrun'
       );
+    });
+
+    it('estimates volunteer milestone 10 for under-18 parkrunners', () => {
+      document.body.innerHTML = `
+        <h3>82 parkruns total</h3>
+        <p>Most recent age category was JM15-17</p>
+        <h3 id="volunteer-summary">Volunteer Summary</h3>
+        <table id="results">
+          <tfoot>
+            <tr>
+              <td><strong>Total Credits</strong></td>
+              <td><strong>3</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      applyMilestoneEstimate(document, now);
+      const summary = document.querySelector('#volunteer-credits-summary');
+      expect(summary?.textContent).toContain('expected to reach 10');
+    });
+
+    it('skips volunteer milestone 10 for adult parkrunners', () => {
+      document.body.innerHTML = `
+        <h3>82 parkruns total</h3>
+        <p>Most recent age category was SM25-29</p>
+        <h3 id="volunteer-summary">Volunteer Summary</h3>
+        <table id="results">
+          <tfoot>
+            <tr>
+              <td><strong>Total Credits</strong></td>
+              <td><strong>3</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      applyMilestoneEstimate(document, now);
+      const summary = document.querySelector('#volunteer-credits-summary');
+      expect(summary?.textContent).toContain('expected to reach 25');
+      expect(summary?.textContent).not.toContain('expected to reach 10');
     });
   });
 
