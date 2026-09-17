@@ -4,7 +4,7 @@ Estimates assume participation at every available event on the chosen day of the
 
 ## 5k finisher milestones
 
-The script reads the parkrun total from the profile heading and appends an estimate for the next 5k milestone (for example 25, 50, 100, 250, 500). Dates are based on weekly Saturdays.
+The script reads the parkrun total from the profile heading and appends an estimate for the next 5k milestone on this ladder: 25, 50, 100, 200, 250, 300, 400, 500, 600, 700, 800, 900, and 1000. Dates are based on weekly Saturdays.
 
 The junior finisher milestone of 10 is included only when the most recent age category is a junior category (codes starting with `J`).
 
