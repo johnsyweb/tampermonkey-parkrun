@@ -90,4 +90,18 @@ describe('findStaleScreenshots', () => {
 
     expect(findStaleScreenshots(root)).toEqual([]);
   });
+
+  it('ignores @version-only source commits when checking freshness', () => {
+    write(root, 'docs/images/example.png', 'png');
+    write(root, 'docs/images/thumbs/example.webp', 'webp');
+    commit(root, 'add outputs');
+    write(
+      root,
+      'src/example.user.js',
+      '// ==UserScript==\n// @version 1.2.3\n// @screenshot-url https://example.com\n// ==/UserScript==\n'
+    );
+    commit(root, 'bump version only');
+
+    expect(findStaleScreenshots(root)).toEqual([]);
+  });
 });

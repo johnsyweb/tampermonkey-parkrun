@@ -16,6 +16,40 @@ function latestCommit(root, filePath) {
   return result.status === 0 ? result.stdout.trim() || null : null;
 }
 
+function isVersionOnlyCommit(root, commit, filePath) {
+  const result = runGit(root, ['show', '--format=', '--unified=0', commit, '--', filePath]);
+  if (result.status !== 0 || !result.stdout.trim()) {
+    return false;
+  }
+
+  const changedLines = result.stdout
+    .split('\n')
+    .filter(
+      (line) =>
+        (line.startsWith('+') || line.startsWith('-')) &&
+        !line.startsWith('+++') &&
+        !line.startsWith('---')
+    );
+
+  return changedLines.length > 0 && changedLines.every((line) => /@version\b/.test(line));
+}
+
+function latestMeaningfulCommit(root, filePath) {
+  const result = runGit(root, ['log', '--format=%H', '--', filePath]);
+  if (result.status !== 0) {
+    return null;
+  }
+
+  const commits = result.stdout.trim().split('\n').filter(Boolean);
+  for (const commit of commits) {
+    if (!isVersionOnlyCommit(root, commit, filePath)) {
+      return commit;
+    }
+  }
+
+  return commits[0] || null;
+}
+
 function isAncestor(root, ancestor, descendant) {
   return runGit(root, ['merge-base', '--is-ancestor', ancestor, descendant]).status === 0;
 }
@@ -43,7 +77,7 @@ function findStaleScreenshots(root = process.cwd()) {
     .map((file) => file.replace(/\.user\.js$/, ''))
     .filter((name) => {
       const sourcePath = `src/${name}.user.js`;
-      const sourceCommit = latestCommit(root, sourcePath);
+      const sourceCommit = latestMeaningfulCommit(root, sourcePath);
       if (!sourceCommit) {
         return true;
       }
