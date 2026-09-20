@@ -160,12 +160,16 @@ describe('createNavigationBar', () => {
     });
 
     expect(bar.id).toBe(BAR_ID);
-    expect(bar.querySelector('.parkrun-event-nav-previous').textContent).toBe(
+    expect(bar.style.bottom).toBe('0px');
+    expect(bar.style.top).toBe('');
+    expect(bar.querySelector('.parkrun-event-nav-previous').textContent).toBe('← #399');
+    expect(bar.querySelector('.parkrun-event-nav-previous').getAttribute('aria-label')).toBe(
       'Previous event (#399)'
     );
     expect(bar.querySelector('.parkrun-event-nav-next').href).toBe(
       'https://www.parkrun.com.au/coburg/results/401/'
     );
+    expect(bar.querySelector('.parkrun-event-nav-next').textContent).toBe('#401 →');
     expect(bar.textContent).toContain('[ #400 · 15 Jun 2024 ]');
   });
 
@@ -186,7 +190,7 @@ describe('createNavigationBar', () => {
 });
 
 describe('renderNavigationBar', () => {
-  it('inserts the bar and offsets page content', () => {
+  it('inserts the bar and offsets page content from the bottom', () => {
     const pathname = setupResultsPage();
 
     const bar = renderNavigationBar({
@@ -197,7 +201,8 @@ describe('renderNavigationBar', () => {
 
     expect(bar).not.toBeNull();
     expect(document.getElementById(BAR_ID)).toBe(bar);
-    expect(document.body.style.paddingTop).not.toBe('');
+    expect(document.body.style.paddingBottom).not.toBe('');
+    expect(document.body.style.paddingTop).toBe('');
   });
 
   it('returns null on out-of-scope paths', () => {
