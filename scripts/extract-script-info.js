@@ -42,17 +42,19 @@ function getScriptDescriptionPath(slug, srcDir = path.join(projectRoot, 'src')) 
 
 function loadScriptAbout(slug, options = {}) {
   const srcDir = options.srcDir ?? path.join(projectRoot, 'src');
-  const warn = options.warn ?? console.warn;
   const sidecarPath = getScriptDescriptionPath(slug, srcDir);
+  const relativeSidecarPath = `src/${slug}${SCRIPT_DESCRIPTION_SUFFIX}`;
 
   if (!fs.existsSync(sidecarPath)) {
-    warn(
-      `⚠️ No sidecar at src/${slug}${SCRIPT_DESCRIPTION_SUFFIX}; script page will use @description`
-    );
-    return null;
+    throw new Error(`Missing required microsite description sidecar at ${relativeSidecarPath}`);
   }
 
-  return fs.readFileSync(sidecarPath, 'utf8').trim();
+  const about = fs.readFileSync(sidecarPath, 'utf8').trim();
+  if (!about) {
+    throw new Error(`Microsite description sidecar at ${relativeSidecarPath} must not be empty`);
+  }
+
+  return about;
 }
 
 async function getImageDimensions(imagePath) {
@@ -84,6 +86,7 @@ async function run() {
     const script = {
       name: info.name,
       description: info.description || '',
+      about,
       filename: file,
       slug,
       screenshot: `/tampermonkey-parkrun/images/${slug}.png`,
@@ -101,9 +104,6 @@ async function run() {
       supportURL: info.supportURL || null,
       license: info.license || null,
     };
-    if (about) {
-      script.about = about;
-    }
     scripts.push(script);
   }
 

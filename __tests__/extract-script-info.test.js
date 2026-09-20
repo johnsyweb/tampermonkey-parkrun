@@ -60,21 +60,22 @@ describe('loadScriptAbout', () => {
       'First paragraph.\n\nSecond paragraph.\n'
     );
 
-    expect(loadScriptAbout(slug, { srcDir, warn: () => {} })).toBe(
-      'First paragraph.\n\nSecond paragraph.'
+    expect(loadScriptAbout(slug, { srcDir })).toBe('First paragraph.\n\nSecond paragraph.');
+  });
+
+  it('throws when the sidecar is missing', () => {
+    const srcDir = fs.mkdtempSync(path.join(os.tmpdir(), 'extract-script-info-'));
+
+    expect(() => loadScriptAbout('missing-script', { srcDir })).toThrow(
+      /missing-script\.description\.md/
     );
   });
 
-  it('warns and returns null when the sidecar is missing', () => {
+  it('throws when the sidecar is empty', () => {
     const srcDir = fs.mkdtempSync(path.join(os.tmpdir(), 'extract-script-info-'));
-    const warnings = [];
-    const about = loadScriptAbout('missing-script', {
-      srcDir,
-      warn: (message) => warnings.push(message),
-    });
+    const slug = 'empty-script';
+    fs.writeFileSync(getScriptDescriptionPath(slug, srcDir), '  \n');
 
-    expect(about).toBeNull();
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0]).toContain('missing-script.description.md');
+    expect(() => loadScriptAbout(slug, { srcDir })).toThrow(/empty-script\.description\.md/);
   });
 });
