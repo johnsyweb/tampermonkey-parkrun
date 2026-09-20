@@ -1,4 +1,4 @@
-parkrun Next Milestone Estimate adds expected dates to a parkrunner profile so you can see when they are likely to reach their next milestone club.
+parkrun Next Milestone Estimate adds expected dates to a parkrunner profile so you can see when they are likely to reach their next milestone club (e.g. [parkrunner A4886000](https://www.parkrun.org.uk/parkrunner/4886000/)).
 
 parkrun rewards persistence over performance: when you reach 10 (for under 18s), 25, 50, 100, 200, 250, 300 and every 100 parkruns up to and including 1,000 Saturday 5k parkruns, whether you walk, jog, run or volunteer, you automatically enter a milestone club. This script estimates those same clubs.
 
