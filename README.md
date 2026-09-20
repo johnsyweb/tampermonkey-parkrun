@@ -52,7 +52,7 @@ Common commands:
 
 `mise` tasks: `bootstrap`, `setup`, `update`, `build`, `server`, `test`, `screenshots`, `preview`, `docs-check`, `cibuild`.
 
-Source lives in `src/`. Default build uses Babel; opt-in esbuild bundling is configured in `scripts/userscript-build.config.js`. Extended microsite copy can live in `src/{slug}.description.md`.
+Source lives in `src/`. Default build uses Babel; opt-in esbuild bundling is configured in `scripts/userscript-build.config.js`. Each userscript must have a microsite description sidecar at `src/{slug}.description.md` (required by CI).
 
 Screenshots are committed under `docs/images/` (parkrun blocks automated capture from GitHub Actions). Regenerate with `mise run screenshots -- <script-name>` or `--force` for all. `docs:build`, `docs:serve`, and CI use committed images only.
 
