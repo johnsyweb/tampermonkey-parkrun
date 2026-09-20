@@ -159,23 +159,25 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function applyLinkButtonStyles(link) {
     link.style.display = 'inline-block';
-    link.style.padding = '0.4rem 0.8rem';
+    link.style.padding = '0.35rem 0.65rem';
     link.style.backgroundColor = STYLES.accentColor;
     link.style.color = STYLES.backgroundColor;
     link.style.textDecoration = 'none';
     link.style.borderRadius = '4px';
     link.style.fontWeight = 'bold';
-    link.style.lineHeight = '1.4';
+    link.style.lineHeight = '1.3';
+    link.style.whiteSpace = 'nowrap';
   }
   function applyDisabledControlStyles(control) {
     control.style.display = 'inline-block';
-    control.style.padding = '0.4rem 0.8rem';
+    control.style.padding = '0.35rem 0.65rem';
     control.style.backgroundColor = '#3a3250';
     control.style.color = STYLES.disabledColor;
     control.style.borderRadius = '4px';
     control.style.fontWeight = 'bold';
-    control.style.lineHeight = '1.4';
+    control.style.lineHeight = '1.3';
     control.style.cursor = 'not-allowed';
+    control.style.whiteSpace = 'nowrap';
   }
   function applyKbdHintStyles(kbd) {
     kbd.style.display = 'inline-block';
@@ -219,25 +221,28 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     var nextNumber = eventNumber + 1;
     var previousLabel = "Previous event (#".concat(previousNumber, ")");
     var nextLabel = "Next event (#".concat(nextNumber, ")");
+    var previousText = "\u2190 #".concat(previousNumber);
+    var nextText = "#".concat(nextNumber, " \u2192");
     var nav = doc.createElement('nav');
     nav.id = BAR_ID;
     nav.setAttribute('role', 'navigation');
     nav.setAttribute('aria-label', 'Event results navigation');
     nav.style.position = 'fixed';
-    nav.style.top = '0';
+    nav.style.bottom = '0';
     nav.style.left = '0';
     nav.style.right = '0';
     nav.style.zIndex = '10000';
     nav.style.display = 'flex';
     nav.style.alignItems = 'center';
     nav.style.justifyContent = 'space-between';
-    nav.style.gap = '1rem';
-    nav.style.padding = '0.5rem 1rem';
+    nav.style.gap = '0.5rem';
+    nav.style.padding = '0.4rem 0.75rem';
+    nav.style.paddingBottom = 'max(0.4rem, env(safe-area-inset-bottom))';
     nav.style.backgroundColor = STYLES.backgroundColor;
     nav.style.color = STYLES.textColor;
-    nav.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+    nav.style.boxShadow = '0 -2px 4px rgba(0, 0, 0, 0.3)';
     nav.style.fontFamily = 'Arial, Helvetica, sans-serif';
-    nav.style.fontSize = '0.95rem';
+    nav.style.fontSize = '0.9rem';
     var previousControl = doc.createElement(eventNumber > 1 ? 'a' : 'span');
     if (eventNumber > 1) {
       previousControl.href = buildEventResultsUrl(origin, location, previousNumber);
@@ -248,12 +253,14 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       previousControl.setAttribute('tabindex', '-1');
       applyDisabledControlStyles(previousControl);
     }
-    previousControl.textContent = previousLabel;
+    previousControl.textContent = previousText;
     previousControl.className = 'parkrun-event-nav-previous';
     var centre = createCentreLabel(doc, eventNumber, formattedDate);
+    centre.style.minWidth = '0';
+    centre.style.fontSize = '0.85rem';
     var nextControl = doc.createElement('a');
     nextControl.href = buildEventResultsUrl(origin, location, nextNumber);
-    nextControl.textContent = nextLabel;
+    nextControl.textContent = nextText;
     nextControl.setAttribute('aria-label', nextLabel);
     nextControl.className = 'parkrun-event-nav-next';
     applyLinkButtonStyles(nextControl);
@@ -264,7 +271,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   }
   function applyBodyOffset(doc, bar) {
     var height = "".concat(bar.offsetHeight, "px");
-    doc.body.style.paddingTop = height;
+    doc.body.style.paddingBottom = height;
     doc.body.setAttribute(BODY_PADDING_ATTR, height);
   }
   var keyboardHandler = null;
