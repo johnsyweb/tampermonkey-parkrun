@@ -14,7 +14,10 @@ permissions:
 
 jobs:
   aube-lock:
-    uses: johnsyweb/renovate-config/.github/workflows/aube-lock.yml@be52d1fcfaca9e337fd461f7767f519957d6f629
+    uses: johnsyweb/renovate-config/.github/workflows/aube-lock.yml@eb631b28e2a536f1ccd3db064790afb2a06c8782
     with:
       verify_command: ./script/cibuild
       check_name: renovate-verify
+      # Required CI job name — when aube-lock fails this goes red so merges cannot ignore it.
+      status_check_names: |
+        build-and-test

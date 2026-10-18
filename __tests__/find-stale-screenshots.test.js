@@ -10,7 +10,18 @@ const { findStaleScreenshots } = require('../scripts/find-stale-screenshots.js')
 function git(root, args) {
   childProcess.execFileSync(
     'git',
-    ['-c', 'user.name=Test', '-c', 'user.email=test@example.com', ...args],
+    [
+      '-c',
+      'user.name=Test',
+      '-c',
+      'user.email=test@example.com',
+      // Temp repos must not inherit the developer's commit.gpgsign / hook setup.
+      '-c',
+      'commit.gpgsign=false',
+      '-c',
+      'core.hooksPath=/dev/null',
+      ...args,
+    ],
     { cwd: root, stdio: 'ignore' }
   );
 }

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A script or scripts for messing with parkrun results pages",
   "main": "index.js",
-  "packageManager": "aube@1.41.0",
+  "packageManager": "aube@2.7.0",
   "scripts": {
     "test": "jest",
     "lint": "eslint .",
