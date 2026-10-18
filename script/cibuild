@@ -5,4 +5,6 @@ root="$(dirname "$0")"
 
 "$root/ci-install"
 "$root/audit"
+# Jekyll microsite gems (aube-lock / local cibuild do not run the CI docs cache steps).
+aube run docs:install
 aube run ci

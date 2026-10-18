@@ -13,7 +13,7 @@ This repo already used aube against a `pnpm-lock.yaml` hybrid. Dependabot and fr
 3. **Explicit build approval** — lifecycle scripts run only when listed in `allowBuilds` (`esbuild`, `puppeteer`, `sharp`, `unrs-resolver`), moved out of `package.json`’s `pnpm` block.
 4. **Release-age gate escape hatch** — add packages to `minimumReleaseAgeExclude` in a deliberate PR only when an emergency security bump cannot wait.
 5. **CVE audit in CI** — `aube audit --audit-level moderate --ignore-unfixable` via `./script/audit` and `./script/cibuild`.
-6. **Version pinning** — `aube` in `mise.toml`, `packageManager: "aube@1.41.0"` in `package.json`, and `packageManagerStrictVersion: true`.
+6. **Version pinning** — `aube` in `mise.toml`, matching `packageManager` in `package.json`, and `packageManagerStrictVersion: true`.
 7. **CI bootstrap via mise** — `jdx/mise-action` installs Node, Ruby, and aube; cache the aube store keyed on `aube-lock.yaml`; frozen installs via `aube ci`.
 8. **Local tasks** — `mise run bootstrap` / `update` / `update-deps` / `cibuild` for the usual contributor flows.
 9. **Security overrides** — `minimatch`, `brace-expansion`, `source-map-js`, and `undici` (8.x for jsdom 30) in `aube-workspace.yaml`, with matching `minimumReleaseAgeExclude` until they age past the seven-day gate. Direct `sharp` stays on a patched range in `package.json`.
