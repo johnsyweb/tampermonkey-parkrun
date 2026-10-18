@@ -1,6 +1,6 @@
 [tools]
 node = "24"
-aube = "1.41.0"
+aube = "2.7.0"
 ruby = "4.0.7"
 
 [tasks.bootstrap]
