@@ -18,6 +18,7 @@ const {
   calculateJuniorMilestoneDate,
   appendMilestoneEstimate,
   appendJuniorMilestoneEstimate,
+  appendJuniorVolunteerMilestoneEstimate,
   appendVolunteerCreditsSummary,
   getVolunteerCreditPreferences,
   setVolunteerCreditPreferences,
@@ -240,6 +241,28 @@ describe('next-milestone', () => {
         'expected to reach junior parkrun 150 around Sunday, May 17, 2026'
       );
       const occurrences = heading.textContent.match(/junior parkrun 150/g) || [];
+      expect(occurrences.length).toBe(1);
+    });
+  });
+
+  describe('appendJuniorVolunteerMilestoneEstimate', () => {
+    it('appends junior volunteer milestone estimate once', () => {
+      document.body.innerHTML = '<h3>77 parkruns &amp; 135 junior parkruns total</h3>';
+      const heading = document.querySelector('h3');
+      appendJuniorVolunteerMilestoneEstimate(
+        heading,
+        'junior parkrun volunteer 150',
+        'Saturday, April 25, 2026'
+      );
+      appendJuniorVolunteerMilestoneEstimate(
+        heading,
+        'junior parkrun volunteer 150',
+        'Saturday, April 25, 2026'
+      );
+      expect(heading.textContent).toContain(
+        'expected to reach junior parkrun volunteer 150 around Saturday, April 25, 2026'
+      );
+      const occurrences = heading.textContent.match(/junior parkrun volunteer 150/g) || [];
       expect(occurrences.length).toBe(1);
     });
   });
@@ -570,6 +593,62 @@ describe('next-milestone', () => {
       const summary = document.querySelector('#volunteer-credits-summary');
       expect(summary?.textContent).toContain('expected to reach 25');
       expect(summary?.textContent).not.toContain('expected to reach 10');
+    });
+
+    function parkrunnerWithVolunteerCreditsHtml(ageCategory, credits) {
+      return `
+        <h3>82 parkruns &amp; 139 junior parkruns total</h3>
+        <p>Most recent age category was ${ageCategory}</p>
+        <h3 id="volunteer-summary">Volunteer Summary</h3>
+        <table id="results">
+          <tfoot>
+            <tr>
+              <td><strong>Total Credits</strong></td>
+              <td><strong>${credits}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    }
+
+    it('appends a 2k junior volunteer estimate on the junior heading for J* with a junior total', () => {
+      document.body.innerHTML = parkrunnerWithVolunteerCreditsHtml('JM11-14', 140);
+      applyMilestoneEstimate(document, now);
+      expect(document.querySelector('h3').textContent).toContain(
+        'expected to reach junior parkrun volunteer 150'
+      );
+    });
+
+    it('appends a 2k junior volunteer estimate for JM15-17 when a junior total exists', () => {
+      document.body.innerHTML = parkrunnerWithVolunteerCreditsHtml('JM15-17', 140);
+      applyMilestoneEstimate(document, now);
+      const headingText = document.querySelector('h3').textContent;
+      expect(headingText).toContain('expected to reach junior parkrun volunteer 150');
+      expect(headingText).not.toMatch(/expected to reach junior parkrun \d+/);
+    });
+
+    it('skips 2k junior volunteer estimate for adults even with a junior total', () => {
+      document.body.innerHTML = parkrunnerWithVolunteerCreditsHtml('SM25-29', 140);
+      applyMilestoneEstimate(document, now);
+      expect(document.querySelector('h3').textContent).not.toContain('junior parkrun volunteer');
+    });
+
+    it('skips 2k junior volunteer estimate when there is no junior parkrun total', () => {
+      document.body.innerHTML = `
+        <h3>82 parkruns total</h3>
+        <p>Most recent age category was JM11-14</p>
+        <h3 id="volunteer-summary">Volunteer Summary</h3>
+        <table id="results">
+          <tfoot>
+            <tr>
+              <td><strong>Total Credits</strong></td>
+              <td><strong>140</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      applyMilestoneEstimate(document, now);
+      expect(document.querySelector('h3').textContent).not.toContain('junior parkrun volunteer');
     });
   });
 

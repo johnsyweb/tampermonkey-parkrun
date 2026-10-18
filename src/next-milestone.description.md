@@ -22,6 +22,10 @@ When the profile includes a junior parkrun total, an estimate for the next 2k mi
 
 2k estimates are based on weekly Sundays. Age categories such as `JM15-17` and `JW15-17` do not receive a 2k estimate.
 
+## 2k junior volunteer milestones
+
+When the profile includes a junior parkrun total and the parkrunner is still in a junior age category (`J*`), an estimate for the next 2k junior volunteer club (10, 25, 50, 75, 100, 150, 200, 250, or 300) is appended on that same heading. Credits come from the Volunteer Summary total (any parkrun), and the date uses the same Saturday/Sunday volunteering preferences as the 5k volunteer estimate.
+
 ## Imminent dates
 
 If an estimated milestone date falls within the next seven days, that date is highlighted on the page.
