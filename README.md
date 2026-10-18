@@ -25,32 +25,34 @@ Maintained by [Pete Johns (@johnsyweb)](https://github.com/johnsyweb). Contribut
 
 ## Development status
 
-Maintained. Userscript versions are bumped automatically on `main` by CI (`scripts/update-version.js`). The package version is `1.0.0`.
+Maintained. Userscript versions are bumped automatically on `main` by CI (`scripts/update-version.js`). The package version is `1.0.0`. Dependency updates are owned by [Mend Renovate][renovate] via [johnsyweb/renovate-config][renovate-config] (see [ADR 0002](docs/adr/0002-renovate-for-dependency-updates.md)).
 
 ## Local development
 
-This project uses [mise][mise] for tools and [aube][aube] for packages (reads and updates `pnpm-lock.yaml`).
+This project uses [mise][mise] for tools and [aube][aube] for packages (`aube-lock.yaml`, paranoid mode — [ADR 0001](docs/adr/0001-aube-paranoid-package-manager.md)). The Jekyll microsite under `docs/` still uses Bundler.
 
 Prerequisites: [mise][mise].
 
 ```bash
-mise run bootstrap   # install tools and dependencies
+mise run bootstrap   # install tools, frozen npm tree, and docs gems
 mise run setup       # bootstrap and build generated scripts
 mise tasks           # list available tasks
 ```
 
-Pinned tools in `mise.toml`: Ruby 3.4.7 (Jekyll), Node 22, aube 1.17.1.
+Pinned tools in `mise.toml`: Ruby 3.4.7 (Jekyll), Node 22, aube 1.41.0.
 
 Common commands:
 
 | Task | Command |
 |------|---------|
-| Install dependencies | `aube install` |
+| Frozen install | `aube ci` |
+| Within-range bumps | `mise run update-deps` |
 | Run a script | `aube run build:scripts` |
 | Run tests | `aube test` |
+| Full local CI | `mise run cibuild` |
 | One-off CLI tool | `aubx <pkg>` |
 
-`mise` tasks: `bootstrap`, `setup`, `update`, `build`, `server`, `test`, `screenshots`, `preview`, `docs-check`, `cibuild`.
+`mise` tasks: `bootstrap`, `setup`, `update`, `update-deps`, `build`, `server`, `test`, `screenshots`, `preview`, `docs-check`, `cibuild`.
 
 Source lives in `src/`. Default build uses Babel; opt-in esbuild bundling is configured in `scripts/userscript-build.config.js`. Each userscript must have a microsite description sidecar at `src/{slug}.description.md` (required by CI).
 
@@ -80,7 +82,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Use conventional commits, keep changes f
 
 ## Releasing
 
-Push to `main` runs GitHub Actions CI/CD: tests and lint, builds userscripts, updates `@version` fields via `scripts/update-version.js`, builds the Jekyll microsite from committed assets, and deploys to GitHub Pages. Do not run `update-version` locally (it requires `CI`/`GITHUB_ACTIONS`).
+Push to `main` runs GitHub Actions CI/CD: audit, tests and lint, builds userscripts, updates `@version` fields via `scripts/update-version.js`, builds the Jekyll microsite from committed assets, and deploys to GitHub Pages. Do not run `update-version` locally (it requires `CI`/`GITHUB_ACTIONS`).
 
 ## License
 
@@ -88,9 +90,11 @@ Push to `main` runs GitHub Actions CI/CD: tests and lint, builds userscripts, up
 
 <!-- Links -->
 
-[aube]: https://aube.en.dev/
+[aube]: https://aube.jdx.dev/
 [microsite]: https://www.johnsy.com/tampermonkey-parkrun/
 [mise]: https://mise.jdx.dev/
+[renovate]: https://docs.renovatebot.com/
+[renovate-config]: https://github.com/johnsyweb/renovate-config
 [tampermonkey]: https://www.tampermonkey.net/
 [userscripts]: https://apps.apple.com/app/userscripts/id1463298887
 [violentmonkey]: https://violentmonkey.github.io/

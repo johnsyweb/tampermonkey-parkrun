@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A script or scripts for messing with parkrun results pages",
   "main": "index.js",
+  "packageManager": "aube@1.41.0",
   "scripts": {
     "test": "jest",
     "lint": "eslint .",
@@ -32,19 +33,6 @@
   ],
   "author": "Pete Johns (@johnsyweb)",
   "license": "MIT",
-  "pnpm": {
-    "overrides": {
-      "minimatch": "10.2.2",
-      "jest-environment-jsdom": "30.5.1",
-      "jest-mock": "30.4.1"
-    },
-    "allowBuilds": {
-      "esbuild": true,
-      "puppeteer": true,
-      "sharp": true,
-      "unrs-resolver": true
-    }
-  },
   "devDependencies": {
     "@babel/cli": "^8.0.5",
     "@babel/core": "^8.0.5",
@@ -65,7 +53,7 @@
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
     "puppeteer": "^25.11.0",
-    "sharp": "^0.35.4",
+    "sharp": "^0.35.5",
     "ts-node": "^10.9.2",
     "typescript": "^7.0.2",
     "uglify-js": "^3.19.3"

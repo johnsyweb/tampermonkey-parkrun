@@ -1,0 +1,28 @@
+paranoid: true
+packageManagerStrictVersion: true
+# 7 days — aligned with Renovate minimumReleaseAge in johnsyweb/renovate-config
+minimumReleaseAge: 10080
+allowBuilds:
+  esbuild: true
+  puppeteer: true
+  sharp: true
+  unrs-resolver: true
+overrides:
+  minimatch: ">=10.2.3"
+  jest-environment-jsdom: "30.5.1"
+  jest-mock: "30.4.1"
+  brace-expansion: ">=5.0.12"
+  source-map-js: ">=1.2.2"
+  # jsdom 30 pulls undici 8.x
+  undici: ">=8.10.2"
+# Security bumps younger than the cooling window (remove once aged in).
+minimumReleaseAgeExclude:
+  - brace-expansion
+  - minimatch
+  - sharp
+  - source-map-js
+  - undici
+# puppeteer resolution can select a chromium-bidi release without trusted-publisher
+# evidence; narrow exclude after inspecting the tarball (see aube trust-policy docs).
+trustPolicyExclude:
+  - chromium-bidi@157.0.8090-0

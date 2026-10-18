@@ -12,5 +12,4 @@ docs/*.md
 !docs/index.md
 docs/vendor/
 pnpm-workspace.yaml
-aube-workspace.yaml
 screenshots.log

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(dirname "$0")"
+
+"$root/ci-install"
+"$root/audit"
+aube run ci
