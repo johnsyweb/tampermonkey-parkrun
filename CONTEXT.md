@@ -61,7 +61,7 @@ Capturing or refreshing a committed microsite screenshot and its thumbnail. Pre-
 _Avoid_: docs:assets, automatic screenshot refresh
 
 **5k finisher milestone**:
-A Saturday 5k finish-count club open to all ages: 25, 50, 100, 250, 500, or 1000 finishes.
+A Saturday 5k finish-count club open to all ages: 25, 50, 100, 200, 250, 300, 400, 500, 600, 700, 800, 900, or 1000 finishes.
 _Avoid_: parkrun milestone, adult milestone, Saturday milestone (when meaning only the all-ages ladder)
 
 **5k junior finisher milestone**:
@@ -81,7 +81,7 @@ A parkrunner age category whose code begins with `J`, e.g. `JM10`, `JW10`, `JM11
 _Avoid_: J20-24
 
 **Volunteer milestone**:
-A volunteer-credit club earned across 5k and 2k volunteering, open to all ages: 25, 50, 100, 250, 500, or 1000 credits.
+A volunteer-credit club earned across 5k and 2k volunteering, open to all ages: 25, 50, 100, 200, 250, 300, 400, 500, 600, 700, 800, 900, or 1000 credits (shown as v25–v1000 on results).
 _Avoid_: Volunteer club (when meaning only the all-ages ladder)
 
 **Junior volunteer milestone**:
@@ -89,5 +89,5 @@ The volunteer-credit club available only to juniors (under 18), counting credits
 _Avoid_: Volunteer 10 (when ambiguous with 2k junior participation)
 
 **2k junior volunteer milestone**:
-Progress for juniors toward the same 10–300 clubs awarded at 2k events, counted from volunteer credits at any parkrun (both 2k and 5k). Distinct from 2k finisher milestones (2k finishes only) and from the cross-distance junior volunteer milestone (volunteer-club 10).
+Progress for juniors (`J*` age categories) toward the same 10, 25, 50, 75, 100, 150, 200, 250, or 300 clubs awarded at 2k events, counted from volunteer credits at any parkrun (both 2k and 5k). Distinct from 2k finisher milestones (2k finishes only) and from the cross-distance volunteer milestone ladder (including junior volunteer 10).
 _Avoid_: Junior volunteer milestone (ambiguous with cross-distance volunteer 10)
