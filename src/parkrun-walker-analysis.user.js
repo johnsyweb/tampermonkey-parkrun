@@ -39,10 +39,49 @@
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-walker-analysis.user.js
-// @version      1.2.2
+// @version      1.3.0
 // ==/UserScript==
 
 const ChartRef = typeof window !== 'undefined' && window.Chart ? window.Chart : undefined;
+
+/** Descending thresholds for 5k finish and volunteer clubs (highest club first). */
+const MILESTONE_CLUB_THRESHOLDS = [
+  1000, 900, 800, 700, 600, 500, 400, 300, 250, 200, 100, 50, 25, 10,
+];
+
+/** Ascending club numbers for chart legend / sort order. */
+const MILESTONE_CLUB_ORDER = [...MILESTONE_CLUB_THRESHOLDS].reverse();
+
+const milestoneColours = {
+  10: '#EBE9F0',
+  25: '#6D5698',
+  50: '#C81D31',
+  100: '#2E393B',
+  200: '#7FC7E7',
+  250: '#2C504A',
+  300: '#E2712D',
+  400: '#923047',
+  500: '#2E4DA7',
+  600: '#BDDD48',
+  700: '#262A4C',
+  800: '#BC57B6',
+  900: '#4F7528',
+  1000: '#FFE049',
+  'Volunteered once': '#90EE90',
+  'Volunteered multiple times': '#00CEAE',
+  'Has Volunteered': '#00CEAE',
+  'Yet to Volunteer': '#FFA300',
+  Unknown: '#A1B6B7',
+};
+
+function getMilestoneClub(count, prefix) {
+  for (const m of MILESTONE_CLUB_THRESHOLDS) {
+    if (count >= m) {
+      return { status: `${prefix} ${m} Club`, milestone: m };
+    }
+  }
+  return { status: null, milestone: 0 };
+}
 
 function assignUnknownFinishTimes(finishers) {
   function findPreviousKnownTime(finishers, startIndex) {
@@ -131,16 +170,6 @@ function parkrunWalkerAnalysisMain() {
   }
   const rows = Array.from(document.querySelectorAll('tr.Results-table-row'));
   if (!rows.length) return;
-
-  function getMilestoneClub(count, prefix) {
-    const milestones = [1000, 500, 250, 100, 50, 25, 10];
-    for (const m of milestones) {
-      if (count >= m) {
-        return { status: `${prefix} ${m} Club`, milestone: m };
-      }
-    }
-    return { status: null, milestone: 0 };
-  }
 
   const finishers = rows.map((row, idx) => {
     const timeCell = row.querySelector('.Results-table-td--time .compact');
@@ -249,21 +278,6 @@ function parkrunWalkerAnalysisMain() {
     return { bins, minMinute, maxMinute };
   }
 
-  const milestoneColours = {
-    10: '#EBE9F0',
-    25: '#6D5698',
-    50: '#C81D31',
-    100: '#2E393B',
-    250: '#2C504A',
-    500: '#2E4DA7',
-    1000: '#FFE049',
-    'Volunteered once': '#90EE90',
-    'Volunteered multiple times': '#00CEAE',
-    'Has Volunteered': '#00CEAE',
-    'Yet to Volunteer': '#FFA300',
-    Unknown: '#A1B6B7',
-  };
-
   const breakdowns = [
     { key: 'parkrunExperience', label: 'parkrun Experience' },
     { key: 'volunteerStatus', label: 'Volunteer Experience' },
@@ -319,22 +333,15 @@ function parkrunWalkerAnalysisMain() {
         'First Timer (anywhere)',
         'First Timer (to this event)',
         'Multiple parkruns',
-        'parkrun 10 Club',
-        'parkrun 25 Club',
-        'parkrun 50 Club',
-        'parkrun 100 Club',
-        'parkrun 250 Club',
-        'parkrun 500 Club',
-        'parkrun 1000 Club',
+        ...MILESTONE_CLUB_ORDER.map((m) => `parkrun ${m} Club`),
       ];
       const experienceIndex = (v) => {
         const idx = experienceOrder.indexOf(v);
         if (idx !== -1) return idx;
         const m = v.match(/parkrun (\d+) Club/);
         if (m) {
-          const milestones = [10, 25, 50, 100, 250, 500, 1000];
           const num = parseInt(m[1], 10);
-          const milestoneIdx = milestones.indexOf(num);
+          const milestoneIdx = MILESTONE_CLUB_ORDER.indexOf(num);
           return milestoneIdx !== -1 ? 3 + milestoneIdx : 200 + num;
         }
         if (v === 'Unknown') return 9999;
@@ -346,13 +353,7 @@ function parkrunWalkerAnalysisMain() {
         'Yet to Volunteer',
         'Volunteered once',
         'Volunteered multiple times',
-        'Volunteer 10 Club',
-        'Volunteer 25 Club',
-        'Volunteer 50 Club',
-        'Volunteer 100 Club',
-        'Volunteer 250 Club',
-        'Volunteer 500 Club',
-        'Volunteer 1000 Club',
+        ...MILESTONE_CLUB_ORDER.map((m) => `Volunteer ${m} Club`),
       ];
       const milestoneIndex = (v) => {
         const idx = milestoneOrder.indexOf(v);
@@ -499,22 +500,15 @@ function parkrunWalkerAnalysisMain() {
           'First Timer (anywhere)',
           'First Timer (to this event)',
           'Multiple parkruns',
-          'parkrun 10 Club',
-          'parkrun 25 Club',
-          'parkrun 50 Club',
-          'parkrun 100 Club',
-          'parkrun 250 Club',
-          'parkrun 500 Club',
-          'parkrun 1000 Club',
+          ...MILESTONE_CLUB_ORDER.map((m) => `parkrun ${m} Club`),
         ];
         const experienceIndex = (v) => {
           const idx = experienceOrder.indexOf(v);
           if (idx !== -1) return idx;
           const m = v.match(/parkrun (\d+) Club/);
           if (m) {
-            const milestones = [10, 25, 50, 100, 250, 500, 1000];
             const num = parseInt(m[1], 10);
-            const milestoneIdx = milestones.indexOf(num);
+            const milestoneIdx = MILESTONE_CLUB_ORDER.indexOf(num);
             return milestoneIdx !== -1 ? 3 + milestoneIdx : 200 + num;
           }
           if (v === 'Unknown') return 9999;
@@ -527,13 +521,7 @@ function parkrunWalkerAnalysisMain() {
           'Yet to Volunteer',
           'Volunteered once',
           'Volunteered multiple times',
-          'Volunteer 10 Club',
-          'Volunteer 25 Club',
-          'Volunteer 50 Club',
-          'Volunteer 100 Club',
-          'Volunteer 250 Club',
-          'Volunteer 500 Club',
-          'Volunteer 1000 Club',
+          ...MILESTONE_CLUB_ORDER.map((m) => `Volunteer ${m} Club`),
         ];
         const milestoneIndex = (v) => {
           const idx = milestoneOrder.indexOf(v);
@@ -789,5 +777,9 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     getEventMetadata,
     generateExportFilename,
     computeWalkerThreshold,
+    getMilestoneClub,
+    MILESTONE_CLUB_THRESHOLDS,
+    MILESTONE_CLUB_ORDER,
+    milestoneColours,
   };
 }

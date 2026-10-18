@@ -35,7 +35,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/parkrun-walker-analysis.user.js
-// @version      1.2.2
+// @version      1.3.0
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
@@ -44,14 +44,71 @@ function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present,
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 
 var ChartRef = typeof window !== 'undefined' && window.Chart ? window.Chart : undefined;
+
+/** Descending thresholds for 5k finish and volunteer clubs (highest club first). */
+var MILESTONE_CLUB_THRESHOLDS = [1000, 900, 800, 700, 600, 500, 400, 300, 250, 200, 100, 50, 25, 10];
+
+/** Ascending club numbers for chart legend / sort order. */
+var MILESTONE_CLUB_ORDER = [].concat(MILESTONE_CLUB_THRESHOLDS).reverse();
+var milestoneColours = {
+  10: '#EBE9F0',
+  25: '#6D5698',
+  50: '#C81D31',
+  100: '#2E393B',
+  200: '#7FC7E7',
+  250: '#2C504A',
+  300: '#E2712D',
+  400: '#923047',
+  500: '#2E4DA7',
+  600: '#BDDD48',
+  700: '#262A4C',
+  800: '#BC57B6',
+  900: '#4F7528',
+  1000: '#FFE049',
+  'Volunteered once': '#90EE90',
+  'Volunteered multiple times': '#00CEAE',
+  'Has Volunteered': '#00CEAE',
+  'Yet to Volunteer': '#FFA300',
+  Unknown: '#A1B6B7'
+};
+function getMilestoneClub(count, prefix) {
+  var _iterator = _createForOfIteratorHelper(MILESTONE_CLUB_THRESHOLDS),
+    _step;
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var m = _step.value;
+      if (count >= m) {
+        return {
+          status: "".concat(prefix, " ").concat(m, " Club"),
+          milestone: m
+        };
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+  return {
+    status: null,
+    milestone: 0
+  };
+}
 function assignUnknownFinishTimes(finishers) {
   function findPreviousKnownTime(finishers, startIndex) {
     var previousFinisher = finishers.slice(0, startIndex).reverse().find(function (f) {
@@ -137,22 +194,6 @@ function parkrunWalkerAnalysisMain() {
   }
   var rows = Array.from(document.querySelectorAll('tr.Results-table-row'));
   if (!rows.length) return;
-  function getMilestoneClub(count, prefix) {
-    var milestones = [1000, 500, 250, 100, 50, 25, 10];
-    for (var _i = 0, _milestones = milestones; _i < _milestones.length; _i++) {
-      var m = _milestones[_i];
-      if (count >= m) {
-        return {
-          status: "".concat(prefix, " ").concat(m, " Club"),
-          milestone: m
-        };
-      }
-    }
-    return {
-      status: null,
-      milestone: 0
-    };
-  }
   var finishers = rows.map(function (row, idx) {
     var timeCell = row.querySelector('.Results-table-td--time .compact');
     var timeStr = timeCell ? timeCell.textContent.trim() : '';
@@ -256,20 +297,6 @@ function parkrunWalkerAnalysisMain() {
       maxMinute: maxMinute
     };
   }
-  var milestoneColours = {
-    10: '#EBE9F0',
-    25: '#6D5698',
-    50: '#C81D31',
-    100: '#2E393B',
-    250: '#2C504A',
-    500: '#2E4DA7',
-    1000: '#FFE049',
-    'Volunteered once': '#90EE90',
-    'Volunteered multiple times': '#00CEAE',
-    'Has Volunteered': '#00CEAE',
-    'Yet to Volunteer': '#FFA300',
-    Unknown: '#A1B6B7'
-  };
   var breakdowns = [{
     key: 'parkrunExperience',
     label: 'parkrun Experience'
@@ -332,15 +359,16 @@ function parkrunWalkerAnalysisMain() {
       if (allValues.has('Not specified')) valueList.push('Not specified');
       if (allValues.has('Unknown')) valueList.push('Unknown');
     } else if (breakdownKey === 'parkrunExperience') {
-      var experienceOrder = ['First Timer (anywhere)', 'First Timer (to this event)', 'Multiple parkruns', 'parkrun 10 Club', 'parkrun 25 Club', 'parkrun 50 Club', 'parkrun 100 Club', 'parkrun 250 Club', 'parkrun 500 Club', 'parkrun 1000 Club'];
+      var experienceOrder = ['First Timer (anywhere)', 'First Timer (to this event)', 'Multiple parkruns'].concat(_toConsumableArray(MILESTONE_CLUB_ORDER.map(function (m) {
+        return "parkrun ".concat(m, " Club");
+      })));
       var experienceIndex = function experienceIndex(v) {
         var idx = experienceOrder.indexOf(v);
         if (idx !== -1) return idx;
         var m = v.match(/parkrun (\d+) Club/);
         if (m) {
-          var milestones = [10, 25, 50, 100, 250, 500, 1000];
           var num = parseInt(m[1], 10);
-          var milestoneIdx = milestones.indexOf(num);
+          var milestoneIdx = MILESTONE_CLUB_ORDER.indexOf(num);
           return milestoneIdx !== -1 ? 3 + milestoneIdx : 200 + num;
         }
         if (v === 'Unknown') return 9999;
@@ -350,7 +378,9 @@ function parkrunWalkerAnalysisMain() {
         return experienceIndex(a) - experienceIndex(b);
       });
     } else if (breakdownKey === 'volunteerStatus') {
-      var milestoneOrder = ['Yet to Volunteer', 'Volunteered once', 'Volunteered multiple times', 'Volunteer 10 Club', 'Volunteer 25 Club', 'Volunteer 50 Club', 'Volunteer 100 Club', 'Volunteer 250 Club', 'Volunteer 500 Club', 'Volunteer 1000 Club'];
+      var milestoneOrder = ['Yet to Volunteer', 'Volunteered once', 'Volunteered multiple times'].concat(_toConsumableArray(MILESTONE_CLUB_ORDER.map(function (m) {
+        return "Volunteer ".concat(m, " Club");
+      })));
       var milestoneIndex = function milestoneIndex(v) {
         var idx = milestoneOrder.indexOf(v);
         if (idx !== -1) return idx;
@@ -486,15 +516,16 @@ function parkrunWalkerAnalysisMain() {
         return sorted;
       }
       if (breakdownType === 'parkrunExperience') {
-        var experienceOrder = ['First Timer (anywhere)', 'First Timer (to this event)', 'Multiple parkruns', 'parkrun 10 Club', 'parkrun 25 Club', 'parkrun 50 Club', 'parkrun 100 Club', 'parkrun 250 Club', 'parkrun 500 Club', 'parkrun 1000 Club'];
+        var experienceOrder = ['First Timer (anywhere)', 'First Timer (to this event)', 'Multiple parkruns'].concat(_toConsumableArray(MILESTONE_CLUB_ORDER.map(function (m) {
+          return "parkrun ".concat(m, " Club");
+        })));
         var experienceIndex = function experienceIndex(v) {
           var idx = experienceOrder.indexOf(v);
           if (idx !== -1) return idx;
           var m = v.match(/parkrun (\d+) Club/);
           if (m) {
-            var milestones = [10, 25, 50, 100, 250, 500, 1000];
             var num = parseInt(m[1], 10);
-            var milestoneIdx = milestones.indexOf(num);
+            var milestoneIdx = MILESTONE_CLUB_ORDER.indexOf(num);
             return milestoneIdx !== -1 ? 3 + milestoneIdx : 200 + num;
           }
           if (v === 'Unknown') return 9999;
@@ -505,7 +536,9 @@ function parkrunWalkerAnalysisMain() {
         });
       }
       if (breakdownType === 'volunteerStatus') {
-        var milestoneOrder = ['Yet to Volunteer', 'Volunteered once', 'Volunteered multiple times', 'Volunteer 10 Club', 'Volunteer 25 Club', 'Volunteer 50 Club', 'Volunteer 100 Club', 'Volunteer 250 Club', 'Volunteer 500 Club', 'Volunteer 1000 Club'];
+        var milestoneOrder = ['Yet to Volunteer', 'Volunteered once', 'Volunteered multiple times'].concat(_toConsumableArray(MILESTONE_CLUB_ORDER.map(function (m) {
+          return "Volunteer ".concat(m, " Club");
+        })));
         var milestoneIndex = function milestoneIndex(v) {
           var idx = milestoneOrder.indexOf(v);
           if (idx !== -1) return idx;
@@ -756,6 +789,10 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     assignUnknownFinishTimes: assignUnknownFinishTimes,
     getEventMetadata: getEventMetadata,
     generateExportFilename: generateExportFilename,
-    computeWalkerThreshold: computeWalkerThreshold
+    computeWalkerThreshold: computeWalkerThreshold,
+    getMilestoneClub: getMilestoneClub,
+    MILESTONE_CLUB_THRESHOLDS: MILESTONE_CLUB_THRESHOLDS,
+    MILESTONE_CLUB_ORDER: MILESTONE_CLUB_ORDER,
+    milestoneColours: milestoneColours
   };
 }
