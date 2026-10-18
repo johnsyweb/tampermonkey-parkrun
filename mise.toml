@@ -1,11 +1,11 @@
 [tools]
 node = "22"
-aube = "1.17.1"
+aube = "1.41.0"
 ruby = "3.4.7"
 
 [tasks.bootstrap]
-description = "Install all project dependencies"
-run = "mise install && aube install && aube run docs:install"
+description = "Install mise tools and a frozen dependency tree (aube ci), plus docs gems"
+run = "mise install && aube ci && aube run docs:install"
 
 [tasks.setup]
 description = "Prepare a fresh local checkout"
@@ -13,9 +13,12 @@ depends = ["bootstrap"]
 run = "aube run build:scripts"
 
 [tasks.update]
-description = "Update dependencies and rebuild local artifacts"
-depends = ["bootstrap"]
-run = "aube run build:scripts && aube run update-scripts-data"
+description = "Refresh tools and dependencies after git pull"
+run = "mise install && aube install && aube run docs:install && aube run build:scripts && aube run update-scripts-data"
+
+[tasks.update-deps]
+description = "Show outdated packages and bump within package.json ranges (aube update)"
+run = "aube outdated || true; aube update"
 
 [tasks.build]
 description = "Build userscripts and microsite"
@@ -46,5 +49,5 @@ description = "Preview a userscript in the browser"
 run = "aube run preview"
 
 [tasks.cibuild]
-description = "Run full local CI build"
-run = "aube run ci"
+description = "Run full local CI build (frozen install, audit, package ci script)"
+run = "./script/cibuild"
