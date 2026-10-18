@@ -1,7 +1,13 @@
 // __tests__/parkrun-walker-analysis.test.js
 
-const { assignUnknownFinishTimes } = require('../src/parkrun-walker-analysis.user');
-const { computeWalkerThreshold } = require('../src/parkrun-walker-analysis.user');
+const {
+  assignUnknownFinishTimes,
+  computeWalkerThreshold,
+  getMilestoneClub,
+  MILESTONE_CLUB_THRESHOLDS,
+  MILESTONE_CLUB_ORDER,
+  milestoneColours,
+} = require('../src/parkrun-walker-analysis.user');
 
 describe('assignUnknownFinishTimes', () => {
   it('should assign estimated times to finishers with missing time', () => {
@@ -52,5 +58,47 @@ describe('assignUnknownFinishTimes', () => {
       expect(computeWalkerThreshold(null)).toBe(50 * 60);
       expect(computeWalkerThreshold('')).toBe(50 * 60);
     });
+  });
+});
+
+describe('getMilestoneClub', () => {
+  it('uses the official 5k/volunteer club ladder including the 2026 additions', () => {
+    expect(MILESTONE_CLUB_ORDER).toEqual([
+      10, 25, 50, 100, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000,
+    ]);
+    expect(MILESTONE_CLUB_THRESHOLDS).toEqual([...MILESTONE_CLUB_ORDER].reverse());
+  });
+
+  it('returns the highest club reached for a finish or volunteer count', () => {
+    expect(getMilestoneClub(199, 'parkrun')).toEqual({
+      status: 'parkrun 100 Club',
+      milestone: 100,
+    });
+    expect(getMilestoneClub(200, 'parkrun')).toEqual({
+      status: 'parkrun 200 Club',
+      milestone: 200,
+    });
+    expect(getMilestoneClub(249, 'Volunteer')).toEqual({
+      status: 'Volunteer 200 Club',
+      milestone: 200,
+    });
+    expect(getMilestoneClub(250, 'Volunteer')).toEqual({
+      status: 'Volunteer 250 Club',
+      milestone: 250,
+    });
+    expect(getMilestoneClub(900, 'parkrun')).toEqual({
+      status: 'parkrun 900 Club',
+      milestone: 900,
+    });
+  });
+
+  it('returns null status below the lowest club', () => {
+    expect(getMilestoneClub(9, 'parkrun')).toEqual({ status: null, milestone: 0 });
+  });
+
+  it('defines a chart colour for every club threshold', () => {
+    for (const club of MILESTONE_CLUB_ORDER) {
+      expect(milestoneColours[club]).toMatch(/^#[0-9A-Fa-f]{6}$/);
+    }
   });
 });
