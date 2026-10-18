@@ -33,7 +33,7 @@
 // @supportURL   https://github.com/johnsyweb/tampermonkey-parkrun/issues/
 // @tag          parkrun
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/next-milestone.user.js
-// @version      1.2.2
+// @version      1.3.0
 // ==/UserScript==
 // DO NOT EDIT - generated from src/ by scripts/build-scripts.js
 
@@ -564,6 +564,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       highlightDateIfNeeded(heading, targetDate);
     }
   }
+  function appendJuniorVolunteerMilestoneEstimate(heading, milestoneName, dateString) {
+    var targetDate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    if (!heading || heading.dataset.juniorVolunteerMilestoneEstimateApplied === 'true') return;
+    heading.appendChild(document.createTextNode(" (expected to reach ".concat(milestoneName, " around ").concat(dateString, ")")));
+    heading.dataset.juniorVolunteerMilestoneEstimateApplied = 'true';
+    if (targetDate) {
+      highlightDateIfNeeded(heading, targetDate);
+    }
+  }
   function appendAssumptionsInfo(heading) {
     var _heading$parentElemen2;
     if (!heading || heading.dataset.assumptionsInfoApplied === 'true') return;
@@ -648,6 +657,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }
     }
+    if (juniorResult && isJuniorAgeCategory(ageCategory) && volunteerCreditsTotal !== null) {
+      var juniorVolunteerNext = getNextMilestoneDefinition(volunteerCreditsTotal, ageCategory, juniorMilestones);
+      if (juniorVolunteerNext) {
+        var juniorVolunteerTargetDate = getNextVolunteerMilestoneDate(volunteerCreditsTotal, juniorVolunteerNext.value, now);
+        if (juniorVolunteerTargetDate) {
+          appendJuniorVolunteerMilestoneEstimate(juniorResult.heading, "junior parkrun volunteer ".concat(juniorVolunteerNext.value), formatDate(juniorVolunteerTargetDate), juniorVolunteerTargetDate);
+        }
+      }
+    }
     appendAssumptionsInfo(result.heading);
   }
   if (typeof module !== 'undefined' && module.exports) {
@@ -675,6 +693,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       getNextVolunteerMilestoneDate: getNextVolunteerMilestoneDate,
       appendMilestoneEstimate: appendMilestoneEstimate,
       appendJuniorMilestoneEstimate: appendJuniorMilestoneEstimate,
+      appendJuniorVolunteerMilestoneEstimate: appendJuniorVolunteerMilestoneEstimate,
       appendVolunteerCreditsSummary: appendVolunteerCreditsSummary,
       appendAssumptionsInfo: appendAssumptionsInfo,
       applyMilestoneEstimate: applyMilestoneEstimate

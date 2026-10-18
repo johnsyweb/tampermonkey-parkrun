@@ -37,7 +37,7 @@
 // @screenshot-timeout   8000
 // @screenshot-viewport  1200x800
 // @updateURL    https://raw.githubusercontent.com/johnsyweb/tampermonkey-parkrun/refs/heads/main/next-milestone.user.js
-// @version      1.2.2
+// @version      1.3.0
 // ==/UserScript==
 
 (function () {
@@ -561,6 +561,23 @@
     }
   }
 
+  function appendJuniorVolunteerMilestoneEstimate(
+    heading,
+    milestoneName,
+    dateString,
+    targetDate = null
+  ) {
+    if (!heading || heading.dataset.juniorVolunteerMilestoneEstimateApplied === 'true') return;
+    heading.appendChild(
+      document.createTextNode(` (expected to reach ${milestoneName} around ${dateString})`)
+    );
+    heading.dataset.juniorVolunteerMilestoneEstimateApplied = 'true';
+
+    if (targetDate) {
+      highlightDateIfNeeded(heading, targetDate);
+    }
+  }
+
   function appendAssumptionsInfo(heading) {
     if (!heading || heading.dataset.assumptionsInfoApplied === 'true') return;
 
@@ -686,6 +703,29 @@
       }
     }
 
+    if (juniorResult && isJuniorAgeCategory(ageCategory) && volunteerCreditsTotal !== null) {
+      const juniorVolunteerNext = getNextMilestoneDefinition(
+        volunteerCreditsTotal,
+        ageCategory,
+        juniorMilestones
+      );
+      if (juniorVolunteerNext) {
+        const juniorVolunteerTargetDate = getNextVolunteerMilestoneDate(
+          volunteerCreditsTotal,
+          juniorVolunteerNext.value,
+          now
+        );
+        if (juniorVolunteerTargetDate) {
+          appendJuniorVolunteerMilestoneEstimate(
+            juniorResult.heading,
+            `junior parkrun volunteer ${juniorVolunteerNext.value}`,
+            formatDate(juniorVolunteerTargetDate),
+            juniorVolunteerTargetDate
+          );
+        }
+      }
+    }
+
     appendAssumptionsInfo(result.heading);
   }
 
@@ -714,6 +754,7 @@
       getNextVolunteerMilestoneDate,
       appendMilestoneEstimate,
       appendJuniorMilestoneEstimate,
+      appendJuniorVolunteerMilestoneEstimate,
       appendVolunteerCreditsSummary,
       appendAssumptionsInfo,
       applyMilestoneEstimate,
