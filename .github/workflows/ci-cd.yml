@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up mise
-        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        uses: jdx/mise-action@82a612c5ab8bcda7cc5db6b7e81a8e7584c3dc6e # v5.2.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get aube store path
@@ -70,7 +70,7 @@ jobs:
       - name: Rebase on latest main
         run: git fetch origin main && git rebase origin/main
       - name: Set up mise
-        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        uses: jdx/mise-action@82a612c5ab8bcda7cc5db6b7e81a8e7584c3dc6e # v5.2.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get aube store path
@@ -112,7 +112,7 @@ jobs:
         # Best-effort: required-check rulesets reject GITHUB_TOKEN pushes to main.
         # Deploy uses the artifact above so Pages still ships bumped @version.
         continue-on-error: true
-        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
+        uses: stefanzweifel/git-auto-commit-action@d0b01107b5db882071f96de5dd4b54961ea93f4c # v7.2.1
         with:
           commit_message: 'chore: update userscript versions [skip ci]'
           file_pattern: '*.user.js src/*.user.js'
@@ -141,7 +141,7 @@ jobs:
           name: versioned-userscripts
           path: .
       - name: Set up mise
-        uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        uses: jdx/mise-action@82a612c5ab8bcda7cc5db6b7e81a8e7584c3dc6e # v5.2.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get aube store path
